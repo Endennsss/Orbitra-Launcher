@@ -2,7 +2,7 @@ name: Deploy launcher site
 on:
   push:
     branches: [main]
-    paths: ["docs/**", ".github/workflows/pages.yml", "SS14.Launcher/Assets/brand-mark.svg"]
+    paths: ["docs/**", "news.json", ".github/workflows/pages.yml", "SS14.Launcher/Assets/brand-mark.svg"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: mkdir -p _site/assets && cp -r docs/. _site/ && cp SS14.Launcher/Assets/brand-mark.svg _site/assets/brand-mark.svg
+      - run: mkdir -p _site/assets && cp -r docs/. _site/ && cp news.json _site/news.json && cp SS14.Launcher/Assets/brand-mark.svg _site/assets/brand-mark.svg
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
