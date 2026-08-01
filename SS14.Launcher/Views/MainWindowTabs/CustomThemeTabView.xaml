@@ -1,0 +1,181 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs"
+             xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="520"
+             x:Class="SS14.Launcher.Views.MainWindowTabs.CustomThemeTabView">
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Spacing="16">
+      <StackPanel Margin="0,0,0,4">
+        <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+          <StackPanel>
+            <TextBlock Text="APPEARANCE" Classes="SectionLabel" />
+            <TextBlock Text="Кастом тема" Classes="NanoHeadingMedium" />
+          </StackPanel>
+          <Button Grid.Column="1" Content="Импорт ZIP" Command="{Binding ImportTheme}"
+                  VerticalAlignment="Center" />
+          <Button Grid.Column="2" Content="Экспорт ZIP" Command="{Binding ExportTheme}"
+                  VerticalAlignment="Center" />
+          <Button Grid.Column="3" Content="Сбросить по умолчанию" Command="{Binding ResetDefaults}"
+                  VerticalAlignment="Center" />
+        </Grid>
+      </StackPanel>
+
+      <Border Classes="Surface" Padding="20">
+        <StackPanel Spacing="9">
+          <CheckBox Content="Использовать кастомную тему" IsChecked="{Binding Enabled, Mode=TwoWay}" />
+          <TextBlock Text="При включении светлая тема автоматически отключается и становится недоступной."
+                     Classes="SubText" TextWrapping="Wrap" Margin="22,0,0,8" />
+          <TextBlock Text="ЦВЕТА ИНТЕРФЕЙСА" Classes="SectionLabel" Margin="0,4,0,4" />
+          <Grid ColumnDefinitions="150,*,150,*" RowDefinitions="Auto,Auto,Auto">
+            <TextBlock Text="Основной фон" VerticalAlignment="Center" />
+            <Grid Grid.Column="1" ColumnDefinitions="*,42" Margin="0,0,10,6">
+              <TextBox Text="{Binding Background, Mode=TwoWay}" Watermark="#101010" />
+              <ColorPicker Grid.Column="1" Color="{Binding BackgroundColor, Mode=TwoWay}" Width="36" Margin="6,0,0,0" />
+            </Grid>
+            <TextBlock Grid.Column="2" Text="Поверхности" VerticalAlignment="Center" Margin="0,0,8,6" />
+            <Grid Grid.Column="3" ColumnDefinitions="*,42" Margin="0,0,0,6">
+              <TextBox Text="{Binding Surface, Mode=TwoWay}" Watermark="#181818" />
+              <ColorPicker Grid.Column="1" Color="{Binding SurfaceColor, Mode=TwoWay}" Width="36" Margin="6,0,0,0" />
+            </Grid>
+            <TextBlock Grid.Row="1" Text="Элементы" VerticalAlignment="Center" />
+            <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="*,42" Margin="0,0,10,6">
+              <TextBox Text="{Binding Control, Mode=TwoWay}" Watermark="#292929" />
+              <ColorPicker Grid.Column="1" Color="{Binding ControlColor, Mode=TwoWay}" Width="36" Margin="6,0,0,0" />
+            </Grid>
+            <TextBlock Grid.Row="1" Grid.Column="2" Text="Акцент" VerticalAlignment="Center" Margin="0,0,8,6" />
+            <Grid Grid.Row="1" Grid.Column="3" ColumnDefinitions="*,42" Margin="0,0,0,6">
+              <TextBox Text="{Binding Accent, Mode=TwoWay}" Watermark="#D0D0D0" />
+              <ColorPicker Grid.Column="1" Color="{Binding AccentColor, Mode=TwoWay}" Width="36" Margin="6,0,0,0" />
+            </Grid>
+            <TextBlock Grid.Row="2" Text="Основной текст" VerticalAlignment="Center" />
+            <Grid Grid.Row="2" Grid.Column="1" ColumnDefinitions="*,42" Margin="0,0,10,0">
+              <TextBox Text="{Binding Text, Mode=TwoWay}" Watermark="#F2F2F2" />
+              <ColorPicker Grid.Column="1" Color="{Binding TextColor, Mode=TwoWay}" Width="36" Margin="6,0,0,0" />
+            </Grid>
+            <TextBlock Grid.Row="2" Grid.Column="2" Text="Вторичный текст" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <Grid Grid.Row="2" Grid.Column="3" ColumnDefinitions="*,42">
+              <TextBox Text="{Binding Muted, Mode=TwoWay}" Watermark="#999999" />
+              <ColorPicker Grid.Column="1" Color="{Binding MutedColor, Mode=TwoWay}" Width="36" Margin="6,0,0,0" />
+            </Grid>
+          </Grid>
+          <TextBlock Text="Используйте HEX-цвета, например #1A1A1A или #FF1A1A1A."
+                     Classes="SubText" Margin="0,3,0,0" />
+          <Border Background="#2A2115" BorderBrush="#7A5730" BorderThickness="1" Padding="10,8"
+                  IsVisible="{Binding HasContrastWarning}" Margin="0,6,0,0">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="{Binding ContrastMessage}" Foreground="#D6A15F" TextWrapping="Wrap" VerticalAlignment="Center" />
+              <Button Grid.Column="1" Content="Исправить автоматически" Command="{Binding FixContrast}" />
+            </Grid>
+          </Border>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="Surface" Padding="20" IsVisible="{Binding HasImportPreview}">
+        <StackPanel Spacing="10">
+          <TextBlock Text="ПРЕДПРОСМОТР ИМПОРТА" Classes="SectionLabel" />
+          <TextBlock Text="Архив ещё не применён. Проверьте палитру, фон и размытие." Classes="SubText" />
+          <Grid ColumnDefinitions="220,*" Height="130">
+            <Border Background="{DynamicResource LauncherWorkspaceBrush}" BorderBrush="{DynamicResource LauncherLineBrush}"
+                    BorderThickness="1" ClipToBounds="True">
+              <Image Source="{Binding ImportPreviewBackground}" Stretch="UniformToFill">
+                <Image.Effect><BlurEffect Radius="{Binding ImportPreviewBlur}" /></Image.Effect>
+              </Image>
+            </Border>
+            <StackPanel Grid.Column="1" Margin="14,0,0,0" Spacing="7" VerticalAlignment="Center">
+              <TextBlock Text="Цвета" Classes="SectionLabel" />
+              <TextBlock Text="{Binding ImportPreviewColors}" TextWrapping="Wrap" FontFamily="Consolas" />
+              <TextBlock Text="{Binding ImportPreviewBlur, StringFormat='Размытие: {0}'}" Classes="SubText" />
+              <WrapPanel>
+                <Button Content="Применить тему" Command="{Binding ApplyImportPreview}" />
+                <Button Content="Отмена" Command="{Binding CancelImportPreview}" />
+              </WrapPanel>
+            </StackPanel>
+          </Grid>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="Surface" Padding="20">
+        <StackPanel Spacing="10">
+          <TextBlock Text="ФОН И РАЗМЫТИЕ" Classes="SectionLabel" />
+          <WrapPanel>
+            <Button Content="Выбрать изображение" Command="{Binding ChooseBackground}" />
+            <Button Content="Убрать фон" Command="{Binding RemoveBackground}" IsEnabled="{Binding BackgroundVisible}" />
+          </WrapPanel>
+          <Grid ColumnDefinitions="150,*,48">
+            <TextBlock Text="Сила размытия" VerticalAlignment="Center" />
+            <Slider Grid.Column="1" Minimum="0" Maximum="40" TickFrequency="1"
+                    Value="{Binding Blur, Mode=TwoWay}" Margin="8,0" />
+            <TextBlock Grid.Column="2" Text="{Binding Blur}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+          </Grid>
+          <Border Height="150" Background="{DynamicResource LauncherWorkspaceBrush}"
+                  BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" ClipToBounds="True">
+            <Grid>
+              <Image Source="{Binding BackgroundBitmap}" Stretch="UniformToFill" IsVisible="{Binding BackgroundVisible}">
+                <Image.Effect><BlurEffect Radius="{Binding Blur}" /></Image.Effect>
+              </Image>
+              <Image anim:ImageBehavior.AnimatedSource="{Binding BackgroundAnimation}"
+                     anim:ImageBehavior.RepeatBehavior="Forever" Stretch="UniformToFill"
+                     IsVisible="{Binding BackgroundIsAnimated}">
+                <Image.Effect><BlurEffect Radius="{Binding Blur}" /></Image.Effect>
+              </Image>
+              <TextBlock Text="ПРЕДПРОСМОТР ФОНА" Classes="SectionLabel" HorizontalAlignment="Center"
+                         VerticalAlignment="Center" IsVisible="{Binding !BackgroundVisible}" />
+            </Grid>
+          </Border>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="Surface" Padding="20">
+        <StackPanel Spacing="10">
+          <TextBlock Text="ФОНЫ ОТДЕЛЬНЫХ ВКЛАДОК" Classes="SectionLabel" />
+          <TextBlock Text="Если отдельный фон не выбран, используется общий фон темы." Classes="SubText" />
+          <ItemsControl ItemsSource="{Binding TabBackgroundOptions}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ThemeBackgroundOptionViewModel">
+                <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,3">
+                  <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontWeight="SemiBold" />
+                  <Button Grid.Column="1" Content="Выбрать" Command="{Binding Choose}" />
+                  <Button Grid.Column="2" Content="Убрать" Command="{Binding Remove}" IsEnabled="{Binding HasBackground}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="Surface" Padding="20">
+        <StackPanel Spacing="10">
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel>
+              <TextBlock Text="БИБЛИОТЕКА ТЕМ" Classes="SectionLabel" />
+              <TextBlock Text="Локальные темы можно применять одним нажатием." Classes="SubText" />
+            </StackPanel>
+            <Button Grid.Column="1" Content="Сохранить текущую" Command="{Binding SaveToLibrary}" />
+          </Grid>
+          <ItemsControl ItemsSource="{Binding ThemeLibrary}" IsVisible="{Binding !IsLibraryEmpty}">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ThemeLibraryItemViewModel">
+                <Border Background="{DynamicResource LauncherSurfaceAltBrush}" BorderBrush="{DynamicResource LauncherLineBrush}"
+                        BorderThickness="1" Padding="12" Width="220" Margin="0,0,8,8">
+                  <StackPanel Spacing="7">
+                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding Date}" Classes="SubText" />
+                    <WrapPanel>
+                      <Button Content="Применить" Command="{Binding Apply}" />
+                      <Button Content="Удалить" Command="{Binding Delete}" />
+                    </WrapPanel>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Text="Библиотека пока пуста." Classes="SubText" IsVisible="{Binding IsLibraryEmpty}" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

@@ -8,9 +8,11 @@ Taken & modified from Avalonia's git repo.
   <Style Selector="ToggleButton">
     <Setter Property="Template">
       <ControlTemplate>
-        <Panel>
-          <views:AngleBox Fill="{TemplateBinding Background}" />
-
+        <Border Name="PART_Background"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{DynamicResource LauncherLineBrush}"
+                BorderThickness="1"
+                CornerRadius="0">
           <Panel Name="PART_Margin">
             <ContentPresenter Name="PART_ContentPresenter"
                               ContentTemplate="{TemplateBinding ContentTemplate}"
@@ -21,7 +23,7 @@ Taken & modified from Avalonia's git repo.
                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
 
           </Panel>
-        </Panel>
+        </Border>
       </ControlTemplate>
     </Setter>
 
@@ -35,18 +37,12 @@ Taken & modified from Avalonia's git repo.
   <Style Selector="ToggleButton.OpenLeft">
     <Setter Property="Padding" Value="7, 2, 0, 2" />
   </Style>
-  <Style Selector="ToggleButton.OpenLeft /template/ views|AngleBox">
-    <Setter Property="SideStyle" Value="OpenLeft" />
-  </Style>
   <Style Selector="ToggleButton.OpenLeft /template/ Panel#PART_Margin">
     <Setter Property="Margin" Value="0 0 14 0" />
   </Style>
 
   <Style Selector="ToggleButton.OpenRight">
     <Setter Property="Padding" Value="0, 2, 7, 2" />
-  </Style>
-  <Style Selector="ToggleButton.OpenRight /template/ views|AngleBox">
-    <Setter Property="SideStyle" Value="OpenRight" />
   </Style>
   <Style Selector="ToggleButton.OpenRight /template/ Panel#PART_Margin">
     <Setter Property="Margin" Value="14 0 0 0" />
@@ -56,11 +52,16 @@ Taken & modified from Avalonia's git repo.
     <Setter Property="Background" Value="{DynamicResource ThemeButtonHoveredBrush}" />
   </Style>
 
+  <Style Selector="ToggleButton:pointerover /template/ Border#PART_Background">
+    <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderHighBrush}" />
+  </Style>
+
   <Style Selector="ToggleButton:pressed">
     <Setter Property="Background" Value="{DynamicResource ThemeControlHighBrush}" />
   </Style>
 
   <Style Selector="ToggleButton:checked">
     <Setter Property="Background" Value="{DynamicResource ThemeControlHighBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource ThemeBackgroundBrush}" />
   </Style>
 </Styles>

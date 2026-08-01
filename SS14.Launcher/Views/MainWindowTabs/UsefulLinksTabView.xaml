@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="520"
+             x:Class="SS14.Launcher.Views.MainWindowTabs.UsefulLinksTabView">
+  <Design.DataContext><vm:UsefulLinksTabViewModel /></Design.DataContext>
+
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Spacing="16">
+      <StackPanel Margin="0,0,0,4">
+        <TextBlock Text="RESOURCES" Classes="SectionLabel" />
+        <TextBlock Text="Полезные ссылки" Classes="NanoHeadingMedium" />
+        <TextBlock Text="Сервисы проекта и официальные ресурсы Space Station 14."
+                   Classes="SubText" Margin="0,4,0,0" />
+      </StackPanel>
+
+      <Border Classes="Surface" Padding="20">
+        <Grid ColumnDefinitions="52,*,Auto">
+          <Border Width="42" Height="42" Background="{DynamicResource LauncherControlBrush}"
+                  BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1">
+            <Viewbox Width="21" Height="21">
+              <!-- Official Lucide "flask-conical". -->
+              <Path Data="M10,2 L14,2 M12,2 L12,9 L18.5,19 A2,2 0 0 1 16.8,22 L7.2,22 A2,2 0 0 1 5.5,19 L12,9 M8.5,16 L15.5,16"
+                    Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}"
+                    StrokeThickness="1.8" StrokeLineCap="Round" />
+            </Viewbox>
+          </Border>
+          <StackPanel Grid.Column="1" Margin="14,0" VerticalAlignment="Center">
+            <TextBlock Text="ChemHelper" FontSize="17" FontWeight="SemiBold" />
+            <TextBlock Text="Помощник по химии для Space Station 14." Classes="SubText" />
+          </StackPanel>
+          <Button Grid.Column="2" Content="Открыть ChemHelper" Command="{Binding OpenChemHelper}"
+                  MinWidth="180" VerticalAlignment="Center" />
+        </Grid>
+      </Border>
+
+      <UniformGrid Columns="2" Rows="2">
+        <Button Margin="0,0,6,6" Padding="18" HorizontalContentAlignment="Stretch" Command="{Binding OpenSs14Website}">
+          <StackPanel><TextBlock Text="Официальный сайт" FontWeight="SemiBold" /><TextBlock Text="Новости и информация SS14" Classes="SubText" /></StackPanel>
+        </Button>
+        <Button Margin="6,0,0,6" Padding="18" HorizontalContentAlignment="Stretch" Command="{Binding OpenAccount}">
+          <StackPanel><TextBlock Text="Управление аккаунтом" FontWeight="SemiBold" /><TextBlock Text="Профиль и параметры входа" Classes="SubText" /></StackPanel>
+        </Button>
+        <Button Margin="0,6,6,0" Padding="18" HorizontalContentAlignment="Stretch" Command="{Binding OpenDocumentation}">
+          <StackPanel><TextBlock Text="Документация" FontWeight="SemiBold" /><TextBlock Text="Руководства Space Station 14" Classes="SubText" /></StackPanel>
+        </Button>
+        <Button Margin="6,6,0,0" Padding="18" HorizontalContentAlignment="Stretch" Command="{Binding OpenGitHub}">
+          <StackPanel><TextBlock Text="GitHub" FontWeight="SemiBold" /><TextBlock Text="Исходный код игры" Classes="SubText" /></StackPanel>
+        </Button>
+      </UniformGrid>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

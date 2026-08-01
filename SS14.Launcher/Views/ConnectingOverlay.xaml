@@ -11,40 +11,51 @@
   <Design.DataContext>
     <vm:ConnectingViewModel />
   </Design.DataContext>
-  <ContentControl Classes="OverlayBox">
-    <Panel>
-      <StackPanel Orientation="Vertical" IsVisible="{Binding !IsAskingPrivacyPolicy}">
-        <TextBlock HorizontalAlignment="Center" Classes="NanoHeadingMedium" Text="{Binding TitleText}" />
-        <TextBlock HorizontalAlignment="Center" Margin="0 10" DockPanel.Dock="Top" Text="{Binding StatusText}"
-                   TextWrapping="Wrap"  MaxWidth="400" />
-        <ProgressBar DockPanel.Dock="Bottom" Maximum="1" Value="{Binding Progress}"
-                     IsIndeterminate="{Binding ProgressIndeterminate}" IsVisible="{Binding ProgressBarVisible}"
-                     MinWidth="300" />
+  <Grid>
+    <!-- Compact non-blocking connection dock. -->
+    <Border Classes="ConnectionDock" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
+            Margin="18" Padding="16,12" IsVisible="{Binding !IsAskingPrivacyPolicy}"
+            Background="{DynamicResource LauncherSurfaceBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1"
+            BoxShadow="0 10 32 #B0000000">
+      <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto">
+        <Viewbox Classes="DockSpinner" Grid.RowSpan="2" Width="26" Height="26" Stretch="Uniform"
+                 ClipToBounds="True" VerticalAlignment="Center" Margin="0,0,14,0">
+          <Canvas Width="24" Height="24">
+            <Path Data="M21,12 A9,9 0 1 1 14.781,3.44"
+                  Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="2" StrokeLineCap="Round" />
+          </Canvas>
+        </Viewbox>
 
-        <Panel DockPanel.Dock="Bottom">
-          <Button Content="Ok" IsVisible="{Binding IsErrored}" HorizontalAlignment="Center"
-                  Command="{Binding ErrorDismissed}" MinWidth="75" />
+        <Grid Grid.Column="1" ColumnDefinitions="*,Auto,Auto">
+          <TextBlock Text="{Binding StatusText}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                     VerticalAlignment="Center" />
+          <TextBlock Grid.Column="1" Text="{Binding SpeedText}" Classes="SubText"
+                     Margin="14,0,0,0" VerticalAlignment="Center"
+                     IsVisible="{Binding !SpeedIndeterminate}" />
+          <TextBlock Grid.Column="2" Text="{Binding ProgressText}" Classes="SubText"
+                     Margin="14,0,0,0" VerticalAlignment="Center"
+                     IsVisible="{Binding !ProgressIndeterminate}" />
+        </Grid>
 
-          <DockPanel LastChildFill="False">
-            <Button DockPanel.Dock="Left"
-                    Name="CancelButton"
-                    Content="{loc:Loc connecting-cancel}"
-                    Command="{Binding Cancel}"
-                    IsVisible="{Binding !IsErrored}" />
+        <Grid Grid.Row="1" Grid.Column="1" Margin="0,7,0,0">
+          <ProgressBar Maximum="1" Value="{Binding Progress}"
+                       IsIndeterminate="{Binding ProgressIndeterminate}"
+                       IsVisible="{Binding ProgressBarVisible}" Height="5" />
+          <TextBlock Text="Ожидание запуска клиента…" Classes="SubText" FontSize="10"
+                     IsVisible="{Binding !ProgressBarVisible}" />
+        </Grid>
 
-            <TextBlock DockPanel.Dock="Right" Margin="8 4 0 4" Text="{Binding ProgressText}"
-                       TextWrapping="Wrap"
-                       IsVisible="{Binding !ProgressIndeterminate}" />
+        <Button Grid.Column="2" Grid.RowSpan="2" Name="CancelButton" MinWidth="92" Margin="14,0,0,0"
+                Content="{loc:Loc connecting-cancel}" Command="{Binding Cancel}"
+                IsVisible="{Binding !IsErrored}" />
+        <Button Grid.Column="2" Grid.RowSpan="2" MinWidth="92" Margin="14,0,0,0"
+                Content="OK" Command="{Binding ErrorDismissed}" IsVisible="{Binding IsErrored}" />
+      </Grid>
+    </Border>
 
-            <TextBlock DockPanel.Dock="Right" Margin="0 4" Text="{Binding SpeedText}"
-                       TextWrapping="Wrap"
-                       IsVisible="{Binding !SpeedIndeterminate}" />
-          </DockPanel>
-        </Panel>
-
-        <views:RandomMessage Name="Messages" Margin="0 6 0 0" MaxWidth="250" />
-      </StackPanel>
-      <StackPanel Orientation="Vertical" IsVisible="{Binding IsAskingPrivacyPolicy}">
+    <!-- Privacy policy still requires a blocking decision. -->
+    <ContentControl Classes="OverlayBox" IsVisible="{Binding IsAskingPrivacyPolicy}">
+      <StackPanel Orientation="Vertical">
         <TextBlock HorizontalAlignment="Center" Classes="NanoHeadingMedium" Text="{Binding TitleText}" />
         <TextBlock HorizontalAlignment="Center" Margin="0 10" DockPanel.Dock="Top" Text="{Binding PrivacyPolicyText}"
                    TextWrapping="Wrap" MaxWidth="400" />
@@ -59,6 +70,6 @@
                   Classes="OpenLeft"/>
         </StackPanel>
       </StackPanel>
-    </Panel>
-  </ContentControl>
+    </ContentControl>
+  </Grid>
 </UserControl>

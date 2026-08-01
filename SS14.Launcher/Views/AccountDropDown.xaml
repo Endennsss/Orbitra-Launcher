@@ -12,14 +12,28 @@
     <vm:AccountDropDownViewModel />
   </Design.DataContext>
 
-  <v:DropDown HeaderContent="{Binding LoginText}" IsDropDownOpen="{Binding IsDropDownOpen, Mode=TwoWay}" Classes="OpenRight">
+  <v:DropDown IsDropDownOpen="{Binding IsDropDownOpen, Mode=TwoWay}"
+              MinWidth="200" Height="42" Classes="OpenRight">
+    <v:DropDown.HeaderContent>
+      <Grid ColumnDefinitions="22,*" HorizontalAlignment="Stretch" Margin="2,0,14,0">
+        <Path Classes="AccountIcon" Data="M12,12 A4,4 0 1 0 12,4 A4,4 0 1 0 12,12 M4,21 C4,16 7,14 12,14 C17,14 20,16 20,21"
+              Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.8" StrokeLineCap="Round"
+              Width="17" Height="17" Stretch="Uniform" VerticalAlignment="Center" />
+        <TextBlock Grid.Column="1" Text="{Binding LoginText}" TextAlignment="Center"
+                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="6,0,0,0" />
+      </Grid>
+    </v:DropDown.HeaderContent>
     <Panel>
       <v:AngleBox Fill="{DynamicResource ThemePopupBackgroundBrush}" SideStyle="OpenRight" />
       <StackPanel Orientation="Vertical">
         <StackPanel Orientation="Vertical" IsVisible="{Binding AccountControlsVisible}">
           <Button Content="{Binding LogoutText}" Command="{Binding LogoutPressed}" Margin="4" />
-          <Button Content="{loc:Loc account-drop-down-add-account}" IsVisible="{Binding EnableMultiAccounts}" Command="{Binding AddAccountPressed}" Margin="4" />
         </StackPanel>
+
+        <!-- Adding an account must remain available even when there is no active account or
+             the upstream multi-account feature flag is unavailable in a development build. -->
+        <Button Content="{loc:Loc account-drop-down-add-account}"
+                Command="{Binding AddAccountPressed}" Margin="4" />
 
         <StackPanel Orientation="Vertical" IsVisible="{Binding AccountSwitchVisible}">
           <TextBlock Text="{Binding AccountSwitchText}" Margin="4" />

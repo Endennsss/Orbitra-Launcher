@@ -19,21 +19,31 @@
   </UserControl.Styles>
 
   <DockPanel LastChildFill="True">
-    <DockPanel DockPanel.Dock="Bottom" Margin="4 4 4 0" Height="32">
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+      <StackPanel>
+        <TextBlock Text="NETWORK" Classes="SectionLabel" />
+        <TextBlock Text="{loc:Loc tab-servers-table-name}" Classes="NanoHeadingMedium" />
+      </StackPanel>
+    </Grid>
+    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,14" Height="40">
       <Button DockPanel.Dock="Right" Command="{Binding RefreshPressed}"
-              Classes="OpenLeft" ToolTip.Tip="{loc:Loc tab-servers-refresh}">
-        <views:IconLabel Icon="{DynamicResource ButtonIcon-refresh}" Height="20" Width="20" />
+              Classes="IconAction" ToolTip.Tip="{loc:Loc tab-servers-refresh}">
+        <Viewbox Classes="RefreshIcon" Width="20" Height="20" Stretch="Uniform">
+          <Canvas Width="24" Height="24">
+            <Path Data="M21,12 A9,9 0 0 1 5.83,18.55 L3,16 M3,22 L3,16 L9,16 M3,12 A9,9 0 0 1 18.17,5.45 L21,8 M21,2 L21,8 L15,8"
+                  Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="2" StrokeLineCap="Round" />
+          </Canvas>
+        </Viewbox>
       </Button>
       <ToggleButton DockPanel.Dock="Right" IsChecked="{Binding FiltersVisible}" Classes="OpenRight"
                     Content="{Binding Filters.FiltersText}" />
-      <TextBox DockPanel.Dock="Right" Text="{Binding SearchString, Mode=TwoWay}"
+      <TextBox Name="SearchBox" DockPanel.Dock="Right" Text="{Binding SearchString, Mode=TwoWay}"
                Watermark="{loc:Loc tab-servers-search-watermark}"
                UseFloatingWatermark="False"
-               Margin="0 0 8 0" />
+               MinWidth="300" Margin="0,0,8,0" />
     </DockPanel>
 
-    <Panel DockPanel.Dock="Bottom" Classes="ScrollViewerSep" />
-
+    <Border Classes="Surface">
     <Grid>
       <Grid.RowDefinitions>
         <RowDefinition Height="*" MinHeight="180" /> <!-- Server List -->
@@ -55,13 +65,14 @@
       </GridSplitter>
 
       <!-- Filters dialog -->
-      <Border Grid.Row="2" DockPanel.Dock="Bottom"
+      <Border Grid.Row="2" DockPanel.Dock="Bottom" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,1,0,0"
               IsVisible="{Binding FiltersVisible}"
-              BoxShadow="0 -2 4 Black">
+              BoxShadow="0 -2 8 #80000000">
         <Panel Background="{DynamicResource ThemeBackgroundBrush}">
           <mainWindowTabsViews:ServerListFiltersView DataContext="{Binding Filters}" />
         </Panel>
       </Border>
     </Grid>
+    </Border>
   </DockPanel>
 </UserControl>

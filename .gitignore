@@ -1,6 +1,7 @@
 bin/
 obj/
 .idea/
+.codex-build/
 *.zip
 *.DotSettings.user
 .DS_Store

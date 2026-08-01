@@ -6,57 +6,60 @@
              xmlns:v="clr-namespace:SS14.Launcher.Views"
              xmlns:loc="clr-namespace:SS14.Launcher.Localization"
              xmlns:mainWindowTabs="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs"
+             xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SS14.Launcher.Views.MainWindowContent">
   <Design.DataContext>
     <vm:MainWindowViewModel />
   </Design.DataContext>
 
-  <Panel>
+  <Panel Background="{DynamicResource ThemeStripeBackBrush}" ClipToBounds="True">
+    <Image Source="{Binding ActiveThemeBackground}" Stretch="UniformToFill"
+           IsVisible="{Binding CustomThemeTab.BackgroundVisible}" Opacity="0.72" IsHitTestVisible="False">
+      <Image.Effect><BlurEffect Radius="{Binding CustomThemeTab.Blur}" /></Image.Effect>
+    </Image>
+    <Image anim:ImageBehavior.AnimatedSource="{Binding ActiveAnimatedThemeBackground}"
+           anim:ImageBehavior.RepeatBehavior="Forever" Stretch="UniformToFill"
+           IsVisible="{Binding CustomThemeTab.BackgroundVisible}" Opacity="0.72" IsHitTestVisible="False">
+      <Image.Effect><BlurEffect Radius="{Binding CustomThemeTab.Blur}" /></Image.Effect>
+    </Image>
+    <Border Classes="BackgroundScan" Height="180" VerticalAlignment="Top" IsHitTestVisible="False">
+      <Border.Background>
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+          <GradientStop Offset="0" Color="#00FFFFFF" />
+          <GradientStop Offset="0.5" Color="#10FFFFFF" />
+          <GradientStop Offset="1" Color="#00FFFFFF" />
+        </LinearGradientBrush>
+      </Border.Background>
+    </Border>
     <DockPanel LastChildFill="true">
-      <!-- Header -->
-      <Panel DockPanel.Dock="Top">
-        <Panel.Background>
-          <SolidColorBrush Color="#212126" />
-        </Panel.Background>
-
-        <DockPanel Name="HeaderPanel" Classes="MainWindowHeader">
-          <!-- Logo -->
-          <Image DockPanel.Dock="Left" HorizontalAlignment="Left" Height="60" Margin="0, 0, 0, 8"
-                 Source="{DynamicResource LogoLong}" />
-          <!--<v:Logo DockPanel.Dock="Left" Height="60" HorizontalAlignment="Left" Margin="0, 8"></v:Logo>-->
-          <Grid DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center"
-                ColumnDefinitions="Auto, Auto" RowDefinitions="Auto, Auto" Margin="0, 0, 3, 0">
-            <!-- Discord link -->
-            <Button Grid.Row="0" Grid.Column="0" MinWidth="90"
-                    Command="{Binding OnDiscordButtonPressed}" Classes="OpenBoth"
-                    Margin="0, 6, 2, 2">
-              <v:IconLabel Icon="{DynamicResource InfoIcon-discord}"
-                           Content="{loc:Loc main-window-header-link-discord}" />
-            </Button>
-
-            <!-- Website link -->
-            <Button Grid.Row="0" Grid.Column="1" MinWidth="90"
-                    Command="{Binding OnWebsiteButtonPressed}" Classes="OpenLeft"
-                    Margin="0, 6, 0, 2">
-              <v:IconLabel Icon="{DynamicResource InfoIcon-web}" Content="{loc:Loc main-window-header-link-website}" />
-            </Button>
-
-            <!-- Account drop down -->
-            <v:AccountDropDown Grid.ColumnSpan="2" Grid.Row="1"
-                               IsEnabled="{Binding $parent.DataContext.AccountDropDownVisible}"
-                               DataContext="{Binding AccountDropDown}" />
-          </Grid>
-        </DockPanel>
-      </Panel>
-      <Panel DockPanel.Dock="Top" Classes="GoldLineHorizontal" />
       <Grid>
         <!-- Main tabbed layout when logged in -->
-        <TabControl IsVisible="{Binding LoggedIn}" ItemsSource="{Binding Tabs}" TabStripPlacement="Bottom"
-                    SelectedIndex="{Binding SelectedIndex,Mode=TwoWay}" Margin="0 4 0 0">
+        <TabControl IsVisible="{Binding LoggedIn}" ItemsSource="{Binding Tabs}" TabStripPlacement="Left"
+                    SelectedIndex="{Binding SelectedIndex,Mode=TwoWay}" Margin="0">
+          <TabControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel Width="210" Spacing="4" Margin="14,18" />
+            </ItemsPanelTemplate>
+          </TabControl.ItemsPanel>
           <TabControl.ItemTemplate>
             <DataTemplate DataType="mainWindowTabs:MainWindowTabViewModel">
-              <TextBlock Text="{Binding Name}" />
+              <Grid ColumnDefinitions="4,26,*,Auto" Height="46" Margin="0">
+                <Border Classes="NavIndicator" Width="3" Height="8" HorizontalAlignment="Left"
+                        VerticalAlignment="Center" Background="{DynamicResource ThemeForegroundBrush}" Opacity="0" />
+                <Viewbox Grid.Column="1" Width="18" Height="18" VerticalAlignment="Center">
+                  <Path Classes="NavIcon" Data="{Binding IconData}" Fill="Transparent"
+                        Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.7" StrokeLineCap="Round" />
+                </Viewbox>
+                <TextBlock Grid.Column="2" Text="{Binding Name}" FontSize="14" FontWeight="SemiBold"
+                           HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,4,0" />
+                <Border Grid.Column="3" IsVisible="{Binding HasBadge}" Background="{DynamicResource LauncherControlBrush}"
+                        BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" MinWidth="24" Height="22"
+                        Padding="6,0" Margin="4,0" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding BadgeText}" FontSize="10" HorizontalAlignment="Center"
+                             VerticalAlignment="Center" Foreground="{DynamicResource ThemeForegroundBrush}" />
+                </Border>
+              </Grid>
             </DataTemplate>
           </TabControl.ItemTemplate>
         </TabControl>
@@ -159,6 +162,43 @@
       </StackPanel>
     </ContentControl>
 
+    <Border Background="{DynamicResource LauncherWorkspaceBrush}" Opacity="{Binding CustomThemeTab.ThemeTransitionOpacity}"
+            IsHitTestVisible="False">
+      <Border.Transitions>
+        <Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.28" /></Transitions>
+      </Border.Transitions>
+    </Border>
+
+    <ContentControl Classes="OverlayBox" IsVisible="{Binding ShowFirstRun}">
+      <Border Background="{DynamicResource LauncherSurfaceBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="28" Width="560">
+        <StackPanel Spacing="14">
+          <StackPanel>
+            <TextBlock Text="ДОБРО ПОЖАЛОВАТЬ" Classes="SectionLabel" />
+            <TextBlock Text="Первичная настройка лаунчера" Classes="NanoHeadingMedium" />
+            <TextBlock Text="Выберите основные параметры. Их всегда можно изменить в настройках."
+                       Classes="SubText" TextWrapping="Wrap" Margin="0,4,0,0" />
+          </StackPanel>
+          <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto">
+            <TextBlock Text="Аккаунт" VerticalAlignment="Center" />
+            <v:AccountDropDown Grid.Column="1" Height="42" DataContext="{Binding AccountDropDown}" />
+            <TextBlock Grid.Row="1" Text="Язык" VerticalAlignment="Center" Margin="0,10,0,0" />
+            <v:LanguageSelector Grid.Row="1" Grid.Column="1" Margin="0,10,0,0" DataContext="{Binding OptionsTab.Language}"
+                                Placement="BottomEdgeAlignedLeft" />
+            <TextBlock Grid.Row="2" Text="Шрифт" VerticalAlignment="Center" Margin="0,10,0,0" />
+            <ComboBox Grid.Row="2" Grid.Column="1" Margin="0,10,0,0" ItemsSource="{Binding OptionsTab.AvailableFonts}"
+                      SelectedItem="{Binding OptionsTab.SelectedFont, Mode=TwoWay}" />
+            <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="0,6,0,0">
+              <CheckBox Content="Автоматически обновлять пинг избранного"
+                        IsChecked="{Binding OptionsTab.AutoRefreshFavoritePing, Mode=TwoWay}" />
+              <CheckBox Content="Включить Discord Rich Presence"
+                        IsChecked="{Binding OptionsTab.DiscordRpcEnabled, Mode=TwoWay}" />
+            </StackPanel>
+          </Grid>
+          <Button Content="НАЧАТЬ" Command="{Binding CompleteFirstRun}" HorizontalAlignment="Right" MinWidth="140" />
+        </StackPanel>
+      </Border>
+    </ContentControl>
+
     <!--
       Literally just keep piling them on it doesn't matter.
       This is way easier than coming up with some horribly over-engineered solution.
@@ -166,6 +206,18 @@
 
     <v:ConnectingOverlay DataContext="{Binding ConnectingVM}"
                          IsVisible="{Binding $parent.DataContext.ConnectingVM, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+    <ItemsControl ItemsSource="{Binding Toasts}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                  Margin="0,18,18,0" IsHitTestVisible="False">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <Border Classes="LauncherToast" Classes.Error="{Binding IsError}" Margin="0,0,0,8"
+                  Padding="14,10" MinWidth="240" MaxWidth="360">
+            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
 
     <v:AngleBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
 

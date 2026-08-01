@@ -14,20 +14,30 @@
 
   <DockPanel>
     <!-- Header controls -->
-    <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="4, 0, 4, 2">
-      <TextBlock DockPanel.Dock="Left" Text="{loc:Loc tab-home-favorite-servers}" Classes="NanoHeadingMedium" />
-      <Button DockPanel.Dock="Right" Classes="OpenLeft" Command="{Binding AddFavoritePressed}"
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,18">
+      <StackPanel Grid.Column="0" Spacing="3">
+        <TextBlock Text="OVERVIEW" Classes="SectionLabel" />
+        <TextBlock Text="{loc:Loc tab-home-favorite-servers}" Classes="NanoHeadingMedium" />
+      </StackPanel>
+      <Button Grid.Column="1" Classes="IconAction" Command="{Binding AddFavoritePressed}"
               ToolTip.Tip="{loc:Loc tab-home-add-favorite}">
-        <v:IconLabel Icon="{DynamicResource ButtonIcon-plus}" Height="20" Width="20" />
+        <Path Classes="PlusIcon" Data="M5,12 L19,12 M12,5 L12,19"
+              Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="2" StrokeLineCap="Round"
+              Width="18" Height="18" Stretch="Uniform" />
       </Button>
-      <Button DockPanel.Dock="Right" Classes="OpenRight" Command="{Binding RefreshPressed}"
+      <Button Grid.Column="2" Classes="IconAction" Command="{Binding RefreshPressed}"
               ToolTip.Tip="{loc:Loc tab-home-refresh}">
-        <v:IconLabel Icon="{DynamicResource ButtonIcon-refresh}" Height="20" Width="20" />
+        <Viewbox Classes="RefreshIcon" Width="20" Height="20" Stretch="Uniform">
+          <Canvas Width="24" Height="24">
+            <Path Data="M21,12 A9,9 0 0 1 5.83,18.55 L3,16 M3,22 L3,16 L9,16 M3,12 A9,9 0 0 1 18.17,5.45 L21,8 M21,2 L21,8 L15,8"
+                  Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="2" StrokeLineCap="Round" />
+          </Canvas>
+        </Viewbox>
       </Button>
-    </DockPanel>
+    </Grid>
 
     <!-- Footer controls -->
-    <DockPanel DockPanel.Dock="Bottom" LastChildFill="False" Margin="4 4 4 0" Height="32">
+    <DockPanel DockPanel.Dock="Bottom" LastChildFill="False" Margin="0,16,0,0" Height="38">
       <Button DockPanel.Dock="Left" Classes="OpenRight"
               Content="{loc:Loc tab-home-direct-connect}"
               Command="{Binding DirectConnectPressed}" />
@@ -36,15 +46,14 @@
               Click="OpenReplayClicked" />
     </DockPanel>
 
-    <Panel DockPanel.Dock="Bottom" Classes="ScrollViewerSep" />
-    <Panel DockPanel.Dock="Top" Classes="ScrollViewerSep" />
-    <Panel>
-      <mwt:ServerList List="{Binding Favorites}" IsVisible="{Binding !FavoritesEmpty}">
+    <Border Classes="Surface">
+      <Grid RowDefinitions="*,Auto">
+      <mwt:ServerList Grid.Row="0" List="{Binding Favorites}" IsVisible="{Binding !FavoritesEmpty}">
         <Button Content="{loc:Loc tab-home-go-to-servers-tab}"
                 Command="{Binding MainWindowViewModel.SelectTabServers}" />
       </mwt:ServerList>
 
-      <StackPanel IsVisible="{Binding FavoritesEmpty}"
+      <StackPanel Grid.Row="0" IsVisible="{Binding FavoritesEmpty}"
                   Orientation="Vertical" VerticalAlignment="Center">
         <TextBlock Text="{loc:Loc tab-home-favorites-guide}" HorizontalAlignment="Center"
                    Margin="0 0 0 10" />
@@ -52,6 +61,30 @@
                 Command="{Binding MainWindowViewModel.SelectTabServers}"
                 HorizontalAlignment="Center" />
       </StackPanel>
-    </Panel>
+
+      <Border Grid.Row="1" IsVisible="{Binding HasRecentServers}" BorderBrush="{DynamicResource LauncherLineBrush}"
+              BorderThickness="0,1,0,0" Padding="14,12">
+        <StackPanel Spacing="8">
+          <TextBlock Text="НЕДАВНИЕ СЕРВЕРЫ" Classes="SectionLabel" />
+          <ItemsControl ItemsSource="{Binding RecentServers}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Button Command="{Binding ConnectPressed}" Margin="0,0,8,6" Padding="12,8">
+                  <StackPanel>
+                    <TextBlock Text="{Binding Name}" MaxWidth="170" TextTrimming="CharacterEllipsis"
+                               FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding LastConnectedText}" Classes="SubText" FontSize="10" />
+                  </StackPanel>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+      </Grid>
+    </Border>
   </DockPanel>
 </UserControl>

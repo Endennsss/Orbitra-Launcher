@@ -293,10 +293,12 @@ public partial class Connector : ObservableObject
             {
                 Status = ConnectionStatus.ClientRunning;
                 await waitClient;
-                return;
+                ClientExitedBadly = clientProc.ExitCode != 0;
             }
-
-            ClientExitedBadly = clientProc.ExitCode != 0;
+            else
+            {
+                ClientExitedBadly = clientProc.ExitCode != 0;
+            }
         }
         else
         {
@@ -520,7 +522,6 @@ public partial class Connector : ObservableObject
         EnvVar("SS14_LOADER_CONTENT_DB", LauncherPaths.PathContentDb);
         EnvVar("SS14_LOADER_CONTENT_VERSION", launchInfo.Version.ToString());
         EnvVar("SS14_LOADER_OVERLAY_ZIP", launchInfo.OverlayZip);
-
         // Env vars for engine modules.
         {
             foreach (var (moduleName, moduleVersion) in launchInfo.ModuleInfo)

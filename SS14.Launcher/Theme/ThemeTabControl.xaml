@@ -18,7 +18,7 @@ Taken & modified from Avalonia's git repo.
           <DockPanel>
             <Panel
               Name="PART_TabPanel"
-              Background="{DynamicResource ThemeStripeBackBrush}">
+              Background="{DynamicResource LauncherChromeBrush}">
               <ItemsPresenter
                 Name="PART_ItemsPresenter"
                 ItemsPanel="{TemplateBinding ItemsPanel}"/>
@@ -61,6 +61,20 @@ Taken & modified from Avalonia's git repo.
   <Style Selector="TabControl[TabStripPlacement=Left] /template/ Panel#PART_Edge">
     <Setter Property="DockPanel.Dock" Value="Left" />
     <Setter Property="MinWidth" Value="2" />
+  </Style>
+
+  <Style Selector="TabControl[TabStripPlacement=Left] /template/ ContentPresenter#PART_SelectedContentHost">
+    <Setter Property="Margin" Value="22" />
+    <Setter Property="ClipToBounds" Value="True" />
+  </Style>
+
+  <Style Selector="TabControl[TabStripPlacement=Left] /template/ ContentPresenter#PART_SelectedContentHost">
+    <Style.Animations>
+      <Animation Duration="0:0:0.3" Easing="CubicEaseOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
   </Style>
   <Style Selector="TabControl[TabStripPlacement=Right] /template/ Panel#PART_Edge">
     <Setter Property="DockPanel.Dock" Value="Right" />

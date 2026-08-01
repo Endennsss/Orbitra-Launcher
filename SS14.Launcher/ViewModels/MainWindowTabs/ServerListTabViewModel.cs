@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using Avalonia.Threading;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
@@ -16,13 +17,19 @@ public partial class ServerListTabViewModel : MainWindowTabViewModel
     private readonly LocalizationManager _loc = LocalizationManager.Instance;
     private readonly MainWindowViewModel _windowVm;
     private readonly ServerListCache _serverListCache;
+    private readonly List<ServerStatusData> _badgeServers = [];
 
     public ObservableList<ServerEntryViewModel> SearchedServers { get; } = [];
+    public event Action? SearchFocusRequested;
 
     private string? _searchString;
     private readonly DispatcherTimer _searchThrottle = new() { Interval = TimeSpan.FromMilliseconds(200) };
 
     public override string Name => _loc.GetString("tab-servers-title");
+    public override string IconData => "M4,4 L20,4 L20,10 L4,10 Z M4,14 L20,14 L20,20 L4,20 Z M8,7 L8.01,7 M8,17 L8.01,17";
+    public override string BadgeText => _serverListCache.AllServers.Count == 0
+        ? string.Empty
+        : _serverListCache.AllServers.Count(x => x.Status == ServerStatusCode.Online).ToString();
 
     public string? SearchString
     {
@@ -43,6 +50,13 @@ public partial class ServerListTabViewModel : MainWindowTabViewModel
     }
 
     public bool SpinnerVisible => _serverListCache.Status < RefreshListStatus.Updated;
+    public void RequestSearchFocus() => SearchFocusRequested?.Invoke();
+    public void ConnectCurrent() => SearchedServers.FirstOrDefault(x => x.IsExpanded && x.CanConnect)?.ConnectPressed();
+    public void CloseExpanded()
+    {
+        foreach (var entry in SearchedServers.Where(x => x.IsExpanded))
+            entry.IsExpanded = false;
+    }
 
     public string ListText
     {
@@ -114,19 +128,35 @@ public partial class ServerListTabViewModel : MainWindowTabViewModel
 
     public override void Selected()
     {
+        DiscordRichPresenceService.Instance.ShowSearching();
         _serverListCache.RequestInitialUpdate();
     }
 
     public void RefreshPressed()
     {
         _serverListCache.RequestRefresh();
+        _windowVm.ShowToast("Список серверов обновляется");
     }
 
     private void ServerListUpdated(object? sender, NotifyCollectionChangedEventArgs notifyCollectionChangedEventArgs)
     {
+        foreach (var server in _badgeServers)
+            server.PropertyChanged -= BadgeServerPropertyChanged;
+        _badgeServers.Clear();
+        _badgeServers.AddRange(_serverListCache.AllServers);
+        foreach (var server in _badgeServers)
+            server.PropertyChanged += BadgeServerPropertyChanged;
+        BadgeChanged();
+
         Filters.UpdatePresentFilters(_serverListCache.AllServers);
 
         UpdateSearchedList();
+    }
+
+    private void BadgeServerPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ServerStatusData.Status))
+            BadgeChanged();
     }
 
     private void UpdateSearchedList()

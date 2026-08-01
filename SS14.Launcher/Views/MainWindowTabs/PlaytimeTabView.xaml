@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs"
+             x:Class="SS14.Launcher.Views.MainWindowTabs.PlaytimeTabView">
+  <StackPanel Spacing="16">
+    <Grid ColumnDefinitions="*,Auto">
+      <StackPanel><TextBlock Text="STATISTICS" Classes="SectionLabel" /><TextBlock Text="Журнал игрового времени" Classes="NanoHeadingMedium" /></StackPanel>
+      <StackPanel Grid.Column="1" HorizontalAlignment="Right"><TextBlock Text="ВСЕГО" Classes="SectionLabel" HorizontalAlignment="Right" /><TextBlock Text="{Binding TotalText}" FontSize="20" FontWeight="SemiBold" /></StackPanel>
+    </Grid>
+    <Border Classes="Surface" Padding="14">
+      <ScrollViewer>
+        <ItemsControl ItemsSource="{Binding Servers}" IsVisible="{Binding !IsEmpty}">
+          <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:PlaytimeEntryViewModel">
+            <Grid ColumnDefinitions="*,180,150" Margin="0,0,0,6" Background="{DynamicResource LauncherSurfaceAltBrush}">
+              <StackPanel Margin="12,9"><TextBlock Text="{Binding Name}" FontWeight="SemiBold" /><TextBlock Text="{Binding Address}" Classes="SubText" /></StackPanel>
+              <StackPanel Grid.Column="1" Margin="12,9"><TextBlock Text="ПОСЛЕДНИЙ ЗАПУСК" Classes="SectionLabel" /><TextBlock Text="{Binding LastPlayedText}" /></StackPanel>
+              <StackPanel Grid.Column="2" Margin="12,9"><TextBlock Text="НАРАБОТАНО" Classes="SectionLabel" /><TextBlock Text="{Binding DurationText}" FontWeight="SemiBold" /></StackPanel>
+            </Grid>
+          </DataTemplate></ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Border>
+    <TextBlock Text="Статистика появится после первого запуска игры через этот лаунчер." Classes="SubText" IsVisible="{Binding IsEmpty}" HorizontalAlignment="Center" />
+  </StackPanel>
+</UserControl>

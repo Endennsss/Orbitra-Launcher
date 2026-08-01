@@ -7,7 +7,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 using Avalonia.Platform.Storage;
+using Avalonia.Media.Imaging;
+using AnimatedImage.Avalonia;
 using Avalonia.Threading;
 using DynamicData;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
@@ -27,14 +30,17 @@ namespace SS14.Launcher.ViewModels;
 
 public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
 {
+    public ObservableCollection<LauncherToast> Toasts { get; } = [];
     private readonly DataManager _cfg;
     private readonly LoginManager _loginMgr;
     private readonly LauncherInfoManager _infoManager;
     private readonly LocalizationManager _loc;
 
     private int _selectedIndex;
+    private readonly List<MainWindowTabViewModel> _allTabs = [];
 
     public DataManager Cfg => _cfg;
+    public ICVarEntry<bool> UseTextLogo => Cfg.GetCVarEntry(CVars.UseTextLogo);
     [ObservableProperty] private bool _outOfDate;
 
     private IDisposable? _authOverrideCountdownTimer;
@@ -42,7 +48,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
     public HomePageViewModel HomeTab { get; }
     public ServerListTabViewModel ServersTab { get; }
     public NewsTabViewModel NewsTab { get; }
+    public UsefulLinksTabViewModel UsefulLinksTab { get; }
     public OptionsTabViewModel OptionsTab { get; }
+    public CustomThemeTabViewModel CustomThemeTab { get; }
+    public PlaytimeTabViewModel PlaytimeTab { get; }
+    public ActivityTabViewModel ActivityTab { get; }
 
     public MainWindowViewModel()
     {
@@ -50,30 +60,45 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         _loginMgr = Locator.Current.GetRequiredService<LoginManager>();
         _infoManager = Locator.Current.GetRequiredService<LauncherInfoManager>();
         _loc = LocalizationManager.Instance;
+        DiscordRichPresenceService.Instance.ShowLauncher();
+
+        AccountDropDown = new AccountDropDownViewModel(this);
 
         ServersTab = new ServerListTabViewModel(this);
         NewsTab = new NewsTabViewModel();
+        UsefulLinksTab = new UsefulLinksTabViewModel();
         HomeTab = new HomePageViewModel(this);
-        OptionsTab = new OptionsTabViewModel();
+        OptionsTab = new OptionsTabViewModel(this);
+        CustomThemeTab = new CustomThemeTabViewModel(this);
+        PlaytimeTab = new PlaytimeTabViewModel();
+        ActivityTab = new ActivityTabViewModel();
 
-        Tabs = new List<MainWindowTabViewModel>
-        {
+        _allTabs.AddRange([
             HomeTab,
             ServersTab,
             NewsTab,
+            UsefulLinksTab,
+            PlaytimeTab,
+            ActivityTab,
+            CustomThemeTab,
             OptionsTab,
 #if DEVELOPMENT
-            new DevelopmentTabViewModel(),
+            new DevelopmentTabViewModel(this),
 #endif
-        };
+        ]);
+        ApplySavedNavigationOrder();
+        RefreshVisibleTabs();
+        OptionsTab.InitializeNavigation();
 
-        AccountDropDown = new AccountDropDownViewModel(this);
         LoginViewModel = new MainWindowLoginViewModel();
 
         PropertyChanged += (_, e) =>
         {
             if (e.PropertyName is nameof(LoggedIn) && LoggedIn)
+            {
                 RunSelectedOnTab();
+                OnPropertyChanged(nameof(ShowFirstRun));
+            }
         };
 
         _loginMgr.PropertyChanged += (_, e) =>
@@ -88,10 +113,85 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
 
     public MainWindow? Control { get; set; }
 
-    public IReadOnlyList<MainWindowTabViewModel> Tabs { get; }
+    public ObservableCollection<MainWindowTabViewModel> Tabs { get; } = [];
+    public IReadOnlyList<MainWindowTabViewModel> AllTabs => _allTabs;
+
+    public string GetNavigationId(MainWindowTabViewModel tab)
+    {
+        if (ReferenceEquals(tab, HomeTab)) return "home";
+        if (ReferenceEquals(tab, ServersTab)) return "servers";
+        if (ReferenceEquals(tab, NewsTab)) return "news";
+        if (ReferenceEquals(tab, UsefulLinksTab)) return "links";
+        if (ReferenceEquals(tab, OptionsTab)) return "options";
+        if (ReferenceEquals(tab, CustomThemeTab)) return "custom-theme";
+        if (ReferenceEquals(tab, PlaytimeTab)) return "playtime";
+        if (ReferenceEquals(tab, ActivityTab)) return "activity";
+        return "development";
+    }
+
+    public bool CanHideNavigationTab(string id) => id is not "home" and not "options";
+
+    public bool IsNavigationTabVisible(string id) =>
+        !ParseCsv(_cfg.GetCVar(CVars.HiddenNavigationTabs)).Contains(id) || !CanHideNavigationTab(id);
+
+    public void SetNavigationTabVisible(string id, bool visible)
+    {
+        if (!CanHideNavigationTab(id)) return;
+        var hidden = ParseCsv(_cfg.GetCVar(CVars.HiddenNavigationTabs));
+        if (visible) hidden.Remove(id); else hidden.Add(id);
+        _cfg.SetCVar(CVars.HiddenNavigationTabs, string.Join(',', hidden));
+        _cfg.CommitConfig();
+        RefreshVisibleTabs();
+    }
+
+    public void MoveNavigationTab(string id, int direction)
+    {
+        var index = _allTabs.FindIndex(tab => GetNavigationId(tab) == id);
+        var target = index + direction;
+        if (index < 0 || target < 0 || target >= _allTabs.Count) return;
+        (_allTabs[index], _allTabs[target]) = (_allTabs[target], _allTabs[index]);
+        _cfg.SetCVar(CVars.NavigationTabOrder, string.Join(',', _allTabs.Select(GetNavigationId)));
+        _cfg.CommitConfig();
+        RefreshVisibleTabs();
+    }
+
+    private void ApplySavedNavigationOrder()
+    {
+        if (_cfg.GetCVar(CVars.NavigationOrderVersion) < 1)
+        {
+            _cfg.SetCVar(CVars.NavigationTabOrder,
+                "home,servers,news,links,playtime,activity,custom-theme,options,development");
+            _cfg.SetCVar(CVars.NavigationOrderVersion, 1);
+            _cfg.CommitConfig();
+        }
+        var order = ParseCsv(_cfg.GetCVar(CVars.NavigationTabOrder)).ToList();
+        _allTabs.Sort((a, b) =>
+        {
+            var ai = order.IndexOf(GetNavigationId(a));
+            var bi = order.IndexOf(GetNavigationId(b));
+            return (ai < 0 ? int.MaxValue : ai).CompareTo(bi < 0 ? int.MaxValue : bi);
+        });
+    }
+
+    private void RefreshVisibleTabs()
+    {
+        var selected = Tabs.Count > 0 && _selectedIndex >= 0 && _selectedIndex < Tabs.Count
+            ? Tabs[_selectedIndex]
+            : HomeTab;
+        Tabs.Clear();
+        foreach (var tab in _allTabs.Where(tab => IsNavigationTabVisible(GetNavigationId(tab))))
+            Tabs.Add(tab);
+        _selectedIndex = Math.Max(0, Tabs.IndexOf(selected));
+        RunSelectedOnTab();
+    }
+
+    private static HashSet<string> ParseCsv(string value) =>
+        value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
     public bool LoggedIn => _loginMgr.ActiveAccount != null;
     public bool AccountDropDownVisible => _loginMgr.Logins.Count != 0;
+    public bool ShowFirstRun => LoggedIn && !_cfg.GetCVar(CVars.FirstRunCompleted);
 
     public AccountDropDownViewModel AccountDropDown { get; }
 
@@ -118,6 +218,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
             }
 
             RunSelectedOnTab();
+            OnPropertyChanged(nameof(ActiveThemeBackground));
+            OnPropertyChanged(nameof(ActiveAnimatedThemeBackground));
         }
     }
 
@@ -167,6 +269,48 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
     public void OnWebsiteButtonPressed()
     {
         Helpers.OpenUri(new Uri(ConfigConstants.WebsiteUrl));
+    }
+
+    public Bitmap? ActiveThemeBackground
+    {
+        get
+        {
+            if (Tabs.Count == 0 || _selectedIndex < 0 || _selectedIndex >= Tabs.Count) return null;
+            return CustomThemeTab.GetBackgroundFor(GetNavigationId(Tabs[_selectedIndex]));
+        }
+    }
+
+    public AnimatedImageSource? ActiveAnimatedThemeBackground
+    {
+        get
+        {
+            if (Tabs.Count == 0 || _selectedIndex < 0 || _selectedIndex >= Tabs.Count) return null;
+            var path = CustomThemeTab.GetBackgroundPathFor(GetNavigationId(Tabs[_selectedIndex]));
+            return CustomThemeTabViewModel.IsAnimatedImage(path) && path != null
+                ? new AnimatedImageSourceUri(new Uri(path))
+                : null;
+        }
+    }
+
+    public void RefreshThemeVisuals()
+    {
+        OnPropertyChanged(nameof(ActiveThemeBackground));
+        OnPropertyChanged(nameof(ActiveAnimatedThemeBackground));
+    }
+
+    public async void ShowToast(string message, bool isError = false)
+    {
+        if (isError)
+            UiSoundService.PlayError();
+        var toast = new LauncherToast(message, isError);
+        Toasts.Add(toast);
+        await Task.Delay(2800);
+        Toasts.Remove(toast);
+    }
+
+    public void OnChemHelperButtonPressed()
+    {
+        Helpers.OpenUri(new Uri(ConfigConstants.ChemHelperUrl));
     }
 
     private async Task CheckLauncherUpdate()
@@ -250,6 +394,43 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
     public void SelectTabServers()
     {
         SelectedIndex = Tabs.IndexOf(ServersTab);
+    }
+
+    public void SelectTabHome()
+    {
+        var index = Tabs.IndexOf(HomeTab);
+        if (index >= 0) SelectedIndex = index;
+    }
+
+    public void RefreshCurrentTab()
+    {
+        if (Tabs[SelectedIndex] == ServersTab)
+            ServersTab.RefreshPressed();
+        else if (Tabs[SelectedIndex] == HomeTab)
+            HomeTab.RefreshPressed();
+    }
+
+    public void ConnectCurrentServer()
+    {
+        if (Tabs[SelectedIndex] == ServersTab)
+            ServersTab.ConnectCurrent();
+        else if (Tabs[SelectedIndex] == HomeTab)
+            HomeTab.Favorites.FirstOrDefault(x => x.IsExpanded && x.CanConnect)?.ConnectPressed();
+    }
+
+    public void CloseExpandedServers()
+    {
+        ServersTab.CloseExpanded();
+        foreach (var server in HomeTab.Favorites.Where(x => x.IsExpanded))
+            server.IsExpanded = false;
+    }
+
+    public void CompleteFirstRun()
+    {
+        _cfg.SetCVar(CVars.FirstRunCompleted, true);
+        _cfg.CommitConfig();
+        OnPropertyChanged(nameof(ShowFirstRun));
+        ShowToast("Настройка лаунчера завершена");
     }
 
     public void TrySwitchToAccount(LoggedInAccount account)
@@ -352,3 +533,5 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         return processor.Contains("VirtualApple") && !cfg.GetCVar(CVars.HasDismissedRosettaWarning);
     }
 }
+
+public sealed record LauncherToast(string Message, bool IsError);

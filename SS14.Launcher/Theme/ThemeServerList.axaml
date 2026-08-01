@@ -4,9 +4,29 @@
         xmlns:views="using:SS14.Launcher.Views"
         xmlns:mwt="using:SS14.Launcher.Views.MainWindowTabs">
   <Style Selector="ItemsControl.ServerList > ContentPresenter:nth-child(2n)">
-    <Setter Property="Background">
-      <SolidColorBrush Color="#262626" />
+    <Setter Property="Background" Value="{DynamicResource LauncherSurfaceBrush}" />
+  </Style>
+
+  <Style Selector="ItemsControl.ServerList > ContentPresenter">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.16" />
+        <DoubleTransition Property="Opacity" Duration="0:0:0.2" />
+      </Transitions>
     </Setter>
+  </Style>
+
+  <Style Selector="ItemsControl.ServerList > ContentPresenter:pointerover">
+    <Setter Property="Background" Value="{DynamicResource LauncherHoverBrush}" />
+  </Style>
+
+  <Style Selector="ItemsControl.ServerList > ContentPresenter">
+    <Style.Animations>
+      <Animation Duration="0:0:0.3" Easing="CubicEaseOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
   </Style>
 
   <Style Selector="Border.GridCell">
@@ -45,11 +65,12 @@
     <Setter Property="Template">
       <ControlTemplate>
         <DockPanel ZIndex="-1" Grid.IsSharedSizeScope="True">
-          <Grid DockPanel.Dock="Top" Margin="24 0 24 0" IsVisible="{TemplateBinding ShowHeader}">
+          <Grid DockPanel.Dock="Top" Margin="24,8" IsVisible="{TemplateBinding ShowHeader}">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*" /> <!-- Server Name -->
               <ColumnDefinition SharedSizeGroup="TimeCol" MinWidth="80" Width="Auto" />
               <ColumnDefinition SharedSizeGroup="StatusCol" MinWidth="80" Width="Auto" />
+              <ColumnDefinition SharedSizeGroup="PingCol" MinWidth="72" Width="Auto" />
               <ColumnDefinition SharedSizeGroup="ConnectCol" Width="Auto" />
             </Grid.ColumnDefinitions>
 
@@ -63,17 +84,17 @@
               <TextBlock Text="{loc:Loc tab-servers-table-players}" Classes="SubText Center" />
             </Border>
             <Border Grid.Column="3" Classes="GridCell">
+              <TextBlock Text="PING" Classes="SubText Center" />
+            </Border>
+            <Border Grid.Column="4" Classes="GridCell">
               <TextBlock Text="" Classes="SubText Center" />
             </Border>
           </Grid>
 
           <Panel DockPanel.Dock="Top" Classes="ScrollViewerSep" IsVisible="{TemplateBinding ShowHeader}" />
 
-          <Panel>
-            <Panel.Background>
-              <SolidColorBrush Color="#1e1e22" />
-            </Panel.Background>
-            <ScrollViewer MinHeight="150" HorizontalScrollBarVisibility="Disabled"
+          <Panel Background="{DynamicResource LauncherChromeBrush}">
+            <ScrollViewer MinHeight="150" HorizontalScrollBarVisibility="Disabled" ClipToBounds="True"
                           VerticalScrollBarVisibility="Auto">
               <DockPanel LastChildFill="True">
                 <StackPanel DockPanel.Dock="Bottom" IsVisible="True">
@@ -86,11 +107,34 @@
                              TextAlignment="Center"
                              VerticalAlignment="Center"
                              Text="{TemplateBinding ListText}" />
-                  <Viewbox Grid.Column="0" Grid.Row="2" IsVisible="{TemplateBinding SpinnerVisible}"
-                           Classes="DungSpinnerBox">
-                    <!-- Explicitly setting visible to block animations -->
-                    <views:DungSpinner IsVisible="{TemplateBinding SpinnerVisible}" />
-                  </Viewbox>
+                  <StackPanel Grid.Column="0" Grid.Row="2" IsVisible="{TemplateBinding SpinnerVisible}"
+                              Margin="18,16" Spacing="8">
+                    <Grid ColumnDefinitions="*,86,74,72" Height="42">
+                      <Border Classes="SkeletonBar" Margin="12,10" />
+                      <Border Grid.Column="1" Classes="SkeletonBar" Margin="10,10" />
+                      <Border Grid.Column="2" Classes="SkeletonBar" Margin="10,10" />
+                      <Border Grid.Column="3" Classes="SkeletonBar" Margin="10,10" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,86,74,72" Height="42">
+                      <Border Classes="SkeletonBar Delay1" Margin="12,10" />
+                      <Border Grid.Column="1" Classes="SkeletonBar Delay1" Margin="10,10" />
+                      <Border Grid.Column="2" Classes="SkeletonBar Delay1" Margin="10,10" />
+                      <Border Grid.Column="3" Classes="SkeletonBar Delay1" Margin="10,10" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,86,74,72" Height="42">
+                      <Border Classes="SkeletonBar Delay2" Margin="12,10" />
+                      <Border Grid.Column="1" Classes="SkeletonBar Delay2" Margin="10,10" />
+                      <Border Grid.Column="2" Classes="SkeletonBar Delay2" Margin="10,10" />
+                      <Border Grid.Column="3" Classes="SkeletonBar Delay2" Margin="10,10" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,86,74,72" Height="42">
+                      <Border Classes="SkeletonBar Delay3" Margin="12,10" />
+                      <Border Grid.Column="1" Classes="SkeletonBar Delay3" Margin="10,10" />
+                      <Border Grid.Column="2" Classes="SkeletonBar Delay3" Margin="10,10" />
+                      <Border Grid.Column="3" Classes="SkeletonBar Delay3" Margin="10,10" />
+                    </Grid>
+                    <TextBlock Text="Загрузка серверов…" Classes="SubText" HorizontalAlignment="Center" Margin="0,8" />
+                  </StackPanel>
                 </Grid>
               </DockPanel>
             </ScrollViewer>

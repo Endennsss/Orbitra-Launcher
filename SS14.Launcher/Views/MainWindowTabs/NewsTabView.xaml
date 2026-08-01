@@ -12,25 +12,60 @@
   </Design.DataContext>
 
   <DockPanel>
-    <TextBlock DockPanel.Dock="Top" Margin="4, 0" Text="{loc:Loc tab-news-recent-news}" Classes="NanoHeadingMedium" />
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,18">
+      <StackPanel>
+        <TextBlock Text="TRANSMISSIONS" Classes="SectionLabel" />
+        <TextBlock Text="Последние новости и изменения" Classes="NanoHeadingMedium" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+        <Button Content="Новости SS14" Command="{Binding ShowOriginalNews}"
+                Classes.Active="{Binding OriginalNewsSelected}" />
+        <Button Content="Новости лаунчера" Command="{Binding ShowLauncherNews}"
+                Classes.Active="{Binding LauncherNewsSelected}" />
+      </StackPanel>
+    </Grid>
 
-    <Panel Background="{DynamicResource StripeBackBrush}">
-      <ScrollViewer IsVisible="{Binding NewsPulled}">
-        <ItemsControl ItemsSource="{Binding NewsEntries}">
-          <ItemsControl.ItemTemplate>
-            <DataTemplate DataType="mainWindowTabs:NewsEntryViewModel">
-              <Button Margin="4, 4" Command="{Binding Open}">
-                <TextBlock Text="{Binding Headline}" />
-              </Button>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-      </ScrollViewer>
+    <Border Classes="Surface">
+      <Grid>
+        <ScrollViewer IsVisible="{Binding OriginalNewsSelected}">
+          <Grid>
+            <ItemsControl ItemsSource="{Binding NewsEntries}" IsVisible="{Binding NewsPulled}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="mainWindowTabs:NewsEntryViewModel">
+                  <Button Margin="10,5" Padding="14,12" HorizontalContentAlignment="Left" Command="{Binding Open}">
+                    <TextBlock Text="{Binding Headline}" TextWrapping="Wrap" />
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock IsVisible="{Binding !NewsPulled}" Text="{loc:Loc tab-news-pulling-news}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20" />
+            <StackPanel IsVisible="{Binding NewsLoadFailed}" HorizontalAlignment="Center"
+                        VerticalAlignment="Center" Spacing="6" Margin="20">
+              <TextBlock Text="Не удалось загрузить новости SS14" Classes="NanoHeadingMedium" />
+              <TextBlock Text="Проверьте подключение к интернету и откройте вкладку позже." Classes="SubText" />
+            </StackPanel>
+          </Grid>
+        </ScrollViewer>
 
-      <TextBlock IsVisible="{Binding !NewsPulled}" Text="{loc:Loc tab-news-pulling-news}">
-      </TextBlock>
-    </Panel>
-
-
+        <ScrollViewer IsVisible="{Binding LauncherNewsSelected}">
+          <ItemsControl ItemsSource="{Binding LauncherNewsEntries}" Margin="10">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="mainWindowTabs:NewsEntryViewModel">
+                <Border Classes="Surface" Margin="0,0,0,8" Padding="16,14"
+                        BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1">
+                  <StackPanel Spacing="6">
+                    <TextBlock Text="{Binding Date}" Classes="SectionLabel" IsVisible="{Binding HasDate}" />
+                    <TextBlock Text="{Binding Headline}" Classes="NanoHeadingMedium" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Summary}" Classes="SubText" IsVisible="{Binding HasSummary}"
+                               TextWrapping="Wrap" MaxWidth="760" HorizontalAlignment="Left" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Grid>
+    </Border>
   </DockPanel>
 </UserControl>

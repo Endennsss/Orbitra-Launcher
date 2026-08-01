@@ -4,26 +4,85 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:mainWindowTabs="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs"
              xmlns:loc="clr-namespace:SS14.Launcher.Localization"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="700"
              x:Class="SS14.Launcher.Views.MainWindowTabs.DevelopmentTabView"
              x:DataType="mainWindowTabs:DevelopmentTabViewModel">
-  <Design.DataContext>
-    <mainWindowTabs:DevelopmentTabViewModel />
-  </Design.DataContext>
+  <Design.DataContext><mainWindowTabs:DevelopmentTabViewModel /></Design.DataContext>
 
-  <StackPanel Orientation="Vertical">
-    <CheckBox VerticalAlignment="Center" Margin="4" IsChecked="{Binding DisableSigning}" Content="{loc:Loc tab-development-disable-signing}" />
-    <TextBlock VerticalAlignment="Center" TextWrapping="Wrap"
-               Text="{loc:Loc tab-development-disable-signing-desc}"
-               Margin="8" />
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Spacing="16">
+      <StackPanel>
+        <TextBlock Text="DEV LAB" Classes="SectionLabel" />
+        <TextBlock Text="Проверка интерфейса и интеграций" Classes="NanoHeadingMedium" />
+      </StackPanel>
 
-    <Grid ColumnDefinitions="Auto,*">
-      <CheckBox VerticalAlignment="Center" Margin="4" IsChecked="{Binding EngineOverrideEnabled}" Content="{loc:Loc tab-development-enable-engine-override}" />
-      <TextBox Grid.Column="1" Text="{Binding EngineOverridePath}" />
+      <Border Classes="Surface" Padding="20">
+        <StackPanel Spacing="10">
+          <TextBlock Text="СООБЩЕНИЯ И УВЕДОМЛЕНИЯ" Classes="SectionLabel" />
+          <WrapPanel>
+            <Button Content="Обычный toast" Command="{Binding ShowInfoToast}" />
+            <Button Content="Toast с ошибкой" Command="{Binding ShowErrorToast}" />
+            <Button Content="Сервер запустился" Command="{Binding NotifyServerOnline}" />
+            <Button Content="Новый раунд" Command="{Binding NotifyNewRound}" />
+            <Button Content="Свободное место" Command="{Binding NotifySlotAvailable}" />
+          </WrapPanel>
+          <TextBlock Text="Системные тесты вызываются принудительно и не зависят от настроек уведомлений."
+                     Classes="SubText" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
 
-    </Grid>
-    <TextBlock VerticalAlignment="Center" TextWrapping="Wrap"
-               Text="{loc:Loc tab-development-enable-engine-override-desc}"
-               Margin="8" />
-  </StackPanel>
+      <Border Classes="Surface" Padding="20">
+        <StackPanel Spacing="10">
+          <TextBlock Text="DISCORD RPC" Classes="SectionLabel" />
+          <WrapPanel>
+            <Button Content="В лаунчере" Command="{Binding RpcLauncher}" />
+            <Button Content="Ищет сервер" Command="{Binding RpcSearching}" />
+            <Button Content="Выбрал сервер" Command="{Binding RpcSelected}" />
+            <Button Content="Играет" Command="{Binding RpcPlaying}" />
+          </WrapPanel>
+          <TextBlock Text="DEV Test Server · Bagel · Secret · 42/50 · 67 мс" Classes="SubText" />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="Surface" Padding="20">
+        <StackPanel Spacing="10">
+          <TextBlock Text="ТЕМА И АНИМАЦИИ" Classes="SectionLabel" />
+          <WrapPanel>
+            <Button Content="Тёмная тема" Command="{Binding PreviewDarkTheme}" />
+            <Button Content="Светлая тема" Command="{Binding PreviewLightTheme}" />
+            <Button Content="+15%" Command="{Binding AdvanceProgress}" />
+            <Button Content="Бесконечная загрузка" Command="{Binding ToggleIndeterminate}" />
+            <Button Content="Сбросить" Command="{Binding ResetProgress}" />
+          </WrapPanel>
+          <ProgressBar Minimum="0" Maximum="1" Value="{Binding TestProgress}"
+                       IsIndeterminate="{Binding ProgressIndeterminate}" Height="8" />
+          <WrapPanel Margin="0,6,0,0">
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,20,0">
+              <TextBlock Text="●" Foreground="#62D68B" /><TextBlock Text="Хороший · 42 мс" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,20,0">
+              <TextBlock Text="●" Foreground="#E4C65A" /><TextBlock Text="Средний · 118 мс" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <TextBlock Text="●" Foreground="#E06B61" /><TextBlock Text="Плохой · 240 мс" />
+            </StackPanel>
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="Surface" Padding="20">
+        <StackPanel Spacing="8">
+          <TextBlock Text="ПАРАМЕТРЫ РАЗРАБОТКИ" Classes="SectionLabel" />
+          <CheckBox IsChecked="{Binding DisableSigning}" Content="{loc:Loc tab-development-disable-signing}" />
+          <TextBlock Text="{loc:Loc tab-development-disable-signing-desc}" Classes="SubText" TextWrapping="Wrap" />
+          <Grid ColumnDefinitions="Auto,*" Margin="0,6,0,0">
+            <CheckBox VerticalAlignment="Center" IsChecked="{Binding EngineOverrideEnabled}"
+                      Content="{loc:Loc tab-development-enable-engine-override}" />
+            <TextBox Grid.Column="1" Margin="12,0,0,0" Text="{Binding EngineOverridePath}" />
+          </Grid>
+          <TextBlock Text="{loc:Loc tab-development-enable-engine-override-desc}" Classes="SubText" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
 </UserControl>

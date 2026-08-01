@@ -6,6 +6,8 @@ using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using SS14.Launcher.Localization;
 using SS14.Launcher.ViewModels;
+using SS14.Launcher.Models.Data;
+using Splat;
 using TerraFX.Interop.Windows;
 using IDataObject = Avalonia.Input.IDataObject;
 
@@ -13,6 +15,7 @@ namespace SS14.Launcher.Views;
 
 public partial class MainWindow : Window
 {
+    private bool _allowClose;
     private MainWindowViewModel? _viewModel;
 
     private MainWindowContent _content;
@@ -27,8 +30,9 @@ public partial class MainWindow : Window
         AddHandler(DragDrop.DragLeaveEvent, DragLeave);
         AddHandler(DragDrop.DragOverEvent, DragOver);
         AddHandler(DragDrop.DropEvent, Drop);
+        AddHandler(KeyDownEvent, WindowKeyDown, RoutingStrategies.Tunnel);
 
-        _content = (MainWindowContent) Content!;
+        _content = LauncherContent;
 
         ReloadTitle();
     }
@@ -37,7 +41,86 @@ public partial class MainWindow : Window
     {
         ReloadTitle();
 
-        Content = _content = new MainWindowContent();
+        LauncherHost.Content = _content = new MainWindowContent();
+    }
+
+    private void WindowKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (_viewModel == null)
+            return;
+
+        if (e.Key == Key.K && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            _viewModel.SelectTabServers();
+            Avalonia.Threading.Dispatcher.UIThread.Post(_viewModel.ServersTab.RequestSearchFocus);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.F5)
+        {
+            _viewModel.RefreshCurrentTab();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Enter)
+        {
+            _viewModel.ConnectCurrentServer();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Escape)
+        {
+            _viewModel.CloseExpandedServers();
+            e.Handled = true;
+        }
+    }
+
+    private void TitleBarPressed(object? sender, PointerPressedEventArgs args)
+    {
+        if (!args.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+            return;
+
+        if (args.ClickCount == 2)
+        {
+            ToggleMaximized();
+            return;
+        }
+
+        BeginMoveDrag(args);
+    }
+
+    private void MinimizeClicked(object? sender, RoutedEventArgs args)
+    {
+        WindowState = WindowState.Minimized;
+    }
+
+    private void MaximizeClicked(object? sender, RoutedEventArgs args)
+    {
+        ToggleMaximized();
+    }
+
+    private void CloseClicked(object? sender, RoutedEventArgs args)
+    {
+        Close();
+    }
+
+    public void PrepareForExit() => _allowClose = true;
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        var cfg = Locator.Current.GetService<DataManager>();
+        if (!_allowClose && cfg?.GetCVar(CVars.CloseToTray) == true)
+        {
+            e.Cancel = true;
+            ShowInTaskbar = false;
+            Hide();
+            return;
+        }
+        base.OnClosing(e);
+    }
+
+    private void ToggleMaximized()
+    {
+        WindowState = WindowState == WindowState.Maximized
+            ? WindowState.Normal
+            : WindowState.Maximized;
     }
 
     private void ReloadTitle()

@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs"
+             x:Class="SS14.Launcher.Views.MainWindowTabs.ActivityTabView">
+  <StackPanel Spacing="16">
+    <Grid ColumnDefinitions="*,Auto">
+      <StackPanel><TextBlock Text="EVENTS" Classes="SectionLabel" /><TextBlock Text="Центр активности" Classes="NanoHeadingMedium" /></StackPanel>
+      <Button Grid.Column="1" Content="Очистить журнал" Command="{Binding Clear}" VerticalAlignment="Center" />
+    </Grid>
+    <Border Classes="Surface" Padding="14">
+      <ScrollViewer>
+        <ItemsControl ItemsSource="{Binding Entries}" IsVisible="{Binding !IsEmpty}">
+          <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:ActivityEntryViewModel">
+            <Border Background="{DynamicResource LauncherSurfaceAltBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="12,9" Margin="0,0,0,6">
+              <Grid ColumnDefinitions="105,110,*">
+                <TextBlock Text="{Binding TimeText}" Classes="SubText" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="{Binding Category}" Classes="SectionLabel" VerticalAlignment="Center" />
+                <StackPanel Grid.Column="2"><TextBlock Text="{Binding Title}" FontWeight="SemiBold" /><TextBlock Text="{Binding Details}" Classes="SubText" TextWrapping="Wrap" /></StackPanel>
+              </Grid>
+            </Border>
+          </DataTemplate></ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Border>
+    <TextBlock Text="Событий пока нет." Classes="SubText" IsVisible="{Binding IsEmpty}" HorizontalAlignment="Center" />
+  </StackPanel>
+</UserControl>

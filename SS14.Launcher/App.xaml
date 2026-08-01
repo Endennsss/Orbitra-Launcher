@@ -28,5 +28,8 @@
     <StyleInclude Source="/Theme/ThemeIconLabel.xaml" />
     <StyleInclude Source="/Theme/ThemeRandomMessage.xaml" />
     <StyleInclude Source="/Theme/ThemeTimerTextCell.xaml" />
+    <!-- Keep this after launcher-wide Button styles: ColorPicker contains internal buttons
+         whose specialized templates must win over the generic launcher template. -->
+    <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Simple/Simple.xaml" />
   </Application.Styles>
 </Application>

@@ -2,25 +2,25 @@
        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
        xmlns:sys="clr-namespace:System;assembly=mscorlib">
   <Style.Resources>
-    <Color x:Key="ThemeBackgroundColor">#25252A</Color>
-    <Color x:Key="ThemePopupBackgroundColor">#202025</Color>
-    <Color x:Key="ThemeForegroundColor">#EEEEEE</Color>
+    <Color x:Key="ThemeBackgroundColor">#101010</Color>
+    <Color x:Key="ThemePopupBackgroundColor">#191919</Color>
+    <Color x:Key="ThemeForegroundColor">#F2F2F2</Color>
 
-    <Color x:Key="ThemeForegroundMutedColor">#666</Color>
+    <Color x:Key="ThemeForegroundMutedColor">#777777</Color>
 
-    <Color x:Key="ThemeControlMidColor">#464966</Color>
-    <Color x:Key="ThemeControlHighColor">#3E6C45</Color>
+    <Color x:Key="ThemeControlMidColor">#292929</Color>
+    <Color x:Key="ThemeControlHighColor">#E8E8E8</Color>
 
-    <Color x:Key="ThemeNanoGoldColor">#ADA24B</Color>
-    <Color x:Key="ThemeSubTextColor">#AAAAAA</Color>
-    <Color x:Key="ThemeStripebackEdgeColor">#525252</Color>
-    <Color x:Key="ThemeButtonHoveredColor">#575B7F</Color>
+    <Color x:Key="ThemeNanoGoldColor">#F2F2F2</Color>
+    <Color x:Key="ThemeSubTextColor">#A0A0A0</Color>
+    <Color x:Key="ThemeStripebackEdgeColor">#393939</Color>
+    <Color x:Key="ThemeButtonHoveredColor">#393939</Color>
 
-    <Color x:Key="ThemeTabItemSelectedColor">#CC3E6C45</Color>
-    <Color x:Key="ThemeTabItemHoveredColor">#CC575B7F</Color>
+    <Color x:Key="ThemeTabItemSelectedColor">#FF303030</Color>
+    <Color x:Key="ThemeTabItemHoveredColor">#FF232323</Color>
 
-    <Color x:Key="ThemeListSeparatorColor">#AA575B7F</Color>
-    <Color x:Key="ThemeListSeparatorColorTransparent">#00575B7F</Color>
+    <Color x:Key="ThemeListSeparatorColor">#AA383838</Color>
+    <Color x:Key="ThemeListSeparatorColorTransparent">#00383838</Color>
 
     <SolidColorBrush x:Key="ThemeBackgroundBrush" Color="{StaticResource ThemeBackgroundColor}" />
     <SolidColorBrush x:Key="ThemePopupBackgroundBrush" Color="{StaticResource ThemePopupBackgroundColor}" />
@@ -38,22 +38,38 @@
     <SolidColorBrush x:Key="ThemeTabItemSelectedBrush" Color="{StaticResource ThemeTabItemSelectedColor}" />
     <SolidColorBrush x:Key="ThemeTabItemHoveredBrush" Color="{StaticResource ThemeTabItemHoveredColor}" />
 
+    <SolidColorBrush x:Key="LauncherWorkspaceBrush" Color="#0D0D0D" />
+    <SolidColorBrush x:Key="LauncherChromeBrush" Color="#121212" />
+    <SolidColorBrush x:Key="LauncherSurfaceBrush" Color="#171717" />
+    <SolidColorBrush x:Key="LauncherSurfaceAltBrush" Color="#1D1D1D" />
+    <SolidColorBrush x:Key="LauncherControlBrush" Color="#292929" />
+    <SolidColorBrush x:Key="LauncherHoverBrush" Color="#393939" />
+    <SolidColorBrush x:Key="LauncherLineBrush" Color="#3B3B3B" />
+    <SolidColorBrush x:Key="LauncherTextBrush" Color="#F2F2F2" />
+    <SolidColorBrush x:Key="LauncherMutedBrush" Color="#A0A0A0" />
+
+    <!-- Override the Simple theme's blue defaults with strictly neutral grayscale. -->
+    <SolidColorBrush x:Key="HighlightBrush" Color="#F0F0F0" />
+    <SolidColorBrush x:Key="ThemeAccentBrush" Color="#F0F0F0" />
+    <SolidColorBrush x:Key="ThemeBorderMidBrush" Color="#4A4A4A" />
+    <SolidColorBrush x:Key="ThemeBorderHighBrush" Color="#A0A0A0" />
+
     <sys:Double x:Key="FontSizeNormal">15</sys:Double>
 
     <VisualBrush x:Key="ThemeStripeBackBrush">
       <VisualBrush.Visual>
-        <Panel Height="32" Width="32" Background="#1e1e22">
-          <Path Data="M 0 8 L 24 32 L 8 32 L 0 24 Z" Fill="#262626" />
-          <Path Data="M 8 0 L 24 0 L 32 8 L 32 24 Z" Fill="#262626" />
-        </Panel>
+        <Border Height="44" Width="44"
+                Background="#0D0D0D"
+                BorderBrush="#1D1D1D"
+                BorderThickness="0,0,1,1" />
       </VisualBrush.Visual>
 
       <TileBrush.TileMode>Tile</TileBrush.TileMode>
       <TileBrush.Stretch>Fill</TileBrush.Stretch>
 
       <!-- Need to specify these to make tiling work. -->
-      <TileBrush.SourceRect>0, 0, 32, 32</TileBrush.SourceRect>
-      <TileBrush.DestinationRect>0, 0, 32, 32</TileBrush.DestinationRect>
+      <TileBrush.SourceRect>0, 0, 44, 44</TileBrush.SourceRect>
+      <TileBrush.DestinationRect>0, 0, 44, 44</TileBrush.DestinationRect>
     </VisualBrush>
 
     <SolidColorBrush x:Key="WindowOverlayBrush" Color="#AA000000" />

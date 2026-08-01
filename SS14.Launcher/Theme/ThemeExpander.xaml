@@ -37,4 +37,13 @@ Taken & modified from Avalonia's git repo.
   <Style Selector="Expander.NoPad /template/ ToggleButton#PART_toggle">
     <Setter Property="Padding" Value="0" />
   </Style>
+
+  <Style Selector="Expander /template/ ToggleButton#PART_toggle:checked">
+    <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+
+  <Style Selector="Expander /template/ ToggleButton#PART_toggle:pointerover">
+    <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}" />
+  </Style>
 </Styles>

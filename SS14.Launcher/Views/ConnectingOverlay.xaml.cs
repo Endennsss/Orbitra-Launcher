@@ -12,7 +12,6 @@ public partial class ConnectingOverlay : UserControl
         ConnectingViewModel.StartedConnecting += () => Dispatcher.UIThread.Post(() =>
         {
             CancelButton.Focus();
-            Messages.Refresh();
         });
     }
 }

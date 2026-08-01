@@ -2,6 +2,7 @@
   <Import Project="../Launcher.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
     <OutputType Condition="'$(Configuration)' == 'Release'">WinExe</OutputType>
     <Nullable>enable</Nullable>
     <!--<PublishTrimmed>true</PublishTrimmed>
@@ -43,6 +44,8 @@
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" />
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="HotAvalonia" PrivateAssets="All" />
     <PackageReference Include="Avalonia.Themes.Simple" />
+    <PackageReference Include="Avalonia.Controls.ColorPicker" />
+    <PackageReference Include="AnimatedImage.Avalonia" />
     <PackageReference Include="CodeHollow.FeedReader" />
     <PackageReference Include="Dapper" />
     <PackageReference Include="DynamicData" />
@@ -68,6 +71,8 @@
     <PackageReference Include="Microsoft.NET.ILLink.Tasks" />
     <PackageReference Include="System.Net.Http.WinHttpHandler" />
     <PackageReference Include="Linguini.Bundle" />
+    <PackageReference Include="DiscordRichPresence" />
+    <PackageReference Include="NAudio" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Utility\runtime.json" />
@@ -88,6 +93,12 @@
   <ItemGroup>
     <None Remove="signing_key" />
     <Content Include="signing_key">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <AvaloniaResource Remove="Assets\Sounds\**" />
+    <Content Include="Assets\Sounds\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

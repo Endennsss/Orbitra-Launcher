@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net.Http;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +22,7 @@ public sealed partial class ServerListCache : ObservableObject, IServerSource
 {
     private readonly HubApi _hubApi = Locator.Current.GetRequiredService<HubApi>();
     private readonly DataManager _dataManager = Locator.Current.GetRequiredService<DataManager>();
+    private readonly HttpClient _http = Locator.Current.GetRequiredService<HttpClient>();
 
     private CancellationTokenSource? _refreshCancel;
 
@@ -125,6 +128,8 @@ public sealed partial class ServerListCache : ObservableObject, IServerSource
                 return statusData;
             }));
 
+            _ = MeasureServerPingsAsync(AllServers.ToArray(), cancel);
+
             if (AllServers.Count == 0)
                 // We did not get any servers
                 Status = RefreshListStatus.Error;
@@ -141,6 +146,49 @@ public sealed partial class ServerListCache : ObservableObject, IServerSource
         {
             Log.Error(e, "Failed to fetch server list due to exception");
             Status = RefreshListStatus.Error;
+        }
+    }
+
+    private async Task MeasureServerPingsAsync(ServerStatusData[] servers, CancellationToken cancel)
+    {
+        using var throttle = new SemaphoreSlim(12);
+        var tasks = servers.Select(async server =>
+        {
+            await throttle.WaitAsync(cancel);
+            try
+            {
+                if (!UriHelper.TryParseSs14Uri(server.Address, out var address))
+                    return;
+
+                using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancel);
+                timeout.CancelAfter(TimeSpan.FromSeconds(3));
+                using var request = new HttpRequestMessage(HttpMethod.Get, UriHelper.GetServerStatusAddress(address));
+                var timer = Stopwatch.StartNew();
+                using var response = await _http.SendAsync(
+                    request,
+                    HttpCompletionOption.ResponseHeadersRead,
+                    timeout.Token);
+                timer.Stop();
+
+                if (response.IsSuccessStatusCode)
+                    server.Ping = timer.Elapsed;
+            }
+            catch (Exception e) when (e is HttpRequestException or OperationCanceledException)
+            {
+                server.Ping = null;
+            }
+            finally
+            {
+                throttle.Release();
+            }
+        });
+
+        try
+        {
+            await Task.WhenAll(tasks);
+        }
+        catch (OperationCanceledException)
+        {
         }
     }
 

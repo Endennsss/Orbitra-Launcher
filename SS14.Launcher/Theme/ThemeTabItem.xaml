@@ -3,5 +3,61 @@
 
   <Style Selector="TabItem /template/ ContentPresenter">
     <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}" />
+    <Setter Property="MinHeight" Value="46" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.18" />
+        <DoubleTransition Property="Opacity" Duration="0:0:0.22" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="TabItem:pointerover /template/ ContentPresenter">
+    <Setter Property="Opacity" Value="0.88" />
+  </Style>
+
+  <Style Selector="TabItem Border.NavIndicator">
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.2" />
+        <DoubleTransition Property="Height" Duration="0:0:0.28" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="TabItem:selected Border.NavIndicator">
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="Height" Value="28" />
+    <Style.Animations>
+      <Animation Duration="0:0:0.3" Easing="CubicEaseOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0" /><Setter Property="Height" Value="6" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /><Setter Property="Height" Value="28" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <Style Selector="TabItem Path.NavIcon">
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.24" />
+        <DoubleTransition Property="Opacity" Duration="0:0:0.2" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="TabItem:pointerover Path.NavIcon">
+    <Setter Property="RenderTransform" Value="scale(1.12)" />
+    <Setter Property="Opacity" Value="1" />
+  </Style>
+
+  <Style Selector="TabItem:selected Path.NavIcon">
+    <Setter Property="Stroke" Value="{DynamicResource ThemeForegroundBrush}" />
+    <Style.Animations>
+      <Animation Duration="0:0:0.32" Easing="CubicEaseOut">
+        <KeyFrame Cue="0%"><Setter Property="ScaleTransform.ScaleX" Value="0.82" /><Setter Property="ScaleTransform.ScaleY" Value="0.82" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="ScaleTransform.ScaleX" Value="1" /><Setter Property="ScaleTransform.ScaleY" Value="1" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
   </Style>
 </Styles>

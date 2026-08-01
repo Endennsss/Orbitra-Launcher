@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -90,6 +91,7 @@ public sealed class ServerStatusCache : IServerSource
             data.Status = ServerStatusCode.FetchingStatus;
 
             ServerApi.ServerStatus status;
+            var pingTimer = Stopwatch.StartNew();
             try
             {
                 // await Task.Delay(Random.Shared.Next(150, 5000), cancel);
@@ -103,11 +105,14 @@ public sealed class ServerStatusCache : IServerSource
                 }
 
                 cancel.ThrowIfCancellationRequested();
+                pingTimer.Stop();
+                data.Ping = pingTimer.Elapsed;
             }
             catch (Exception e) when (e is JsonException or HttpRequestException or InvalidDataException or IOException
                                           or SocketException)
             {
                 data.Status = ServerStatusCode.Offline;
+                data.Ping = null;
                 return;
             }
 
@@ -125,6 +130,8 @@ public sealed class ServerStatusCache : IServerSource
         data.Name = status.Name;
         data.PlayerCount = Math.Max(0, status.PlayerCount);
         data.SoftMaxPlayerCount = Math.Max(0, status.SoftMaxPlayerCount);
+        data.Map = status.Map;
+        data.GamePreset = status.Preset;
 
         switch (status.RunLevel)
         {

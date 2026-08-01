@@ -20,12 +20,15 @@ public class ConnectingViewModel : ViewModelBase
     private readonly CancellationTokenSource _cancelSource = new CancellationTokenSource();
 
     private string? _reasonSuffix;
+    private bool _errorToastShown;
+    public string? TargetAddress { get; private set; }
 
     public bool IsErrored
         => _connector.Status == ConnectionFailed ||
            _connector.Status == UpdateError ||
            _connector.Status == NotAContentBundle ||
            _connector is { Status: ClientExited, ClientExitedBadly: true };
+    public bool IsConnected => _connector.Status == ClientRunning;
 
     public static event Action? StartedConnecting;
 
@@ -69,9 +72,29 @@ public class ConnectingViewModel : ViewModelBase
                     OnPropertyChanged(nameof(ProgressBarVisible));
                     OnPropertyChanged(nameof(IsErrored));
                     OnPropertyChanged(nameof(IsAskingPrivacyPolicy));
+                    OnPropertyChanged(nameof(IsConnected));
 
-                    if (_connector.Status == ClientRunning
-                        || _connector.Status == Cancelled
+                    if (IsErrored && !_errorToastShown)
+                    {
+                        _errorToastShown = true;
+                        _windowVm.ShowToast("Не удалось подключиться к серверу", true);
+                        ActivityLog.Record("Подключение", "Ошибка запуска клиента", TargetAddress ?? "Неизвестный сервер", true);
+                    }
+
+                    if (_connector.Status == ClientExited)
+                    {
+                        PlaytimeTracker.Stop();
+                        DiscordRichPresenceService.Instance.ShowLauncher();
+                    }
+
+                    if (_connector.Status == ClientRunning)
+                    {
+                        PlaytimeTracker.Start(TargetAddress);
+                        ActivityLog.Record("Подключение", "Клиент запущен", TargetAddress ?? "Неизвестный сервер");
+                        DiscordRichPresenceService.Instance.ShowPlaying();
+                        CloseAfterConnected();
+                    }
+                    else if (_connector.Status == Cancelled
                         || _connector is { Status: ClientExited, ClientExitedBadly: false })
                     {
                         CloseOverlay();
@@ -150,9 +173,9 @@ public class ConnectingViewModel : ViewModelBase
     public string StatusText
         => _connector.Status switch
         {
-            None => _loc.GetString("connecting-status-none") + _reasonSuffix,
+            None => "Подготовка подключения…",
             UpdateError => FormatUpdateError(),
-            Updating => _loc.GetString("connecting-status-updating", ("status", _loc.GetString(_updater.Status switch
+            Updating => "Загрузка файлов · " + _loc.GetString(_updater.Status switch
             {
                 Updater.UpdateStatus.CheckingClientUpdate => "connecting-update-status-checking-client-update",
                 Updater.UpdateStatus.DownloadingEngineVersion => "connecting-update-status-downloading-engine",
@@ -168,10 +191,11 @@ public class ConnectingViewModel : ViewModelBase
                 Updater.UpdateStatus.LoadingIntoDb => "connecting-update-status-loading-into-db",
                 Updater.UpdateStatus.LoadingContentBundle => "connecting-update-status-loading-content-bundle",
                 _ => "connecting-update-status-unknown"
-            }))) + _reasonSuffix,
-            Connecting => _loc.GetString("connecting-status-connecting") + _reasonSuffix,
+            }) + _reasonSuffix,
+            Connecting => "Проверка сервера…" + _reasonSuffix,
             ConnectionFailed => _loc.GetString("connecting-status-connection-failed"),
-            StartingClient => _loc.GetString("connecting-status-starting-client") + _reasonSuffix,
+            StartingClient => "Запуск клиента…" + _reasonSuffix,
+            ClientRunning => "Подключено",
             NotAContentBundle => _loc.GetString("connecting-status-not-a-content-bundle"),
             ClientExited => _connector.ClientExitedBadly
                 ? _loc.GetString("connecting-status-client-crashed")
@@ -207,7 +231,10 @@ public class ConnectingViewModel : ViewModelBase
     {
         var connector = new Connector();
         var vm = new ConnectingViewModel(connector, windowVm, givenReason, ConnectionType.Server);
+        vm.TargetAddress = address;
+        DiscordRichPresenceService.Instance.ShowConnecting(address);
         windowVm.ConnectingVM = vm;
+        ActivityLog.Record("Подключение", "Начато подключение", address);
         vm.Start(address);
         StartedConnecting?.Invoke();
     }
@@ -239,6 +266,13 @@ public class ConnectingViewModel : ViewModelBase
     private void CloseOverlay()
     {
         _windowVm.ConnectingVM = null;
+    }
+
+    private async void CloseAfterConnected()
+    {
+        await System.Threading.Tasks.Task.Delay(700);
+        if (_windowVm.ConnectingVM == this)
+            CloseOverlay();
     }
 
     public void Cancel()

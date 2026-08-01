@@ -164,6 +164,21 @@ public sealed class DataManager : ObservableObject
         _favoriteServers.AddOrUpdate(server);
     }
 
+    public bool IsFavoriteMonitored(string address) =>
+        GetCVar(CVars.MonitoredFavoriteServers)
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Contains(address, StringComparer.OrdinalIgnoreCase);
+
+    public void SetFavoriteMonitored(string address, bool monitored)
+    {
+        var addresses = GetCVar(CVars.MonitoredFavoriteServers)
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        if (monitored) addresses.Add(address); else addresses.Remove(address);
+        SetCVar(CVars.MonitoredFavoriteServers, string.Join('\n', addresses));
+        CommitConfig();
+    }
+
     public void AddEngineInstallation(InstalledEngineVersion version)
     {
         _engineInstallations.AddOrUpdate(version);

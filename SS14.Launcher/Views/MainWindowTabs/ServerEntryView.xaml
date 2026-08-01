@@ -14,15 +14,67 @@
   </Design.DataContext>
 
   <UserControl.Styles>
-    <Style Selector="Button.FavoriteButton > views|IconLabel">
-      <Setter Property="Icon" Value="{DynamicResource 'ButtonIcon-star-outline'}" />
+    <Style Selector="TextBlock.PingGood">
+      <Setter Property="Foreground" Value="#62D68B" />
     </Style>
-    <Style Selector="Button.FavoriteButton.IsFavorite > views|IconLabel">
-      <Setter Property="Icon" Value="{DynamicResource 'ButtonIcon-star'}" />
+    <Style Selector="TextBlock.PingMedium">
+      <Setter Property="Foreground" Value="#E4C65A" />
+    </Style>
+    <Style Selector="TextBlock.PingBad">
+      <Setter Property="Foreground" Value="#E06B61" />
+    </Style>
+    <Style Selector="DockPanel.ServerDetails.Expanded">
+      <Style.Animations>
+        <Animation Duration="0:0:0.22" Easing="CubicEaseOut">
+          <KeyFrame Cue="0%">
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="TranslateTransform.Y" Value="-6" />
+          </KeyFrame>
+          <KeyFrame Cue="100%">
+            <Setter Property="Opacity" Value="1" />
+            <Setter Property="TranslateTransform.Y" Value="0" />
+          </KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+    <Style Selector="TextBlock.MetricUp">
+      <Style.Animations><Animation Duration="0:0:0.65"><KeyFrame Cue="0%"><Setter Property="Foreground" Value="#62D68B" /><Setter Property="Opacity" Value="0.55" /></KeyFrame><KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /></KeyFrame></Animation></Style.Animations>
+    </Style>
+    <Style Selector="TextBlock.MetricDown">
+      <Style.Animations><Animation Duration="0:0:0.65"><KeyFrame Cue="0%"><Setter Property="Foreground" Value="#E06B61" /><Setter Property="Opacity" Value="0.55" /></KeyFrame><KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /></KeyFrame></Animation></Style.Animations>
+    </Style>
+    <Style Selector="Button.ConnectAction:pointerover Path.ConnectArrow">
+      <Style.Animations>
+        <Animation Duration="0:0:0.24" Easing="CubicEaseOut">
+          <KeyFrame Cue="0%"><Setter Property="TranslateTransform.X" Value="0" /></KeyFrame>
+          <KeyFrame Cue="55%"><Setter Property="TranslateTransform.X" Value="4" /></KeyFrame>
+          <KeyFrame Cue="100%"><Setter Property="TranslateTransform.X" Value="2" /></KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+    <Style Selector="Path.ConnectSuccess">
+      <Style.Animations>
+        <Animation Duration="0:0:0.42" Easing="CubicEaseOut">
+          <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0" /><Setter Property="ScaleTransform.ScaleX" Value="0.55" /><Setter Property="ScaleTransform.ScaleY" Value="0.55" /></KeyFrame>
+          <KeyFrame Cue="70%"><Setter Property="Opacity" Value="1" /><Setter Property="ScaleTransform.ScaleX" Value="1.12" /><Setter Property="ScaleTransform.ScaleY" Value="1.12" /></KeyFrame>
+          <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /><Setter Property="ScaleTransform.ScaleX" Value="1" /><Setter Property="ScaleTransform.ScaleY" Value="1" /></KeyFrame>
+        </Animation>
+      </Style.Animations>
     </Style>
   </UserControl.Styles>
 
   <Panel>
+    <Panel.ContextMenu>
+      <ContextMenu>
+        <MenuItem Header="Подключиться" Command="{Binding ConnectPressed}" IsEnabled="{Binding CanConnect}" />
+        <MenuItem Header="Добавить / убрать из избранного" Command="{Binding FavoriteButtonPressed}" />
+        <MenuItem Header="{Binding TrayMonitoringText}" Command="{Binding ToggleTrayMonitoring}"
+                  IsChecked="{Binding IsTrayMonitored}" IsVisible="{Binding IsFavorite}" />
+        <Separator />
+        <MenuItem Header="Копировать адрес" Command="{Binding CopyAddressPressed}" />
+        <MenuItem Header="Открыть сайт сервера" Command="{Binding OpenWebsitePressed}" />
+      </ContextMenu>
+    </Panel.ContextMenu>
     <Expander Name="Expando" Classes="NoPad" IsExpanded="{Binding IsExpanded}">
       <Expander.Header>
         <Grid>
@@ -30,16 +82,28 @@
             <ColumnDefinition Width="*" /> <!-- Server Name -->
             <ColumnDefinition SharedSizeGroup="TimeCol" MinWidth="80" Width="Auto" />
             <ColumnDefinition SharedSizeGroup="StatusCol" MinWidth="80" Width="Auto" />
+            <ColumnDefinition SharedSizeGroup="PingCol" MinWidth="72" Width="Auto" />
             <ColumnDefinition SharedSizeGroup="ConnectCol" Width="Auto" />
           </Grid.ColumnDefinitions>
 
           <Border Grid.Column="0" Classes="GridCell">
-            <TextBlock VerticalAlignment="Center"
-              Text="{Binding Name}" TextTrimming="CharacterEllipsis"
-              HorizontalAlignment="Left" />
+            <Grid ColumnDefinitions="30,*">
+              <Border Width="24" Height="24" Background="{DynamicResource LauncherControlBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1"
+                      VerticalAlignment="Center">
+                <Grid>
+                  <Image Source="{Binding ServerIcon}" Stretch="UniformToFill" IsVisible="{Binding HasServerIcon}" />
+                  <Path Data="M4,5 L20,5 L20,19 L4,19 Z M8,9 L16,9 M8,13 L14,13"
+                        Stroke="{DynamicResource ThemeForegroundMutedBrush}" StrokeThickness="1.4" Margin="5" IsVisible="{Binding !HasServerIcon}" />
+                </Grid>
+              </Border>
+              <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0"
+                Text="{Binding Name}" TextTrimming="CharacterEllipsis"
+                Foreground="{DynamicResource ThemeForegroundBrush}"
+                HorizontalAlignment="Left" />
+            </Grid>
           </Border>
 
-          <Border Grid.Column="1" Classes="GridCell" Grid.ColumnSpan="2"
+          <Border Grid.Column="1" Classes="GridCell" Grid.ColumnSpan="3"
             IsVisible="{Binding !HaveData}">
             <TextBlock Text="{Binding ServerStatusString}" TextAlignment="Left" Classes="Center" />
           </Border>
@@ -56,17 +120,92 @@
           </Border>
 
           <Border Grid.Column="2" Classes="GridCell" IsVisible="{Binding HaveData}">
-            <TextBlock DockPanel.Dock="Right" Classes="Numeric" Text="{Binding PlayerCountString}" />
+            <TextBlock DockPanel.Dock="Right" Classes="Numeric"
+                       Classes.MetricUp="{Binding PlayerMetricUp}" Classes.MetricDown="{Binding PlayerMetricDown}"
+                       Text="{Binding PlayerCountString}" />
           </Border>
 
           <Border Grid.Column="3" Classes="GridCell">
-            <Button IsEnabled="{Binding IsOnline}" DockPanel.Dock="Right"
-              Content="{loc:Loc server-entry-connect}"
-              Command="{Binding ConnectPressed}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6"
+                        IsVisible="{Binding IsOnline}">
+              <Viewbox Width="18" Height="18" Stretch="Uniform" ClipToBounds="True">
+                <Canvas Width="24" Height="24">
+                  <!-- Lucide Wi-Fi silhouette: unavailable levels remain visible in neutral gray. -->
+                  <Path Data="M2,8.82 A15,15 0 0 1 22,8.82 M5,12.859 A10,10 0 0 1 19,12.859 M8.5,16.429 A5,5 0 0 1 15.5,16.429"
+                        Stroke="{DynamicResource ThemeForegroundMutedBrush}" StrokeThickness="2" StrokeLineCap="Round" Fill="Transparent" />
+                  <Ellipse Canvas.Left="10.5" Canvas.Top="19" Width="3" Height="3" Fill="{DynamicResource ThemeForegroundMutedBrush}" />
+
+                  <!-- Bad: the live point is red, while all missing levels stay gray. -->
+                  <Ellipse Canvas.Left="10.5" Canvas.Top="19" Width="3" Height="3" Fill="#E06B61"
+                           IsVisible="{Binding PingBad}" />
+
+                  <!-- Medium: two live levels are yellow and the missing outer level stays gray. -->
+                  <Path Data="M5,12.859 A10,10 0 0 1 19,12.859 M8.5,16.429 A5,5 0 0 1 15.5,16.429"
+                        Stroke="#E4C65A" StrokeThickness="2" StrokeLineCap="Round" Fill="Transparent"
+                        IsVisible="{Binding PingMedium}" />
+                  <Ellipse Canvas.Left="10.5" Canvas.Top="19" Width="3" Height="3" Fill="#E4C65A"
+                           IsVisible="{Binding PingMedium}" />
+
+                  <!-- Good: every level is active. -->
+                  <Path Data="M2,8.82 A15,15 0 0 1 22,8.82 M5,12.859 A10,10 0 0 1 19,12.859 M8.5,16.429 A5,5 0 0 1 15.5,16.429"
+                        Stroke="#62D68B" StrokeThickness="2" StrokeLineCap="Round" Fill="Transparent"
+                        IsVisible="{Binding PingGood}" />
+                  <Ellipse Canvas.Left="10.5" Canvas.Top="19" Width="3" Height="3" Fill="#62D68B"
+                           IsVisible="{Binding PingGood}" />
+                </Canvas>
+              </Viewbox>
+              <TextBlock Classes="Numeric Center"
+                         Classes.PingGood="{Binding PingGood}"
+                         Classes.PingMedium="{Binding PingMedium}"
+                         Classes.PingBad="{Binding PingBad}"
+                         Classes.MetricUp="{Binding PingMetricUp}"
+                         Classes.MetricDown="{Binding PingMetricDown}"
+                         Text="{Binding PingString}" />
+            </StackPanel>
+          </Border>
+
+          <Border Grid.Column="4" Classes="GridCell">
+            <Button IsEnabled="{Binding CanConnect}" DockPanel.Dock="Right" MinWidth="112" Classes="ConnectAction"
+                    Classes.Connecting="{Binding IsConnecting}"
+                    Command="{Binding ConnectPressed}">
+              <Grid>
+                <StackPanel Orientation="Horizontal" Spacing="7" IsVisible="{Binding !IsConnecting}"
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <TextBlock Text="{loc:Loc server-entry-connect}" VerticalAlignment="Center" />
+                  <Path Classes="ConnectArrow" Data="M4,12 L19,12 M14,7 L19,12 L14,17"
+                        Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.8"
+                        StrokeLineCap="Round" Width="16" Height="16" Stretch="Uniform" />
+                </StackPanel>
+                <StackPanel Spacing="4" IsVisible="{Binding IsConnectionBusy}"
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                    <Viewbox Classes="ConnectSpinner" Width="14" Height="14" Stretch="Uniform" ClipToBounds="True">
+                      <Canvas Width="24" Height="24">
+                        <Path Data="M21,12 A9,9 0 1 1 14.781,3.44" Stroke="{DynamicResource ThemeForegroundBrush}"
+                              StrokeThickness="2" StrokeLineCap="Round" />
+                      </Canvas>
+                    </Viewbox>
+                    <TextBlock Text="CONNECTING" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource ThemeForegroundBrush}" />
+                  </StackPanel>
+                  <ProgressBar Width="76" Height="3" Maximum="1" Value="{Binding ConnectionProgress}"
+                               Background="#1B1B1B" Foreground="#8A8A8A"
+                               IsIndeterminate="{Binding ConnectionProgressIndeterminate}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="7" IsVisible="{Binding IsConnectionSuccess}"
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <Path Classes="ConnectSuccess" Data="M4,12 L9.2,17 L20,6"
+                        Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="2.4"
+                        StrokeLineCap="Round" Width="18" Height="18" Stretch="Uniform" />
+                  <TextBlock Text="ГОТОВО" FontSize="9" FontWeight="Bold"
+                             Foreground="{DynamicResource ThemeForegroundBrush}" VerticalAlignment="Center" />
+                </StackPanel>
+              </Grid>
+            </Button>
           </Border>
         </Grid>
       </Expander.Header>
-      <DockPanel Margin="4">
+      <DockPanel Margin="8,6" Classes="ServerDetails"
+                 Classes.Expanded="{Binding IsExpanded}" ClipToBounds="True">
         <TextBlock DockPanel.Dock="Top"
           Name="Description" Margin="4,0,4,4"
           Text="{Binding Description}"
@@ -78,6 +217,57 @@
           Foreground="{DynamicResource ThemeSubTextBrush}"
           Text="{Binding FetchedFrom}"
           IsVisible="{Binding ShowFetchedFrom}" />
+
+        <WrapPanel DockPanel.Dock="Top" Margin="4,4,4,2" Orientation="Horizontal">
+          <Border Background="{DynamicResource LauncherSurfaceAltBrush}"
+                  BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1"
+                  Padding="10,6" Margin="0,0,8,6"
+                  IsVisible="{Binding CacheData.Map, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <TextBlock Text="КАРТА" Classes="SectionLabel" VerticalAlignment="Center" />
+              <TextBlock Text="{Binding CacheData.Map}" FontWeight="SemiBold" VerticalAlignment="Center" />
+            </StackPanel>
+          </Border>
+          <Border Background="{DynamicResource LauncherSurfaceAltBrush}"
+                  BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1"
+                  Padding="10,6" Margin="0,0,8,6"
+                  IsVisible="{Binding CacheData.GamePreset, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <TextBlock Text="РЕЖИМ" Classes="SectionLabel" VerticalAlignment="Center" />
+              <TextBlock Text="{Binding CacheData.GamePreset}" FontWeight="SemiBold" VerticalAlignment="Center" />
+            </StackPanel>
+          </Border>
+        </WrapPanel>
+
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,*,Auto" Margin="4,4,4,8">
+          <Border Grid.Column="0" Background="{DynamicResource LauncherSurfaceAltBrush}"
+                  BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="10,8" Margin="0,0,8,0">
+            <StackPanel Spacing="5">
+              <TextBlock Text="ПИНГ · ИСТОРИЯ" Classes="SectionLabel" />
+              <Grid Width="160" Height="38" HorizontalAlignment="Left" ClipToBounds="True">
+                <Path Data="M0,37 L160,37" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="1" />
+                <Path Data="{Binding PingGraph}" Stroke="#A8A8A8" StrokeThickness="1.8" />
+              </Grid>
+            </StackPanel>
+          </Border>
+          <Border Grid.Column="1" Background="{DynamicResource LauncherSurfaceAltBrush}"
+                  BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="10,8" Margin="0,0,8,0">
+            <StackPanel Spacing="5">
+              <TextBlock Text="ОНЛАЙН · ИСТОРИЯ" Classes="SectionLabel" />
+              <Grid Width="160" Height="38" HorizontalAlignment="Left" ClipToBounds="True">
+                <Path Data="M0,37 L160,37" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="1" />
+                <Path Data="{Binding OnlineGraph}" Stroke="#777777" StrokeThickness="1.8" />
+              </Grid>
+            </StackPanel>
+          </Border>
+          <Border Grid.Column="2" Background="{DynamicResource LauncherSurfaceAltBrush}"
+                  BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="14,8" MinWidth="135">
+            <StackPanel Spacing="7" VerticalAlignment="Center">
+              <TextBlock Text="ВАШЕ ВРЕМЯ" Classes="SectionLabel" />
+              <TextBlock Text="{Binding PlaytimeText}" FontSize="16" FontWeight="SemiBold" />
+            </StackPanel>
+          </Border>
+        </Grid>
 
         <Control DockPanel.Dock="Top" Height="8" />
 
@@ -103,9 +293,15 @@
                     Classes.OpenRight="{Binding ViewedInFavoritesPane}"
                     Classes.IsFavorite="{Binding IsFavorite}"
                     Command="{Binding FavoriteButtonPressed}">
-              <views:IconLabel Name="FavoriteButtonIconLabel"
-                               Content="{Binding FavoriteButtonText}"
-                               Height="20" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Grid Width="17" Height="17">
+                  <Path Classes="FavoriteIcon" Data="M9,1 L11,6 L16,6 L12,9 L14,15 L9,12 L4,15 L6,9 L2,6 L7,6 Z"
+                        Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.2" IsVisible="{Binding !IsFavorite}" />
+                  <Path Classes="FavoriteIcon" Data="M9,1 L11,6 L16,6 L12,9 L14,15 L9,12 L4,15 L6,9 L2,6 L7,6 Z"
+                        Fill="{DynamicResource ThemeForegroundBrush}" IsVisible="{Binding IsFavorite}" />
+                </Grid>
+                <TextBlock Text="{Binding FavoriteButtonText}" />
+              </StackPanel>
             </Button>
 
             <!-- Raise to top button. -->

@@ -1,12 +1,17 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Splat;
 using SS14.Launcher.Localization;
 using SS14.Launcher.Models.ContentManagement;
 using SS14.Launcher.Models.Data;
 using SS14.Launcher.Models.EngineManager;
 using SS14.Launcher.Utility;
+using SS14.Launcher.ViewModels;
 
 namespace SS14.Launcher.ViewModels.MainWindowTabs;
 
@@ -15,20 +20,172 @@ public class OptionsTabViewModel : MainWindowTabViewModel
     public DataManager Cfg { get; }
     private readonly IEngineManager _engineManager;
     private readonly ContentManager _contentManager;
+    private readonly MainWindowViewModel? _mainWindow;
+    public ObservableCollection<NavigationTabOptionViewModel> NavigationTabs { get; } = [];
 
     public LanguageSelectorViewModel Language { get; } = new();
+    public AccountDropDownViewModel? AccountDropDown { get; }
 
-    public OptionsTabViewModel()
+    public OptionsTabViewModel() : this(null)
+    {
+    }
+
+    public OptionsTabViewModel(MainWindowViewModel? mainWindow)
     {
         Cfg = Locator.Current.GetRequiredService<DataManager>();
         _engineManager = Locator.Current.GetRequiredService<IEngineManager>();
         _contentManager = Locator.Current.GetRequiredService<ContentManager>();
+        AccountDropDown = mainWindow?.AccountDropDown;
+        _mainWindow = mainWindow;
 
         DisableIncompatibleMacOS = OperatingSystem.IsMacOS();
     }
     public bool DisableIncompatibleMacOS { get; }
+    public IReadOnlyList<string> AvailableFonts { get; } =
+        ["Noto Sans", "Segoe UI", "Arial", "Consolas"];
+    public bool UseTextLogo
+    {
+        get => Cfg.GetCVar(CVars.UseTextLogo);
+        set
+        {
+            Cfg.SetCVar(CVars.UseTextLogo, value);
+            Cfg.CommitConfig();
+        }
+    }
+
+    public void InitializeNavigation()
+    {
+        NavigationTabs.Clear();
+        if (_mainWindow == null) return;
+        foreach (var tab in _mainWindow.AllTabs)
+            NavigationTabs.Add(new NavigationTabOptionViewModel(this, _mainWindow, tab));
+    }
+
+    public string SelectedFont
+    {
+        get => Cfg.GetCVar(CVars.LauncherFont);
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return;
+            Cfg.SetCVar(CVars.LauncherFont, value);
+            Cfg.CommitConfig();
+            App.ApplyLauncherFont(value);
+        }
+    }
+
+    public bool LightTheme
+    {
+        get => Cfg.GetCVar(CVars.LightTheme);
+        set
+        {
+            if (!CanUseLightTheme) return;
+            Cfg.SetCVar(CVars.LightTheme, value);
+            Cfg.CommitConfig();
+            App.ApplyColorTheme(value);
+        }
+    }
+    public bool CanUseLightTheme => !Cfg.GetCVar(CVars.CustomThemeEnabled);
+    public void RefreshThemeAvailability()
+    {
+        OnPropertyChanged(nameof(CanUseLightTheme));
+        OnPropertyChanged(nameof(LightTheme));
+    }
+
+    public bool UiSoundsEnabled
+    {
+        get => Cfg.GetCVar(CVars.UiSoundsEnabled);
+        set
+        {
+            Cfg.SetCVar(CVars.UiSoundsEnabled, value);
+            Cfg.CommitConfig();
+        }
+    }
+
+    public int UiSoundVolume
+    {
+        get => Cfg.GetCVar(CVars.UiSoundVolume);
+        set
+        {
+            var volume = Math.Clamp(value, 0, 100);
+            if (volume == Cfg.GetCVar(CVars.UiSoundVolume))
+                return;
+            Cfg.SetCVar(CVars.UiSoundVolume, volume);
+            Cfg.CommitConfig();
+            OnPropertyChanged(nameof(UiSoundVolume));
+        }
+    }
+
+    public bool CloseToTray
+    {
+        get => Cfg.GetCVar(CVars.CloseToTray);
+        set { Cfg.SetCVar(CVars.CloseToTray, value); Cfg.CommitConfig(); }
+    }
+
+    public void PreviewClickSound() => UiSoundService.Preview("click.wav");
+    public void PreviewNavigationSound() => UiSoundService.Preview("navigation.wav");
+    public void PreviewToggleSound() => UiSoundService.Preview("toggle.wav");
+    public void PreviewNotificationSound() => UiSoundService.Preview("notification.wav");
+    public void PreviewErrorSound() => UiSoundService.Preview("error.wav");
+
+    public bool AutoRefreshFavoritePing
+    {
+        get => Cfg.GetCVar(CVars.AutoRefreshFavoritePing);
+        set
+        {
+            Cfg.SetCVar(CVars.AutoRefreshFavoritePing, value);
+            Cfg.CommitConfig();
+        }
+    }
+
+    public bool FavoriteNotificationsEnabled
+    {
+        get => Cfg.GetCVar(CVars.FavoriteNotificationsEnabled);
+        set => SetFavoriteNotification(CVars.FavoriteNotificationsEnabled, value);
+    }
+
+    public bool FavoriteNotifyServerOnline
+    {
+        get => Cfg.GetCVar(CVars.FavoriteNotifyServerOnline);
+        set => SetFavoriteNotification(CVars.FavoriteNotifyServerOnline, value);
+    }
+
+    public bool FavoriteNotifyNewRound
+    {
+        get => Cfg.GetCVar(CVars.FavoriteNotifyNewRound);
+        set => SetFavoriteNotification(CVars.FavoriteNotifyNewRound, value);
+    }
+
+    public bool FavoriteNotifySlotAvailable
+    {
+        get => Cfg.GetCVar(CVars.FavoriteNotifySlotAvailable);
+        set => SetFavoriteNotification(CVars.FavoriteNotifySlotAvailable, value);
+    }
+
+    private void SetFavoriteNotification(CVarDef<bool> cvar, bool value)
+    {
+        Cfg.SetCVar(cvar, value);
+        Cfg.CommitConfig();
+    }
+
+    public bool DiscordRpcEnabled { get => GetRpc(CVars.DiscordRpcEnabled); set => SetRpc(CVars.DiscordRpcEnabled, value); }
+    public bool DiscordRpcShowNickname { get => GetRpc(CVars.DiscordRpcShowNickname); set => SetRpc(CVars.DiscordRpcShowNickname, value); }
+    public bool DiscordRpcShowServer { get => GetRpc(CVars.DiscordRpcShowServer); set => SetRpc(CVars.DiscordRpcShowServer, value); }
+    public bool DiscordRpcShowOnline { get => GetRpc(CVars.DiscordRpcShowOnline); set => SetRpc(CVars.DiscordRpcShowOnline, value); }
+    public bool DiscordRpcShowPing { get => GetRpc(CVars.DiscordRpcShowPing); set => SetRpc(CVars.DiscordRpcShowPing, value); }
+    public bool DiscordRpcShowMap { get => GetRpc(CVars.DiscordRpcShowMap); set => SetRpc(CVars.DiscordRpcShowMap, value); }
+    public bool DiscordRpcShowGamePreset { get => GetRpc(CVars.DiscordRpcShowGamePreset); set => SetRpc(CVars.DiscordRpcShowGamePreset, value); }
+
+    private bool GetRpc(CVarDef<bool> cvar) => Cfg.GetCVar(cvar);
+    private void SetRpc(CVarDef<bool> cvar, bool value)
+    {
+        Cfg.SetCVar(cvar, value);
+        Cfg.CommitConfig();
+        DiscordRichPresenceService.Instance.RefreshSettings();
+    }
 
     public override string Name => LocalizationManager.Instance.GetString("tab-options-title");
+    public override string IconData => "M12,8 A4,4 0 1 0 12,16 A4,4 0 1 0 12,8 M19.4,15 A1.7,1.7 0 0 0 19.7,16.9 L19.8,17 A2,2 0 1 1 17,19.8 L16.9,19.7 A1.7,1.7 0 0 0 15,19.4 A1.7,1.7 0 0 0 14,21 L14,21.1 A2,2 0 1 1 10,21.1 L10,21 A1.7,1.7 0 0 0 9,19.4 A1.7,1.7 0 0 0 7.1,19.7 L7,19.8 A2,2 0 1 1 4.2,17 L4.3,16.9 A1.7,1.7 0 0 0 4.6,15 A1.7,1.7 0 0 0 3,14 L2.9,14 A2,2 0 1 1 2.9,10 L3,10 A1.7,1.7 0 0 0 4.6,9 A1.7,1.7 0 0 0 4.3,7.1 L4.2,7 A2,2 0 1 1 7,4.2 L7.1,4.3 A1.7,1.7 0 0 0 9,4.6 A1.7,1.7 0 0 0 10,3 L10,2.9 A2,2 0 1 1 14,2.9 L14,3 A1.7,1.7 0 0 0 15,4.6 A1.7,1.7 0 0 0 16.9,4.3 L17,4.2 A2,2 0 1 1 19.8,7 L19.7,7.1 A1.7,1.7 0 0 0 19.4,9 A1.7,1.7 0 0 0 21,10 L21.1,10 A2,2 0 1 1 21.1,14 L21,14 A1.7,1.7 0 0 0 19.4,15";
 
     public bool CompatMode
     {
@@ -46,16 +203,6 @@ public class OptionsTabViewModel : MainWindowTabViewModel
         set
         {
             Cfg.SetCVar(CVars.LogLauncherVerbose, value);
-            Cfg.CommitConfig();
-        }
-    }
-
-    public bool OverrideAssets
-    {
-        get => Cfg.GetCVar(CVars.OverrideAssets);
-        set
-        {
-            Cfg.SetCVar(CVars.OverrideAssets, value);
             Cfg.CommitConfig();
         }
     }
@@ -83,4 +230,37 @@ public class OptionsTabViewModel : MainWindowTabViewModel
     {
         Helpers.OpenUri(ConfigConstants.AccountManagementUrl);
     }
+}
+
+public sealed class NavigationTabOptionViewModel : ObservableObject
+{
+    private readonly OptionsTabViewModel _owner;
+    private readonly MainWindowViewModel _mainWindow;
+    private readonly string _id;
+    public string Name { get; }
+    public bool CanHide => _mainWindow.CanHideNavigationTab(_id);
+    public bool IsVisible
+    {
+        get => _mainWindow.IsNavigationTabVisible(_id);
+        set
+        {
+            if (value == IsVisible) return;
+            _mainWindow.SetNavigationTabVisible(_id, value);
+            _owner.InitializeNavigation();
+        }
+    }
+    private int Index => _mainWindow.AllTabs.ToList().FindIndex(t => _mainWindow.GetNavigationId(t) == _id);
+    public bool CanMoveUp => Index > 0;
+    public bool CanMoveDown => Index >= 0 && Index < _mainWindow.AllTabs.Count - 1;
+
+    public NavigationTabOptionViewModel(OptionsTabViewModel owner, MainWindowViewModel mainWindow, MainWindowTabViewModel tab)
+    {
+        _owner = owner;
+        _mainWindow = mainWindow;
+        _id = mainWindow.GetNavigationId(tab);
+        Name = tab.Name;
+    }
+
+    public void MoveUp() { _mainWindow.MoveNavigationTab(_id, -1); _owner.InitializeNavigation(); }
+    public void MoveDown() { _mainWindow.MoveNavigationTab(_id, 1); _owner.InitializeNavigation(); }
 }

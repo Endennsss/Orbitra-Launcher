@@ -20,6 +20,8 @@
     <PackageVersion Include="Avalonia.Desktop" Version="11.2.4"/>
     <PackageVersion Include="Avalonia.Diagnostics" Version="11.2.4"/>
     <PackageVersion Include="Avalonia.Themes.Simple" Version="11.2.4"/>
+    <PackageVersion Include="Avalonia.Controls.ColorPicker" Version="11.2.4"/>
+    <PackageVersion Include="AnimatedImage.Avalonia" Version="2.1.4" />
     <PackageVersion Include="CodeHollow.FeedReader" Version="1.2.6"/>
     <PackageVersion Include="Dapper" Version="2.0.123"/>
     <PackageVersion Include="DynamicData" Version="8.4.1"/>
@@ -35,6 +37,8 @@
     <PackageVersion Include="libsodium" Version="1.0.20.1" />
     <PackageVersion Include="System.Net.Http.WinHttpHandler" Version="8.0.0" />
     <PackageVersion Include="Linguini.Bundle" Version="0.8.1" />
+    <PackageVersion Include="DiscordRichPresence" Version="1.6.1.70" />
+    <PackageVersion Include="NAudio" Version="2.2.1" />
     <!-- Test stuff -->
     <PackageVersion Include="nunit" Version="3.13.3"/>
     <PackageVersion Include="NUnit.Analyzers" Version="3.6.1"/>

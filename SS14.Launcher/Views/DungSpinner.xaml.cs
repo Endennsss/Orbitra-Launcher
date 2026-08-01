@@ -22,8 +22,6 @@ public sealed partial class DungSpinner : UserControl
     public static readonly StyledProperty<IBrush> FillProperty =
         AvaloniaProperty.Register<DungSpinner, IBrush>(nameof(Fill));
 
-    private readonly IPen _pen = new Pen();
-
     static DungSpinner()
     {
         AffectsRender<DungSpinner>(AnimationProgressProperty, FillProperty);
@@ -77,32 +75,21 @@ public sealed partial class DungSpinner : UserControl
 
         using var translateState = context.PushTransform(offset);
 
-        var brush = Fill;
-        var progress = AnimationProgress * Math.PI * 2;
+        const int dots = 12;
+        var orbit = Math.Max(5, Math.Min(Bounds.Width, Bounds.Height) * 0.32);
+        var dotRadius = Math.Max(1.2, orbit * 0.12);
+        var active = (int)(AnimationProgress * dots) % dots;
 
-        void DrawElectron(double angle, double xScale, double yScale, double radius, double animationOffset,
-            double mul = 1)
+        for (var i = 0; i < dots; i++)
         {
-            var rotation = Matrix.CreateRotation(angle);
-            using var _ = context.PushTransform(rotation);
-
-            var p = (progress + animationOffset) * mul;
-            var x = Math.Sin(p) * xScale;
-            var y = Math.Cos(p) * yScale;
-
-            var ellipseGeometry = new EllipseGeometry(new Rect(x - radius, y - radius, radius * 2, radius * 2));
-
-            context.DrawGeometry(brush, _pen, ellipseGeometry);
+            var distance = (i - active + dots) % dots;
+            var alpha = (byte)Math.Clamp(245 - distance * 17, 45, 245);
+            var brush = new SolidColorBrush(Color.FromArgb(alpha, 242, 242, 242));
+            var angle = i * Math.PI * 2 / dots - Math.PI / 2;
+            var x = Math.Cos(angle) * orbit;
+            var y = Math.Sin(angle) * orbit;
+            var radius = distance == 0 ? dotRadius * 1.25 : dotRadius;
+            context.DrawEllipse(brush, null, new Point(x, y), radius, radius);
         }
-
-        const double sizeElectron = 1.5;
-        const double sizeNucleus = 3;
-        const double pathX = 4;
-        const double pathY = 10;
-
-        DrawElectron(Math.PI * 2d / 3d, pathX, pathY, sizeElectron, 0.5);
-        DrawElectron(Math.PI / 3d, pathX, pathY, sizeElectron, 0.33, -1);
-        DrawElectron(0, pathX, pathY, sizeElectron, 0.0);
-        DrawElectron(0, 0, 0, sizeNucleus, 0);
     }
 }

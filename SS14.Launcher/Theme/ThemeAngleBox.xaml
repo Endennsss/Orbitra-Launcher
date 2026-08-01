@@ -3,7 +3,7 @@
         xmlns:v="clr-namespace:SS14.Launcher.Views">
 
   <Style Selector="v|AngleBox">
-    <Setter Property="CornerSize" Value="10" />
+    <Setter Property="CornerSize" Value="0" />
   </Style>
 
 </Styles>

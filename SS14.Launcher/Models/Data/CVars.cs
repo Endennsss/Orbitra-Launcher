@@ -125,6 +125,59 @@ public static class CVars
     /// </summary>
     public static readonly CVarDef<string?> Language = CVarDef.Create<string?>("Language", null);
 
+    public static readonly CVarDef<bool> UseTextLogo = CVarDef.Create("UseTextLogo", false);
+
+    public static readonly CVarDef<string> LauncherFont = CVarDef.Create("LauncherFont", "Noto Sans");
+
+    /// <summary>
+    /// Use the neutral light launcher palette instead of the default dark palette.
+    /// </summary>
+    public static readonly CVarDef<bool> LightTheme = CVarDef.Create("LightTheme", false);
+    public static readonly CVarDef<bool> CustomThemeEnabled = CVarDef.Create("CustomThemeEnabled", false);
+    public static readonly CVarDef<string> CustomThemeBackground = CVarDef.Create("CustomThemeBackground", "#101010");
+    public static readonly CVarDef<string> CustomThemeSurface = CVarDef.Create("CustomThemeSurface", "#181818");
+    public static readonly CVarDef<string> CustomThemeControl = CVarDef.Create("CustomThemeControl", "#292929");
+    public static readonly CVarDef<string> CustomThemeAccent = CVarDef.Create("CustomThemeAccent", "#D0D0D0");
+    public static readonly CVarDef<string> CustomThemeText = CVarDef.Create("CustomThemeText", "#F2F2F2");
+    public static readonly CVarDef<string> CustomThemeMuted = CVarDef.Create("CustomThemeMuted", "#999999");
+    public static readonly CVarDef<string> CustomThemeImage = CVarDef.Create("CustomThemeImage", "");
+    public static readonly CVarDef<string> CustomThemeImageHome = CVarDef.Create("CustomThemeImageHome", "");
+    public static readonly CVarDef<string> CustomThemeImageServers = CVarDef.Create("CustomThemeImageServers", "");
+    public static readonly CVarDef<string> CustomThemeImageOptions = CVarDef.Create("CustomThemeImageOptions", "");
+    public static readonly CVarDef<int> CustomThemeBlur = CVarDef.Create("CustomThemeBlur", 8);
+    public static readonly CVarDef<bool> UiSoundsEnabled = CVarDef.Create("UiSoundsEnabled", true);
+    public static readonly CVarDef<int> UiSoundVolume = CVarDef.Create("UiSoundVolume", 65);
+    public static readonly CVarDef<bool> CloseToTray = CVarDef.Create("CloseToTray", true);
+    public static readonly CVarDef<string> NavigationTabOrder =
+        CVarDef.Create("NavigationTabOrder", "home,servers,news,links,playtime,activity,custom-theme,options,development");
+    public static readonly CVarDef<string> HiddenNavigationTabs =
+        CVarDef.Create("HiddenNavigationTabs", "");
+    public static readonly CVarDef<int> NavigationOrderVersion = CVarDef.Create("NavigationOrderVersion", 0);
+
+    /// <summary>
+    /// Automatically refresh favorite server status and ping every three seconds.
+    /// </summary>
+    public static readonly CVarDef<bool> AutoRefreshFavoritePing =
+        CVarDef.Create("AutoRefreshFavoritePing", true);
+    public static readonly CVarDef<bool> FavoriteNotificationsEnabled =
+        CVarDef.Create("FavoriteNotificationsEnabled", true);
+    public static readonly CVarDef<string> MonitoredFavoriteServers =
+        CVarDef.Create("MonitoredFavoriteServers", "");
+    public static readonly CVarDef<bool> FavoriteNotifyServerOnline =
+        CVarDef.Create("FavoriteNotifyServerOnline", true);
+    public static readonly CVarDef<bool> FavoriteNotifyNewRound =
+        CVarDef.Create("FavoriteNotifyNewRound", true);
+    public static readonly CVarDef<bool> FavoriteNotifySlotAvailable =
+        CVarDef.Create("FavoriteNotifySlotAvailable", true);
+    public static readonly CVarDef<bool> DiscordRpcEnabled = CVarDef.Create("DiscordRpcEnabled", true);
+    public static readonly CVarDef<bool> DiscordRpcShowNickname = CVarDef.Create("DiscordRpcShowNickname", true);
+    public static readonly CVarDef<bool> DiscordRpcShowServer = CVarDef.Create("DiscordRpcShowServer", true);
+    public static readonly CVarDef<bool> DiscordRpcShowOnline = CVarDef.Create("DiscordRpcShowOnline", true);
+    public static readonly CVarDef<bool> DiscordRpcShowPing = CVarDef.Create("DiscordRpcShowPing", true);
+    public static readonly CVarDef<bool> DiscordRpcShowMap = CVarDef.Create("DiscordRpcShowMap", true);
+    public static readonly CVarDef<bool> DiscordRpcShowGamePreset = CVarDef.Create("DiscordRpcShowGamePreset", true);
+    public static readonly CVarDef<bool> FirstRunCompleted = CVarDef.Create("FirstRunCompleted", false);
+
     /// <summary>
     /// The CPU architecture this launcher was last run with.
     /// </summary>

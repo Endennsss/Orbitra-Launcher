@@ -5,6 +5,8 @@
 
   <Style Selector="views|DropDown">
     <Setter Property="Background" Value="{DynamicResource ThemeControlMidBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}" />
+    <Setter Property="MinHeight" Value="42" />
     <Setter Property="Template">
       <ControlTemplate>
         <Panel>
@@ -13,7 +15,10 @@
           <Panel Margin="14 0">
             <Grid Margin="0, 2" ColumnDefinitions="*,Auto">
               <ContentPresenter Content="{TemplateBinding HeaderContent}"
-                                ContentTemplate="{TemplateBinding HeaderContentTemplate}" />
+                                ContentTemplate="{TemplateBinding HeaderContentTemplate}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                TextBlock.TextAlignment="Center" />
               <Path Grid.Column="1" Fill="{DynamicResource ThemeForegroundBrush}"
                     Width="8"
                     Height="4"
@@ -43,8 +48,19 @@
     <Setter Property="Background" Value="{DynamicResource ThemeButtonHoveredBrush}" />
   </Style>
 
+  <Style Selector="views|DropDown:pointerover Path.AccountIcon">
+    <Style.Animations>
+      <Animation Duration="0:0:0.3" Easing="CubicEaseOut">
+        <KeyFrame Cue="0%"><Setter Property="TranslateTransform.Y" Value="0" /></KeyFrame>
+        <KeyFrame Cue="50%"><Setter Property="TranslateTransform.Y" Value="-2" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="TranslateTransform.Y" Value="0" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
   <Style Selector="views|DropDown:pressed">
-    <Setter Property="Background" Value="{DynamicResource ThemeControlHighBrush}" />
+    <Setter Property="Background" Value="{DynamicResource LauncherControlBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}" />
   </Style>
 
   <Style Selector="views|DropDown:disabled">
