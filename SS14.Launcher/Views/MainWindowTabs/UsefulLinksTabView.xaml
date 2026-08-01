@@ -28,8 +28,15 @@
             </Viewbox>
           </Border>
           <StackPanel Grid.Column="1" Margin="14,0" VerticalAlignment="Center">
-            <TextBlock Text="ChemHelper" FontSize="17" FontWeight="SemiBold" />
-            <TextBlock Text="Помощник по химии для Space Station 14." Classes="SubText" />
+            <StackPanel Orientation="Horizontal" Spacing="9">
+              <TextBlock Text="ChemHelper" FontSize="17" FontWeight="SemiBold" VerticalAlignment="Center" />
+              <Border Background="{DynamicResource LauncherControlBrush}" BorderBrush="{DynamicResource LauncherLineBrush}"
+                      BorderThickness="1" Padding="7,2" VerticalAlignment="Center">
+                <TextBlock Text="ПРОЕКТ АВТОРА" Classes="SectionLabel" FontSize="9" />
+              </Border>
+            </StackPanel>
+            <TextBlock Text="Отдельный проект автора лаунчера — помощник по химии для Space Station 14."
+                       Classes="SubText" TextWrapping="Wrap" />
           </StackPanel>
           <Button Grid.Column="2" Content="Открыть ChemHelper" Command="{Binding OpenChemHelper}"
                   MinWidth="180" VerticalAlignment="Center" />
