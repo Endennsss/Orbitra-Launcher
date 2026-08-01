@@ -187,6 +187,7 @@ public sealed class ServerEntryViewModel : ObservableRecipient, IRecipient<Favor
     public bool CanConnect => IsOnline && !IsConnecting;
     public float ConnectionProgress => _windowVm.ConnectingVM?.Progress ?? 0;
     public bool ConnectionProgressIndeterminate => _windowVm.ConnectingVM?.ProgressIndeterminate ?? true;
+    public string ConnectionStageText => _windowVm.ConnectingVM?.SmartStageText ?? "ПОДКЛЮЧЕНИЕ";
     public bool PingMetricUp => _pingMetricUp;
     public bool PingMetricDown => _pingMetricDown;
     public bool PlayerMetricUp => _playerMetricUp;
@@ -333,6 +334,7 @@ public sealed class ServerEntryViewModel : ObservableRecipient, IRecipient<Favor
         OnPropertyChanged(nameof(CanConnect));
         OnPropertyChanged(nameof(ConnectionProgress));
         OnPropertyChanged(nameof(ConnectionProgressIndeterminate));
+        OnPropertyChanged(nameof(ConnectionStageText));
 
         if (_windowVm.ConnectingVM != null)
             _windowVm.ConnectingVM.PropertyChanged += OnConnectingPropertyChanged;
@@ -340,10 +342,12 @@ public sealed class ServerEntryViewModel : ObservableRecipient, IRecipient<Favor
 
     private void OnConnectingPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
-        if (args.PropertyName is nameof(ConnectingViewModel.Progress) or nameof(ConnectingViewModel.ProgressIndeterminate))
+        if (args.PropertyName is nameof(ConnectingViewModel.Progress) or nameof(ConnectingViewModel.ProgressIndeterminate)
+            or nameof(ConnectingViewModel.SmartStageText) or nameof(ConnectingViewModel.StatusText))
         {
             OnPropertyChanged(nameof(ConnectionProgress));
             OnPropertyChanged(nameof(ConnectionProgressIndeterminate));
+            OnPropertyChanged(nameof(ConnectionStageText));
         }
         else if (args.PropertyName == nameof(ConnectingViewModel.IsConnected))
         {

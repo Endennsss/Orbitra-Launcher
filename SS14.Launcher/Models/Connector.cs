@@ -41,6 +41,7 @@ public partial class Connector : ObservableObject
 
     [ObservableProperty] private ConnectionStatus _status = ConnectionStatus.None;
     [ObservableProperty] private bool _clientExitedBadly;
+    [ObservableProperty] private Exception? _lastError;
     [ObservableProperty] private bool _privacyPolicyDifferentVersion;
     public ServerPrivacyPolicyInfo? PrivacyPolicyInfo { get; private set; }
 
@@ -53,6 +54,7 @@ public partial class Connector : ObservableObject
         catch (ConnectException e)
         {
             Log.Error(e, "Failed to connect: {status}", e.Status);
+            LastError = e.InnerException ?? e;
             Status = e.Status;
         }
         catch (OperationCanceledException e)
@@ -395,6 +397,7 @@ public partial class Connector : ObservableObject
         catch (Exception e)
         {
             Log.Error(e, "Exception while starting client");
+            LastError = e;
             return null;
         }
     }
@@ -779,6 +782,9 @@ public partial class Connector : ObservableObject
 
         throw new NotSupportedException("Unsupported platform.");
     }
+
+    internal static async Task<string> GetLoaderExecutablePathAsync()
+        => (await GetLoaderStartInfo()).FileName;
 #pragma warning restore 162
 
     public enum ConnectionStatus

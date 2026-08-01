@@ -17,7 +17,7 @@
             Margin="18" Padding="16,12" IsVisible="{Binding !IsAskingPrivacyPolicy}"
             Background="{DynamicResource LauncherSurfaceBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1"
             BoxShadow="0 10 32 #B0000000">
-      <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto">
+      <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto">
         <Viewbox Classes="DockSpinner" Grid.RowSpan="2" Width="26" Height="26" Stretch="Uniform"
                  ClipToBounds="True" VerticalAlignment="Center" Margin="0,0,14,0">
           <Canvas Width="24" Height="24">
@@ -50,6 +50,38 @@
                 IsVisible="{Binding !IsErrored}" />
         <Button Grid.Column="2" Grid.RowSpan="2" MinWidth="92" Margin="14,0,0,0"
                 Content="OK" Command="{Binding ErrorDismissed}" IsVisible="{Binding IsErrored}" />
+
+        <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Margin="0,9,0,0"
+                Padding="0" Background="Transparent" BorderThickness="0"
+                Content="{Binding DiagnosticSummary}" Command="{Binding ToggleDiagnostics}"
+                Classes="TextButton" />
+
+        <Border Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,9,0,0" Padding="12"
+                IsVisible="{Binding DiagnosticsVisible}"
+                Background="{DynamicResource LauncherWorkspaceBrush}"
+                BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1">
+          <StackPanel Spacing="8">
+            <ItemsControl ItemsSource="{Binding Diagnostics}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Grid ColumnDefinitions="22,150,*" Margin="0,3">
+                    <TextBlock Text="{Binding Marker}" Foreground="{Binding Color}" FontWeight="Bold" />
+                    <TextBlock Grid.Column="1" Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="2" Text="{Binding Details}" Classes="SubText"
+                               TextWrapping="Wrap" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Text="{Binding ErrorDetails}" Classes="SubText" TextWrapping="Wrap"
+                       IsVisible="{Binding IsErrored}" />
+            <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsErrored}">
+              <Button Content="Исправить и повторить" Command="{Binding RepairAndRetry}" />
+              <Button Content="Открыть журналы" Command="{Binding OpenLogs}" />
+              <Button Content="Закрыть" Command="{Binding ErrorDismissed}" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
       </Grid>
     </Border>
 
