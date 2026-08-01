@@ -21,10 +21,10 @@ jobs:
       - run: python publish.py windows --x64-only
       - uses: actions/upload-artifact@v4
         with:
-          name: SS14-Custom-Launcher-Windows-x64
-          path: SS14.Launcher_Windows.zip
+          name: Orbitra-Launcher-Windows-x64
+          path: Orbitra_Launcher_Windows.zip
       - if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: SS14.Launcher_Windows.zip
+          files: Orbitra_Launcher_Windows.zip
           generate_release_notes: true

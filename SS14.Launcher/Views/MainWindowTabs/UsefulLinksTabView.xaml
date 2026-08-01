@@ -43,7 +43,7 @@
         </Grid>
       </Border>
 
-      <TextBlock Text="SS14 CUSTOM LAUNCHER" Classes="SectionLabel" Margin="0,6,0,0" />
+      <TextBlock Text="ORBITRA LAUNCHER" Classes="SectionLabel" Margin="0,6,0,0" />
       <UniformGrid Columns="2">
         <Button Margin="0,0,6,6" Padding="18" HorizontalContentAlignment="Stretch" Command="{Binding OpenLauncherSite}">
           <StackPanel><TextBlock Text="Сайт лаунчера" FontWeight="SemiBold" /><TextBlock Text="Описание и возможности проекта" Classes="SubText" /></StackPanel>

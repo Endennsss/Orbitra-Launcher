@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>SS14 Launcher</string>
+    <string>Orbitra Launcher</string>
     <key>CFBundleDisplayName</key>
-    <string>Space Station 14 Launcher</string>
+    <string>Orbitra Launcher</string>
     <key>CFBundleExecutable</key>
     <string>SS14</string>
     <key>CFBundleIdentifier</key>

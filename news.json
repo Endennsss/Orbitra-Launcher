@@ -1,10 +1,10 @@
 [
   {
     "id": "release-0.40.0",
-    "title": "Первый публичный релиз SS14 Custom Launcher",
+    "title": "Первый публичный релиз Orbitra Launcher",
     "summary": "Версия 0.40.0 объединяет новый интерфейс, темы, мониторинг серверов, Discord RPC, уведомления, статистику, удалённые новости, безопасный режим и резервные копии настроек.",
     "date": "01.08.2026",
-    "url": "https://github.com/Endennsss/SS14-Custom-launcher/releases/tag/v0.40.0",
+    "url": "https://github.com/Endennsss/Orbitra-Launcher/releases/tag/v0.40.0",
     "version": "0.40.0",
     "important": true
   },
@@ -13,7 +13,7 @@
     "title": "Фоны тем стали легче",
     "summary": "Удалена поддержка MP4. Для анимированных фонов оставлен стабильный зацикленный GIF, обычные изображения продолжают работать.",
     "date": "1 августа 2026",
-    "url": "https://github.com/Endennsss/SS14-Custom-launcher",
+    "url": "https://github.com/Endennsss/Orbitra-Launcher",
     "version": "0.39.1-custom",
     "important": true
   },
@@ -22,7 +22,7 @@
     "title": "Добавлен раздел новостей лаунчера",
     "summary": "Новости проекта теперь можно обновлять удалённо через news.json без выпуска новой сборки.",
     "date": "1 августа 2026",
-    "url": "https://github.com/Endennsss/SS14-Custom-launcher",
+    "url": "https://github.com/Endennsss/Orbitra-Launcher",
     "version": "0.39.1-custom",
     "important": false
   }

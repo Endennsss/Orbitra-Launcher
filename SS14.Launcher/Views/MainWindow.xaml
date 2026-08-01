@@ -23,7 +23,7 @@
                     Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1" StrokeLineCap="Round" />
             </Viewbox>
           </Border>
-          <TextBlock Text="SPACE STATION 14" VerticalAlignment="Center"
+          <TextBlock Text="ORBITRA LAUNCHER" VerticalAlignment="Center"
                      FontSize="11" FontWeight="Bold" LetterSpacing="1.2" Foreground="{DynamicResource ThemeSubTextBrush}" />
         </StackPanel>
         <StackPanel Grid.Column="1" Orientation="Horizontal">

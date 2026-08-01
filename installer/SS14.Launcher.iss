@@ -1,7 +1,7 @@
-#define AppName "SS14 Launcher"
+#define AppName "Orbitra Launcher"
 #define AppVersion "0.39.1"
 #define AppPublisher "ChemHelper"
-#define AppExeName "Space Station 14 Launcher.exe"
+#define AppExeName "Orbitra Launcher.exe"
 
 [Setup]
 AppId={{A70F856B-1BF8-49DC-86A5-153281704560}
@@ -11,14 +11,14 @@ AppPublisher={#AppPublisher}
 VersionInfoVersion={#AppVersion}.0
 VersionInfoCompany={#AppPublisher}
 VersionInfoDescription=Установщик {#AppName}
-DefaultDirName={localappdata}\Programs\SS14 Launcher
+DefaultDirName={localappdata}\Programs\Orbitra Launcher
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=..\bin\installer
-OutputBaseFilename=SS14.Launcher.Setup.x64
+OutputBaseFilename=Orbitra.Launcher.Setup.x64
 SetupIconFile=..\SS14.Launcher\Assets\icon.ico
 UninstallDisplayIcon={app}\{#AppExeName}
 Compression=lzma2/ultra64
@@ -60,7 +60,7 @@ Type: filesandordirs; Name: "{app}"
 procedure InitializeWizard;
 begin
   WizardForm.Color := $101010;
-  WizardForm.WelcomeLabel1.Caption := 'SS14 LAUNCHER';
+  WizardForm.WelcomeLabel1.Caption := 'ORBITRA LAUNCHER';
   WizardForm.WelcomeLabel2.Caption :=
     'Установщик подготовит лаунчер к работе и создаст необходимые ярлыки.' + #13#10 + #13#10 +
     'Настройки, аккаунты и избранные серверы сохраняются отдельно и не удаляются при обновлении.';

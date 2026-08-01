@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="SS14.Launcher/Assets/brand-mark.svg" width="96" height="96" alt="SS14 Custom Launcher" />
+  <img src="SS14.Launcher/Assets/brand-mark.svg" width="96" height="96" alt="Orbitra Launcher" />
 
-  # SS14 Custom Launcher
+  # Orbitra Launcher
 
   **Неофициальный лаунчер Space Station 14 с новым интерфейсом, расширенным списком серверов и глубокой персонализацией.**
 
@@ -10,7 +10,7 @@
   [![License](https://img.shields.io/badge/license-MIT-242424)](LICENSE.txt)
   [![Platform](https://img.shields.io/badge/platform-Windows-242424?logo=windows)](#установка)
 
-  [Сайт](https://endennsss.github.io/SS14-Custom-launcher/) · [Возможности](#возможности) · [Установка](#установка) · [Сборка](#сборка-из-исходников) · [Новости](#публикация-новостей)
+  [Сайт](https://endennsss.github.io/Orbitra-Launcher/) · [Возможности](#возможности) · [Установка](#установка) · [Сборка](#сборка-из-исходников) · [Новости](#публикация-новостей)
 </div>
 
 > [!IMPORTANT]
@@ -18,7 +18,7 @@
 
 ## О проекте
 
-SS14 Custom Launcher сохраняет совместимость с серверами Space Station 14, но полностью меняет взаимодействие с лаунчером: от оформления и анимаций до мониторинга серверов, уведомлений, статистики и Discord Rich Presence.
+Orbitra Launcher сохраняет совместимость с серверами Space Station 14, но полностью меняет взаимодействие с лаунчером: от оформления и анимаций до мониторинга серверов, уведомлений, статистики и Discord Rich Presence.
 
 Интерфейс выполнен в чёрно-серой палитре с плавными переходами, кастомным заголовком окна и единым набором иконок Lucide.
 
@@ -59,12 +59,12 @@ SS14 Custom Launcher сохраняет совместимость с серве
 Актуальный скриншот интерфейса будет добавлен после финальной полировки текущего дизайна.
 
 <!-- Чтобы добавить скриншот: сохраните его как docs/launcher-preview.png и замените этот комментарий на:
-![Интерфейс SS14 Custom Launcher](docs/launcher-preview.png)
+![Интерфейс Orbitra Launcher](docs/launcher-preview.png)
 -->
 
 ## Установка
 
-Готовые сборки будут публиковаться в разделе [Releases](https://github.com/Endennsss/SS14-Custom-launcher/releases).
+Готовые сборки будут публиковаться в разделе [Releases](https://github.com/Endennsss/Orbitra-Launcher/releases).
 
 Пока релиз не опубликован, лаунчер можно собрать из исходников по инструкции ниже.
 
@@ -81,8 +81,8 @@ SS14 Custom Launcher сохраняет совместимость с серве
 ### Обычная сборка
 
 ```powershell
-git clone https://github.com/Endennsss/SS14-Custom-launcher.git
-cd SS14-Custom-launcher
+git clone https://github.com/Endennsss/Orbitra-Launcher.git
+cd Orbitra-Launcher
 dotnet build SS14.Launcher/SS14.Launcher.csproj -c Release
 ```
 
@@ -116,7 +116,7 @@ python publish.py windows --x64-only
 .\tools\publish-news.ps1 `
   -Title "Версия 0.40.0" `
   -Text "Добавлены новые возможности" `
-  -Link "https://github.com/Endennsss/SS14-Custom-launcher/releases"
+  -Link "https://github.com/Endennsss/Orbitra-Launcher/releases"
 ```
 
 Если GitHub временно недоступен, лаунчер показывает встроенный резервный список новостей.

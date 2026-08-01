@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory = $true)] [string] $Title,
     [Parameter(Mandatory = $true)] [string] $Text,
-    [string] $Link = "https://github.com/Endennsss/SS14-Custom-launcher",
+    [string] $Link = "https://github.com/Endennsss/Orbitra-Launcher",
     [string] $Remote = "custom",
     [string] $Branch = "main"
 )
@@ -9,7 +9,7 @@ param(
 $ErrorActionPreference = "Stop"
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $newsPath = Join-Path $repositoryRoot "news.json"
-$remoteAddress = "git@github.com:Endennsss/SS14-Custom-launcher.git"
+$remoteAddress = "git@github.com:Endennsss/Orbitra-Launcher.git"
 
 if (-not (Test-Path -LiteralPath $newsPath)) {
     Set-Content -LiteralPath $newsPath -Value "[]" -Encoding utf8

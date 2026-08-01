@@ -423,7 +423,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         try
         {
             using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(6) };
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("SS14-Custom-Launcher");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("Orbitra-Launcher");
             var json = await client.GetStringAsync(ConfigConstants.CustomLatestReleaseApiUrl);
             var release = JsonSerializer.Deserialize<CustomReleaseDto>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             if (release == null || release.Draft || release.Prerelease) return;

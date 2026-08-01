@@ -119,7 +119,7 @@ buildDotnetModule rec {
       name = pname;
       exec = meta.mainProgram;
       icon = pname;
-      desktopName = "Space Station 14 Launcher";
+      desktopName = "Orbitra Launcher";
       comment = meta.description;
       categories = [ "Game" ];
       startupWMClass = meta.mainProgram;

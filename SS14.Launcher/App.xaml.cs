@@ -323,7 +323,7 @@ public class App : Application
         _trayIcon = new TrayIcon
         {
             Icon = Resources["WindowIcon"] as WindowIcon,
-            ToolTipText = "Space Station 14 Launcher",
+            ToolTipText = "Orbitra Launcher",
             Menu = _trayMenu,
             IsVisible = true,
         };

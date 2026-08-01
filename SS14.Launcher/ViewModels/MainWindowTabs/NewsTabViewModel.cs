@@ -110,7 +110,7 @@ public partial class NewsTabViewModel : MainWindowTabViewModel
         try
         {
             using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("SS14-Custom-Launcher");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("Orbitra-Launcher");
             var json = await client.GetStringAsync(ConfigConstants.LauncherNewsUrl);
             var entries = JsonSerializer.Deserialize<LauncherNewsDto[]>(json, new JsonSerializerOptions
             {

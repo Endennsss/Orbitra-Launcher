@@ -131,7 +131,7 @@ public partial class MainWindow : Window
 
     private void ReloadTitle()
     {
-        Title = LocalizationManager.Instance.GetString("main-window-title");
+        Title = "Orbitra Launcher";
     }
 
     protected override void OnDataContextChanged(EventArgs e)
