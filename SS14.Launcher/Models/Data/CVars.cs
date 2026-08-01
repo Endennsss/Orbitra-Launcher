@@ -179,8 +179,6 @@ public static class CVars
     public static readonly CVarDef<bool> FirstRunCompleted = CVarDef.Create("FirstRunCompleted", false);
     public static readonly CVarDef<string> LastReadLauncherNews = CVarDef.Create("LastReadLauncherNews", "");
     public static readonly CVarDef<bool> CustomUpdateChecks = CVarDef.Create("CustomUpdateChecks", true);
-    public static readonly CVarDef<string> FavoriteServerGroups = CVarDef.Create("FavoriteServerGroups", "{}");
-    public static readonly CVarDef<string> FavoriteGroupOrder = CVarDef.Create("FavoriteGroupOrder", "Основные,Ролевые,Тестовые,Друзья");
 
     /// <summary>
     /// The CPU architecture this launcher was last run with.

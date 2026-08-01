@@ -24,17 +24,14 @@ namespace SS14.Launcher.ViewModels.MainWindowTabs;
 
 public sealed class SystemCenterTabViewModel : MainWindowTabViewModel
 {
-    private static readonly string[] Groups = ["Основные", "Ролевые", "Тестовые", "Друзья"];
     private readonly MainWindowViewModel _main;
     private readonly DataManager _cfg;
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(7) };
-    private Dictionary<string, string> _groups;
 
     public ObservableCollection<SystemCheckItem> Integrity { get; } = [];
     public ObservableCollection<SystemCheckItem> Services { get; } = [];
     public ObservableCollection<ReleaseHistoryItem> Releases { get; } = [];
     public ObservableCollection<FavoriteToolItem> FavoriteTools { get; } = [];
-    public ObservableCollection<FavoriteGroupSection> FavoriteGroups { get; } = [];
     public IEnumerable<FavoriteToolItem> ComparedServers => FavoriteTools.Where(x => x.IsCompared);
     public string CurrentVersion => LauncherVersion.Version?.ToString() ?? "неизвестно";
 
@@ -46,7 +43,6 @@ public sealed class SystemCenterTabViewModel : MainWindowTabViewModel
         _main = main;
         _cfg = Locator.Current.GetRequiredService<DataManager>();
         _http.DefaultRequestHeaders.UserAgent.ParseAdd("Orbitra-Launcher");
-        _groups = LoadGroups();
         _cfg.FavoriteServers.Connect().Subscribe(_ => RefreshFavorites());
         RefreshFavorites();
     }
@@ -125,19 +121,8 @@ public sealed class SystemCenterTabViewModel : MainWindowTabViewModel
         var selected = FavoriteTools.Where(x => x.IsCompared).Select(x => x.Address).ToHashSet(StringComparer.OrdinalIgnoreCase);
         FavoriteTools.Clear();
         foreach (var server in _main.HomeTab.Favorites)
-            FavoriteTools.Add(new FavoriteToolItem(this, server, _groups.GetValueOrDefault(server.CacheData.Address, Groups[0]), selected.Contains(server.CacheData.Address)));
-        RebuildGroupSections();
+            FavoriteTools.Add(new FavoriteToolItem(this, server, selected.Contains(server.CacheData.Address)));
         OnPropertyChanged(nameof(ComparedServers));
-    }
-
-    internal void CycleGroup(FavoriteToolItem item)
-    {
-        var index = Array.IndexOf(Groups, item.Group);
-        item.Group = Groups[(index + 1) % Groups.Length];
-        _groups[item.Address] = item.Group;
-        _cfg.SetCVar(CVars.FavoriteServerGroups, JsonSerializer.Serialize(_groups));
-        _cfg.CommitConfig();
-        RebuildGroupSections();
     }
 
     internal bool TrySetCompared(FavoriteToolItem item, bool value)
@@ -152,37 +137,6 @@ public sealed class SystemCenterTabViewModel : MainWindowTabViewModel
 
     internal void ComparisonChanged() => OnPropertyChanged(nameof(ComparedServers));
 
-    internal void MoveGroup(FavoriteGroupSection section, int direction)
-    {
-        var index = FavoriteGroups.IndexOf(section); var target = index + direction;
-        if (index < 0 || target < 0 || target >= FavoriteGroups.Count) return;
-        FavoriteGroups.Move(index, target);
-        _cfg.SetCVar(CVars.FavoriteGroupOrder, string.Join(',', FavoriteGroups.Select(x => x.Name)));
-        _cfg.CommitConfig();
-        RefreshGroupMoveState();
-    }
-
-    private void RebuildGroupSections()
-    {
-        var expanded = FavoriteGroups.ToDictionary(x => x.Name, x => x.IsExpanded);
-        var order = _cfg.GetCVar(CVars.FavoriteGroupOrder).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Concat(Groups).Distinct().Where(Groups.Contains).ToArray();
-        FavoriteGroups.Clear();
-        foreach (var group in order)
-            FavoriteGroups.Add(new FavoriteGroupSection(this, group, FavoriteTools.Where(x => x.Group == group), expanded.GetValueOrDefault(group, true)));
-        RefreshGroupMoveState();
-    }
-
-    private void RefreshGroupMoveState()
-    {
-        foreach (var section in FavoriteGroups) section.RefreshMoveState();
-    }
-
-    private Dictionary<string, string> LoadGroups()
-    {
-        try { return JsonSerializer.Deserialize<Dictionary<string, string>>(_cfg.GetCVar(CVars.FavoriteServerGroups)) ?? new(StringComparer.OrdinalIgnoreCase); }
-        catch { return new(StringComparer.OrdinalIgnoreCase); }
-    }
 
     private async Task Probe(string title, string url)
     {
@@ -215,24 +169,10 @@ public sealed record ReleaseHistoryItem(string Name, string Version, string Date
 
 public sealed class FavoriteToolItem : ObservableObject
 {
-    private readonly SystemCenterTabViewModel _owner; private bool _isCompared; private string _group;
+    private readonly SystemCenterTabViewModel _owner; private bool _isCompared;
     public ServerEntryViewModel Server { get; }
     public string Address => Server.CacheData.Address; public string Name => Server.Name;
     public string RoundTime => Server.RoundStartTime is { } start ? $"Раунд: {DateTime.Now - start:hh\\:mm\\:ss}" : "Раунд: —";
-    public string Group { get => _group; set => SetProperty(ref _group, value); }
     public bool IsCompared { get => _isCompared; set { if (value == _isCompared) return; if (!_owner.TrySetCompared(this, value)) { OnPropertyChanged(); return; } SetProperty(ref _isCompared, value); _owner.ComparisonChanged(); } }
-    public FavoriteToolItem(SystemCenterTabViewModel owner, ServerEntryViewModel server, string group, bool selected) { _owner = owner; Server = server; _group = group; _isCompared = selected; }
-    public void CycleGroup() => _owner.CycleGroup(this);
-}
-
-public sealed class FavoriteGroupSection : ObservableObject
-{
-    private readonly SystemCenterTabViewModel _owner; private bool _isExpanded;
-    public string Name { get; } public ObservableCollection<FavoriteToolItem> Items { get; }
-    public bool IsExpanded { get => _isExpanded; set => SetProperty(ref _isExpanded, value); }
-    public bool CanMoveUp => _owner.FavoriteGroups.IndexOf(this) > 0;
-    public bool CanMoveDown => _owner.FavoriteGroups.IndexOf(this) < _owner.FavoriteGroups.Count - 1;
-    public FavoriteGroupSection(SystemCenterTabViewModel owner, string name, IEnumerable<FavoriteToolItem> items, bool expanded) { _owner = owner; Name = name; Items = new(items); _isExpanded = expanded; }
-    public void MoveUp() => _owner.MoveGroup(this, -1); public void MoveDown() => _owner.MoveGroup(this, 1);
-    internal void RefreshMoveState() { OnPropertyChanged(nameof(CanMoveUp)); OnPropertyChanged(nameof(CanMoveDown)); }
+    public FavoriteToolItem(SystemCenterTabViewModel owner, ServerEntryViewModel server, bool selected) { _owner = owner; Server = server; _isCompared = selected; }
 }
