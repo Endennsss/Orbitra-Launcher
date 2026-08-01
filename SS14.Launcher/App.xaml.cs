@@ -74,15 +74,11 @@ public class App : Application
         if (Current == null)
             return;
 
-        // Put the bundled emoji family first. If the text family is first, Skia can
-        // resolve a missing emoji through Windows (Segoe UI Emoji) before it reaches
-        // our explicit second family. Noto contains no regular Cyrillic/Latin glyphs,
-        // so ordinary launcher text still falls through to the selected text family.
-        const string emojiFamily = "avares://SS14.Launcher/Assets/Fonts/noto_emoji/NotoColorEmoji_WindowsCompatible.ttf#Noto Color Emoji";
-        var textFamily = fontName == "Noto Sans"
-            ? "avares://SS14.Launcher/Assets/Fonts/noto_sans/*.ttf#Noto Sans"
-            : fontName;
-        var family = new FontFamily($"{emojiFamily}, {textFamily}");
+        // Emoji are selected through Unicode-scoped fallbacks in Program.cs. Keeping
+        // only the text family here prevents Noto Emoji from taking over digits.
+        var family = fontName == "Noto Sans"
+            ? new FontFamily("avares://SS14.Launcher/Assets/Fonts/noto_sans/*.ttf#Noto Sans")
+            : new FontFamily(fontName);
         Current.Resources["LauncherFontFamily"] = family;
     }
 
