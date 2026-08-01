@@ -21,6 +21,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- The development launcher starts this executable directly. Keep it built even
+         when only SS14.Launcher.csproj is selected instead of the whole solution. -->
+    <ProjectReference Include="..\SS14.Loader\SS14.Loader.csproj"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Update="**\*.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>

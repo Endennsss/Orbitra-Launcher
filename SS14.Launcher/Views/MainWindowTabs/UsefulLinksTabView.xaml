@@ -21,10 +21,14 @@
           <Border Width="42" Height="42" Background="{DynamicResource LauncherControlBrush}"
                   BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1">
             <Viewbox Width="21" Height="21">
-              <!-- Official Lucide "flask-conical". -->
-              <Path Data="M10,2 L14,2 M12,2 L12,9 L18.5,19 A2,2 0 0 1 16.8,22 L7.2,22 A2,2 0 0 1 5.5,19 L12,9 M8.5,16 L15.5,16"
-                    Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}"
-                    StrokeThickness="1.8" StrokeLineCap="Round" />
+              <Canvas Width="24" Height="24">
+                <!-- Official Lucide "atom". -->
+                <Path Data="M20.2,20.2 C22.24,18.17 20.22,12.63 15.7,7.84 C11.22,3.04 5.67,1.02 3.63,3.06 C1.6,5.1 3.61,10.64 8.4,15.42 C13.2,20.22 18.16,22.24 20.2,20.2 M15.7,15.7 C20.49,10.9 22.51,5.36 20.47,3.32 C18.43,1.29 12.89,3.31 8.09,8.11 C3.29,12.91 1.27,18.45 3.31,20.49 C5.35,22.52 10.89,20.5 15.7,15.7"
+                      Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}"
+                      StrokeThickness="1.8" StrokeLineCap="Round" />
+                <Ellipse Canvas.Left="10" Canvas.Top="10" Width="4" Height="4" Fill="Transparent"
+                         Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.8" />
+              </Canvas>
             </Viewbox>
           </Border>
           <StackPanel Grid.Column="1" Margin="14,0" VerticalAlignment="Center">
