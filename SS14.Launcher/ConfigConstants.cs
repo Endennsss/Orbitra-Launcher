@@ -42,6 +42,12 @@ public static class ConfigConstants
     public const string NewsFeedUrl = "https://spacestation14.com/post/index.xml";
     public const string LauncherNewsUrl = "https://raw.githubusercontent.com/Endennsss/SS14-Custom-launcher/main/news.json";
     public const string CustomLatestReleaseApiUrl = "https://api.github.com/repos/Endennsss/SS14-Custom-launcher/releases/latest";
+    public const string CustomLauncherSiteUrl = "https://endennsss.github.io/SS14-Custom-launcher/";
+    public const string CustomLauncherRepositoryUrl = "https://github.com/Endennsss/SS14-Custom-launcher";
+    public const string CustomLauncherReleasesUrl = "https://github.com/Endennsss/SS14-Custom-launcher/releases";
+    public const string CustomLauncherLatestDownloadUrl = "https://github.com/Endennsss/SS14-Custom-launcher/releases/latest/download/SS14.Launcher_Windows.zip";
+    public const string CustomLauncherIssuesUrl = "https://github.com/Endennsss/SS14-Custom-launcher/issues";
+    public const string CustomLauncherActionsUrl = "https://github.com/Endennsss/SS14-Custom-launcher/actions";
     public const string TranslateUrl = "https://docs.spacestation14.com/en/general-development/contributing-translations.html";
     public static bool IsAuthOverride;
 

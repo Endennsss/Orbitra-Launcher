@@ -36,7 +36,30 @@
         </Grid>
       </Border>
 
-      <UniformGrid Columns="2" Rows="2">
+      <TextBlock Text="SS14 CUSTOM LAUNCHER" Classes="SectionLabel" Margin="0,6,0,0" />
+      <UniformGrid Columns="2">
+        <Button Margin="0,0,6,6" Padding="18" HorizontalContentAlignment="Stretch" Command="{Binding OpenLauncherSite}">
+          <StackPanel><TextBlock Text="Сайт лаунчера" FontWeight="SemiBold" /><TextBlock Text="Описание и возможности проекта" Classes="SubText" /></StackPanel>
+        </Button>
+        <Button Margin="6,0,0,6" Padding="18" HorizontalContentAlignment="Stretch" Command="{Binding DownloadLatestLauncher}">
+          <StackPanel><TextBlock Text="Скачать последнюю версию" FontWeight="SemiBold" /><TextBlock Text="Прямая загрузка Windows ZIP" Classes="SubText" /></StackPanel>
+        </Button>
+        <Button Margin="0,6,6,6" Padding="18" HorizontalContentAlignment="Stretch" Command="{Binding OpenLauncherReleases}">
+          <StackPanel><TextBlock Text="Релизы" FontWeight="SemiBold" /><TextBlock Text="Версии и списки изменений" Classes="SubText" /></StackPanel>
+        </Button>
+        <Button Margin="6,6,0,6" Padding="18" HorizontalContentAlignment="Stretch" Command="{Binding OpenLauncherGitHub}">
+          <StackPanel><TextBlock Text="GitHub лаунчера" FontWeight="SemiBold" /><TextBlock Text="Исходный код проекта" Classes="SubText" /></StackPanel>
+        </Button>
+        <Button Margin="0,6,6,0" Padding="18" HorizontalContentAlignment="Stretch" Command="{Binding OpenLauncherIssues}">
+          <StackPanel><TextBlock Text="Сообщить о проблеме" FontWeight="SemiBold" /><TextBlock Text="Ошибки и предложения на GitHub" Classes="SubText" /></StackPanel>
+        </Button>
+        <Button Margin="6,6,0,0" Padding="18" HorizontalContentAlignment="Stretch" Command="{Binding OpenLauncherActions}">
+          <StackPanel><TextBlock Text="Состояние сборок" FontWeight="SemiBold" /><TextBlock Text="GitHub Actions и публикации" Classes="SubText" /></StackPanel>
+        </Button>
+      </UniformGrid>
+
+      <TextBlock Text="SPACE STATION 14" Classes="SectionLabel" Margin="0,6,0,0" />
+      <UniformGrid Columns="2">
         <Button Margin="0,0,6,6" Padding="18" HorizontalContentAlignment="Stretch" Command="{Binding OpenSs14Website}">
           <StackPanel><TextBlock Text="Официальный сайт" FontWeight="SemiBold" /><TextBlock Text="Новости и информация SS14" Classes="SubText" /></StackPanel>
         </Button>

@@ -15,4 +15,10 @@ public sealed class UsefulLinksTabViewModel : MainWindowTabViewModel
     public void OpenAccount() => Helpers.OpenUri(new Uri(ConfigConstants.AccountManagementUrl));
     public void OpenDocumentation() => Helpers.OpenUri(new Uri("https://docs.spacestation14.com/"));
     public void OpenGitHub() => Helpers.OpenUri(new Uri("https://github.com/space-wizards/space-station-14"));
+    public void OpenLauncherSite() => Helpers.OpenUri(new Uri(ConfigConstants.CustomLauncherSiteUrl));
+    public void OpenLauncherGitHub() => Helpers.OpenUri(new Uri(ConfigConstants.CustomLauncherRepositoryUrl));
+    public void OpenLauncherReleases() => Helpers.OpenUri(new Uri(ConfigConstants.CustomLauncherReleasesUrl));
+    public void DownloadLatestLauncher() => Helpers.OpenUri(new Uri(ConfigConstants.CustomLauncherLatestDownloadUrl));
+    public void OpenLauncherIssues() => Helpers.OpenUri(new Uri(ConfigConstants.CustomLauncherIssuesUrl));
+    public void OpenLauncherActions() => Helpers.OpenUri(new Uri(ConfigConstants.CustomLauncherActionsUrl));
 }
