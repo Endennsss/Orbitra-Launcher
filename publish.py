@@ -122,7 +122,7 @@ def publish_osx():
     clear_prev_publish("macOS")
 
     os.makedirs("bin/publish/macOS", exist_ok=True)
-    shutil.copytree("PublishFiles/Space Station 14 Launcher.app", "bin/publish/macOS/Orbitra Launcher.app")
+    shutil.copytree("PublishFiles/Orbitra Launcher.app", "bin/publish/macOS/Orbitra Launcher.app")
 
     res_root = "bin/publish/macOS/Orbitra Launcher.app/Contents/Resources"
 
