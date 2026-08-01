@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Data.Sqlite;
@@ -14,6 +15,65 @@ namespace SS14.Launcher.Models.ContentManagement;
 
 public sealed class ContentManager
 {
+    public IReadOnlyList<ManagedContentVersion> GetManagedVersions()
+    {
+        using var con = GetSqliteConnection();
+        var running = GetRunningClientVersions(con).ToHashSet();
+        return con.Query<ManagedContentVersion>(@"
+            SELECT cv.Id,
+                   COALESCE(cv.ForkId, 'Неизвестный сервер') AS ForkId,
+                   COALESCE(cv.ForkVersion, 'Без версии') AS ForkVersion,
+                   cv.LastUsed,
+                   COALESCE((SELECT ModuleVersion FROM ContentEngineDependency
+                             WHERE VersionId = cv.Id AND ModuleName = 'Robust'), '—') AS EngineVersion,
+                   COUNT(cm.Id) AS FileCount,
+                   COALESCE(SUM(c.Size), 0) AS LogicalSize
+            FROM ContentVersion cv
+            LEFT JOIN ContentManifest cm ON cm.VersionId = cv.Id
+            LEFT JOIN Content c ON c.Id = cm.ContentId
+            GROUP BY cv.Id
+            ORDER BY cv.LastUsed DESC").Select(item => item with { InUse = running.Contains(item.Id) }).ToArray();
+    }
+
+    public long GetDatabaseSize()
+    {
+        var total = File.Exists(LauncherPaths.PathContentDb) ? new FileInfo(LauncherPaths.PathContentDb).Length : 0;
+        foreach (var suffix in new[] { "-wal", "-shm" })
+        {
+            var path = LauncherPaths.PathContentDb + suffix;
+            if (File.Exists(path)) total += new FileInfo(path).Length;
+        }
+        return total;
+    }
+
+    public async Task<bool> RemoveVersions(IEnumerable<long> versionIds)
+    {
+        var requested = versionIds.Distinct().ToArray();
+        if (requested.Length == 0) return true;
+        return await Task.Run(() =>
+        {
+            try
+            {
+                using var con = GetSqliteConnection();
+                var running = GetRunningClientVersions(con);
+                if (requested.Any(running.Contains)) return false;
+                using (var transaction = con.BeginTransaction())
+                {
+                    con.Execute("DELETE FROM ContentVersion WHERE Id IN @Ids", new { Ids = requested }, transaction);
+                    con.Execute("DELETE FROM Content WHERE NOT EXISTS (SELECT 1 FROM ContentManifest WHERE ContentId = Content.Id)", transaction: transaction);
+                    transaction.Commit();
+                }
+                con.Execute("VACUUM");
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Unable to remove selected server content");
+                return false;
+            }
+        });
+    }
+
     public void Initialize()
     {
         using var con = GetSqliteConnection();
@@ -64,7 +124,7 @@ public sealed class ContentManager
             catch (Exception e)
             {
                 Log.Error(e, "Error while truncating content DB!");
-                return true;
+                return false;
             }
         });
     }
@@ -175,4 +235,16 @@ public sealed class ContentManager
 
         return proc.MainModule?.FileName == mainModule;
     }
+}
+
+public sealed record ManagedContentVersion
+{
+    public long Id { get; init; }
+    public string ForkId { get; init; } = string.Empty;
+    public string ForkVersion { get; init; } = string.Empty;
+    public DateTime LastUsed { get; init; }
+    public string EngineVersion { get; init; } = string.Empty;
+    public long FileCount { get; init; }
+    public long LogicalSize { get; init; }
+    public bool InUse { get; init; }
 }

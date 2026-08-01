@@ -20,6 +20,29 @@
         <ItemsControl ItemsSource="{Binding Releases}"><ItemsControl.ItemTemplate><DataTemplate><Button Command="{Binding Open}" Margin="0,2" HorizontalContentAlignment="Stretch"><Grid ColumnDefinitions="90,*,100"><TextBlock Text="{Binding Version}" FontWeight="Bold"/><TextBlock Grid.Column="1" Text="{Binding Name}"/><TextBlock Grid.Column="2" Text="{Binding Date}" Classes="SubText" HorizontalAlignment="Right"/></Grid></Button></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
       </StackPanel></Border>
       <Border Classes="Surface" Padding="18"><StackPanel Spacing="10">
+        <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+          <StackPanel><TextBlock Text="КОНТЕНТ СЕРВЕРОВ" Classes="SectionLabel"/><TextBlock Text="{Binding ContentDatabaseSize}" Classes="SubText"/></StackPanel>
+          <Button Grid.Column="1" Content="Обновить" Command="{Binding RefreshServerContent}" Margin="6,0"/>
+          <Button Grid.Column="2" Content="Удалить выбранное" Command="{Binding DeleteSelectedContent}" IsEnabled="{Binding HasSelectedContent}" Margin="6,0"/>
+          <Button Grid.Column="3" Content="Очистить всё" Command="{Binding DeleteAllContent}" Margin="6,0"/>
+        </Grid>
+        <Grid ColumnDefinitions="32,1.4*,1.2*,90,120,130" Margin="4,6,4,2">
+          <TextBlock Grid.Column="1" Text="Сервер / форк" Classes="SubText"/><TextBlock Grid.Column="2" Text="Версия и движок" Classes="SubText"/>
+          <TextBlock Grid.Column="3" Text="Размер" Classes="SubText"/><TextBlock Grid.Column="4" Text="Файлы" Classes="SubText"/><TextBlock Grid.Column="5" Text="Использовалось" Classes="SubText"/>
+        </Grid>
+        <ItemsControl ItemsSource="{Binding ServerContent}"><ItemsControl.ItemTemplate><DataTemplate>
+          <Border BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,1,0,0" Padding="4,9">
+            <Grid ColumnDefinitions="32,1.4*,1.2*,90,120,130">
+              <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" IsEnabled="{Binding !InUse}"/>
+              <StackPanel Grid.Column="1"><TextBlock Text="{Binding ForkId}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/><TextBlock Text="ИСПОЛЬЗУЕТСЯ КЛИЕНТОМ" Classes="SubText" Foreground="#D6A84B" IsVisible="{Binding InUse}"/></StackPanel>
+              <StackPanel Grid.Column="2"><TextBlock Text="{Binding ForkVersion}" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding Engine, StringFormat='Engine {0}'}" Classes="SubText"/></StackPanel>
+              <TextBlock Grid.Column="3" Text="{Binding Size}" VerticalAlignment="Center"/><TextBlock Grid.Column="4" Text="{Binding Files}" Classes="SubText" VerticalAlignment="Center"/>
+              <TextBlock Grid.Column="5" Text="{Binding LastUsed}" Classes="SubText" VerticalAlignment="Center"/>
+            </Grid>
+          </Border>
+        </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+      </StackPanel></Border>
+      <Border Classes="Surface" Padding="18"><StackPanel Spacing="10">
         <TextBlock Text="СРАВНЕНИЕ ИЗБРАННЫХ СЕРВЕРОВ" Classes="SectionLabel"/>
         <TextBlock Text="Выберите до трёх серверов для сравнения." Classes="SubText"/>
         <ItemsControl ItemsSource="{Binding FavoriteTools}"><ItemsControl.ItemTemplate><DataTemplate><Grid ColumnDefinitions="Auto,*" Margin="8,3"><CheckBox IsChecked="{Binding IsCompared, Mode=TwoWay}"/><TextBlock Grid.Column="1" Text="{Binding Name}" Margin="8,0"/></Grid></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>

@@ -26,14 +26,18 @@ public sealed class SystemCenterTabViewModel : MainWindowTabViewModel
 {
     private readonly MainWindowViewModel _main;
     private readonly DataManager _cfg;
+    private readonly ContentManager _contentManager;
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(7) };
 
     public ObservableCollection<SystemCheckItem> Integrity { get; } = [];
     public ObservableCollection<SystemCheckItem> Services { get; } = [];
     public ObservableCollection<ReleaseHistoryItem> Releases { get; } = [];
     public ObservableCollection<FavoriteToolItem> FavoriteTools { get; } = [];
+    public ObservableCollection<ServerContentItem> ServerContent { get; } = [];
     public IEnumerable<FavoriteToolItem> ComparedServers => FavoriteTools.Where(x => x.IsCompared);
     public string CurrentVersion => LauncherVersion.Version?.ToString() ?? "неизвестно";
+    public string ContentDatabaseSize => $"Фактически на диске: {Helpers.FormatBytes(_contentManager.GetDatabaseSize())}";
+    public bool HasSelectedContent => ServerContent.Any(x => x.IsSelected);
 
     public override string Name => "Система";
     public override string IconData => "M12,2 L12,5 M12,19 L12,22 M4.93,4.93 L7.05,7.05 M16.95,16.95 L19.07,19.07 M2,12 L5,12 M19,12 L22,12 M4.93,19.07 L7.05,16.95 M16.95,7.05 L19.07,4.93 M12,8 A4,4 0 1 1 11.99,8";
@@ -42,9 +46,11 @@ public sealed class SystemCenterTabViewModel : MainWindowTabViewModel
     {
         _main = main;
         _cfg = Locator.Current.GetRequiredService<DataManager>();
+        _contentManager = Locator.Current.GetRequiredService<ContentManager>();
         _http.DefaultRequestHeaders.UserAgent.ParseAdd("Orbitra-Launcher");
         _cfg.FavoriteServers.Connect().Subscribe(_ => RefreshFavorites());
         RefreshFavorites();
+        RefreshServerContent();
     }
 
     public override void Selected()
@@ -52,7 +58,35 @@ public sealed class SystemCenterTabViewModel : MainWindowTabViewModel
         if (Integrity.Count == 0) RunIntegrity();
         if (Services.Count == 0) RefreshServices();
         if (Releases.Count == 0) RefreshReleases();
+        RefreshServerContent();
     }
+
+    public void RefreshServerContent()
+    {
+        ServerContent.Clear();
+        foreach (var version in _contentManager.GetManagedVersions())
+            ServerContent.Add(new ServerContentItem(this, version));
+        OnPropertyChanged(nameof(ContentDatabaseSize));
+        OnPropertyChanged(nameof(HasSelectedContent));
+    }
+
+    public async void DeleteSelectedContent()
+    {
+        var selected = ServerContent.Where(x => x.IsSelected).Select(x => x.Id).ToArray();
+        if (selected.Length == 0) { _main.ShowToast("Выберите хотя бы одну сборку"); return; }
+        var result = await _contentManager.RemoveVersions(selected);
+        _main.ShowToast(result ? "Выбранный контент удалён" : "Контент используется запущенным клиентом", !result);
+        RefreshServerContent();
+    }
+
+    public async void DeleteAllContent()
+    {
+        var result = await _contentManager.ClearAll();
+        _main.ShowToast(result ? "Кэш серверного контента очищен" : "Сначала закройте запущенный клиент", !result);
+        RefreshServerContent();
+    }
+
+    internal void ContentSelectionChanged() => OnPropertyChanged(nameof(HasSelectedContent));
 
     public async void RunIntegrity()
     {
@@ -175,4 +209,19 @@ public sealed class FavoriteToolItem : ObservableObject
     public string RoundTime => Server.RoundStartTime is { } start ? $"Раунд: {DateTime.Now - start:hh\\:mm\\:ss}" : "Раунд: —";
     public bool IsCompared { get => _isCompared; set { if (value == _isCompared) return; if (!_owner.TrySetCompared(this, value)) { OnPropertyChanged(); return; } SetProperty(ref _isCompared, value); _owner.ComparisonChanged(); } }
     public FavoriteToolItem(SystemCenterTabViewModel owner, ServerEntryViewModel server, bool selected) { _owner = owner; Server = server; _isCompared = selected; }
+}
+
+public sealed class ServerContentItem : ObservableObject
+{
+    private readonly SystemCenterTabViewModel _owner; private bool _isSelected;
+    public long Id { get; } public string ForkId { get; } public string ForkVersion { get; }
+    public string Engine { get; } public string LastUsed { get; } public string Size { get; }
+    public string Files { get; } public bool InUse { get; }
+    public bool IsSelected { get => _isSelected; set { if (SetProperty(ref _isSelected, value)) _owner.ContentSelectionChanged(); } }
+    public ServerContentItem(SystemCenterTabViewModel owner, ManagedContentVersion item)
+    {
+        _owner = owner; Id = item.Id; ForkId = item.ForkId; ForkVersion = item.ForkVersion;
+        Engine = item.EngineVersion; LastUsed = item.LastUsed.ToLocalTime().ToString("dd.MM.yyyy HH:mm");
+        Size = Helpers.FormatBytes(item.LogicalSize); Files = $"{item.FileCount:N0} файлов"; InUse = item.InUse;
+    }
 }
