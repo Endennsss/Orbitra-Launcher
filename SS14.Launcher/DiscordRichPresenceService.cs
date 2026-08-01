@@ -39,6 +39,7 @@ public sealed class DiscordRichPresenceService : IDisposable
     private string? _gamePreset;
     private bool _isPlaying;
     public bool IsPlaying => _isPlaying;
+    public bool IsConnected => _connected;
     private DataManager Config => Locator.Current.GetRequiredService<DataManager>();
 
     private DiscordRichPresenceService()

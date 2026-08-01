@@ -47,7 +47,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
     [ObservableProperty] private bool _outOfDate;
     [ObservableProperty] private bool _customUpdateAvailable;
     [ObservableProperty] private string _customUpdateVersion = string.Empty;
+    [ObservableProperty] private bool _customUpdateInstalling;
+    [ObservableProperty] private double _customUpdateProgress;
+    [ObservableProperty] private string _customUpdateStatus = string.Empty;
     private string? _customUpdateUrl;
+    private CustomReleaseAssetDto? _customUpdateAsset;
 
     private IDisposable? _authOverrideCountdownTimer;
 
@@ -59,6 +63,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
     public CustomThemeTabViewModel CustomThemeTab { get; }
     public PlaytimeTabViewModel PlaytimeTab { get; }
     public ActivityTabViewModel ActivityTab { get; }
+    public SystemCenterTabViewModel SystemCenterTab { get; }
 
     public MainWindowViewModel()
     {
@@ -78,6 +83,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         CustomThemeTab = new CustomThemeTabViewModel(this);
         PlaytimeTab = new PlaytimeTabViewModel();
         ActivityTab = new ActivityTabViewModel();
+        SystemCenterTab = new SystemCenterTabViewModel(this);
 
         _allTabs.AddRange([
             HomeTab,
@@ -86,6 +92,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
             UsefulLinksTab,
             PlaytimeTab,
             ActivityTab,
+            SystemCenterTab,
             CustomThemeTab,
             OptionsTab,
 #if DEVELOPMENT
@@ -134,6 +141,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         if (ReferenceEquals(tab, CustomThemeTab)) return "custom-theme";
         if (ReferenceEquals(tab, PlaytimeTab)) return "playtime";
         if (ReferenceEquals(tab, ActivityTab)) return "activity";
+        if (ReferenceEquals(tab, SystemCenterTab)) return "system-center";
         return "development";
     }
 
@@ -165,11 +173,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
 
     private void ApplySavedNavigationOrder()
     {
-        if (_cfg.GetCVar(CVars.NavigationOrderVersion) < 1)
+        if (_cfg.GetCVar(CVars.NavigationOrderVersion) < 2)
         {
             _cfg.SetCVar(CVars.NavigationTabOrder,
-                "home,servers,news,links,playtime,activity,custom-theme,options,development");
-            _cfg.SetCVar(CVars.NavigationOrderVersion, 1);
+                "home,servers,news,links,playtime,activity,system-center,custom-theme,options,development");
+            _cfg.SetCVar(CVars.NavigationOrderVersion, 2);
             _cfg.CommitConfig();
         }
         var order = ParseCsv(_cfg.GetCVar(CVars.NavigationTabOrder)).ToList();
@@ -450,6 +458,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
                 return;
             }
             _customUpdateUrl = release.HtmlUrl;
+            _customUpdateAsset = release.Assets.FirstOrDefault(asset =>
+                asset.Name.Equals("Orbitra_Launcher_Windows.zip", StringComparison.OrdinalIgnoreCase));
             CustomUpdateVersion = release.TagName;
             CustomUpdateAvailable = true;
             if (manual) ShowToast($"Доступно обновление {release.TagName}");
@@ -470,6 +480,29 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
 
     public void DismissCustomUpdate() => CustomUpdateAvailable = false;
 
+    public async void InstallCustomUpdate()
+    {
+        if (_customUpdateAsset == null || CustomUpdateInstalling) return;
+        try
+        {
+            CustomUpdateInstalling = true;
+            CustomUpdateStatus = "Скачивание и проверка обновления…";
+            await LauncherUpdateService.StageAndRestartAsync(CustomUpdateVersion,
+                _customUpdateAsset.BrowserDownloadUrl, _customUpdateAsset.Digest,
+                value => Avalonia.Threading.Dispatcher.UIThread.Post(() => CustomUpdateProgress = value));
+            CustomUpdateStatus = "Обновление готово · перезапуск…";
+            Control?.PrepareForExit();
+            Control?.Close();
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "Unable to install launcher update");
+            CustomUpdateStatus = e.Message;
+            ShowToast($"Не удалось установить обновление: {e.Message}", true);
+            CustomUpdateInstalling = false;
+        }
+    }
+
     private sealed class CustomReleaseDto
     {
         [JsonPropertyName("tag_name")]
@@ -478,6 +511,15 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         public string HtmlUrl { get; init; } = string.Empty;
         public bool Draft { get; init; }
         public bool Prerelease { get; init; }
+        public CustomReleaseAssetDto[] Assets { get; init; } = [];
+    }
+
+    private sealed class CustomReleaseAssetDto
+    {
+        public string Name { get; init; } = string.Empty;
+        [JsonPropertyName("browser_download_url")]
+        public string BrowserDownloadUrl { get; init; } = string.Empty;
+        public string Digest { get; init; } = string.Empty;
     }
 
     public void SelectTabHome()

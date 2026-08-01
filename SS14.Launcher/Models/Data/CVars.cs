@@ -149,7 +149,7 @@ public static class CVars
     public static readonly CVarDef<int> UiSoundVolume = CVarDef.Create("UiSoundVolume", 65);
     public static readonly CVarDef<bool> CloseToTray = CVarDef.Create("CloseToTray", true);
     public static readonly CVarDef<string> NavigationTabOrder =
-        CVarDef.Create("NavigationTabOrder", "home,servers,news,links,playtime,activity,custom-theme,options,development");
+        CVarDef.Create("NavigationTabOrder", "home,servers,news,links,playtime,activity,system-center,custom-theme,options,development");
     public static readonly CVarDef<string> HiddenNavigationTabs =
         CVarDef.Create("HiddenNavigationTabs", "");
     public static readonly CVarDef<int> NavigationOrderVersion = CVarDef.Create("NavigationOrderVersion", 0);
@@ -179,6 +179,8 @@ public static class CVars
     public static readonly CVarDef<bool> FirstRunCompleted = CVarDef.Create("FirstRunCompleted", false);
     public static readonly CVarDef<string> LastReadLauncherNews = CVarDef.Create("LastReadLauncherNews", "");
     public static readonly CVarDef<bool> CustomUpdateChecks = CVarDef.Create("CustomUpdateChecks", true);
+    public static readonly CVarDef<string> FavoriteServerGroups = CVarDef.Create("FavoriteServerGroups", "{}");
+    public static readonly CVarDef<string> FavoriteGroupOrder = CVarDef.Create("FavoriteGroupOrder", "Основные,Ролевые,Тестовые,Друзья");
 
     /// <summary>
     /// The CPU architecture this launcher was last run with.

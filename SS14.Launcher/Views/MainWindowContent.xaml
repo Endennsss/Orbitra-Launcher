@@ -167,10 +167,17 @@
         <StackPanel Spacing="12">
           <TextBlock Text="ДОСТУПНО ОБНОВЛЕНИЕ" Classes="SectionLabel" />
           <TextBlock Text="{Binding CustomUpdateVersion, StringFormat='Новая версия: {0}'}" Classes="NanoHeadingMedium" />
-          <TextBlock Text="Откройте страницу релиза, чтобы скачать и установить новую сборку." Classes="SubText" TextWrapping="Wrap" />
+          <TextBlock Text="Orbitra скачает архив, проверит SHA-256 и заменит файлы после закрытия лаунчера."
+                     Classes="SubText" TextWrapping="Wrap" />
+          <ProgressBar Minimum="0" Maximum="1" Value="{Binding CustomUpdateProgress}" Height="5"
+                       IsVisible="{Binding CustomUpdateInstalling}" />
+          <TextBlock Text="{Binding CustomUpdateStatus}" Classes="SubText"
+                     IsVisible="{Binding CustomUpdateInstalling}" TextWrapping="Wrap" />
           <WrapPanel HorizontalAlignment="Right">
-            <Button Content="Позже" Command="{Binding DismissCustomUpdate}" />
+            <Button Content="Позже" Command="{Binding DismissCustomUpdate}" IsEnabled="{Binding !CustomUpdateInstalling}" />
             <Button Content="Открыть релиз" Command="{Binding OpenCustomUpdate}" />
+            <Button Content="Скачать и установить" Command="{Binding InstallCustomUpdate}"
+                    IsEnabled="{Binding !CustomUpdateInstalling}" />
           </WrapPanel>
         </StackPanel>
       </Border>
