@@ -1,13 +1,154 @@
-# SS14.Launcher
+<div align="center">
+  <img src="SS14.Launcher/Assets/brand-mark.svg" width="96" height="96" alt="SS14 Custom Launcher" />
 
-<a href="https://weblate.spacestation14.com/engage/space-station-14-launcher/">
-<img src="https://weblate.spacestation14.com/widget/space-station-14-launcher/main/svg-badge.svg" alt="Translation status" />
-</a>
+  # SS14 Custom Launcher
 
-This is the launcher you should be using to connect to SS14 servers. Server browser, content downloads, account management. It's got it all!
+  **Неофициальный лаунчер Space Station 14 с новым интерфейсом, расширенным списком серверов и глубокой персонализацией.**
 
-# Development
+  [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+  [![Avalonia](https://img.shields.io/badge/Avalonia-11.2-8B44AC)](https://avaloniaui.net/)
+  [![License](https://img.shields.io/badge/license-MIT-242424)](LICENSE.txt)
+  [![Platform](https://img.shields.io/badge/platform-Windows-242424?logo=windows)](#установка)
 
-Useful environment variables for development:
-* `SS14_LAUNCHER_APPDATA_NAME=launcherTest` to change the user data directories the launcher stores its data in. This can be useful to avoid breaking your "normal" SS14 launcher data while developing something.
-* `SS14_LAUNCHER_OVERRIDE_AUTH=https://.../` to change the auth API URL to test against a local dev version of the API.
+  [Возможности](#возможности) · [Установка](#установка) · [Сборка](#сборка-из-исходников) · [Новости](#публикация-новостей)
+</div>
+
+> [!IMPORTANT]
+> Это неофициальная модификация лаунчера. Проект не связан с командой Space Wizards. Основа проекта распространяется по лицензии MIT.
+
+## О проекте
+
+SS14 Custom Launcher сохраняет совместимость с серверами Space Station 14, но полностью меняет взаимодействие с лаунчером: от оформления и анимаций до мониторинга серверов, уведомлений, статистики и Discord Rich Presence.
+
+Интерфейс выполнен в чёрно-серой палитре с плавными переходами, кастомным заголовком окна и единым набором иконок Lucide.
+
+## Возможности
+
+### Серверы
+
+- отображение пинга, онлайна, карты и игрового режима;
+- цветной индикатор качества соединения;
+- избранные серверы и выбор серверов для фоновой проверки;
+- автоматическое обновление состояния без навязчивой анимации списка;
+- контекстное меню и горячие клавиши;
+- уведомления о доступности сервера, свободном месте и новом раунде;
+- мини-график показателей и статистика проведённого на сервере времени.
+
+### Интерфейс и темы
+
+- тёмная и светлая темы;
+- собственная палитра цветов через Color Picker;
+- статичные изображения и зацикленные GIF-фоны;
+- отдельные фоны вкладок и настройка размытия;
+- предпросмотр, импорт, экспорт и локальная библиотека тем;
+- автоматическая проверка контраста текста;
+- плавная смена палитры и анимации элементов интерфейса;
+- настраиваемый порядок и видимость разделов левой панели.
+
+### Интеграции и удобство
+
+- Discord Rich Presence с сервером, ником, пингом, онлайном, картой и режимом;
+- работа из системного трея и быстрое переключение аккаунта;
+- звуки интерфейса с отдельной регулировкой громкости;
+- журнал активности, подключений и игрового времени;
+- оригинальные новости SS14 и отдельная удалённая лента новостей лаунчера;
+- раздел полезных ссылок, включая [ChemHelper](https://chemhelper.xo.je/).
+
+## Скриншот
+
+Актуальный скриншот интерфейса будет добавлен после финальной полировки текущего дизайна.
+
+<!-- Чтобы добавить скриншот: сохраните его как docs/launcher-preview.png и замените этот комментарий на:
+![Интерфейс SS14 Custom Launcher](docs/launcher-preview.png)
+-->
+
+## Установка
+
+Готовые сборки будут публиковаться в разделе [Releases](https://github.com/Endennsss/SS14-Custom-launcher/releases).
+
+Пока релиз не опубликован, лаунчер можно собрать из исходников по инструкции ниже.
+
+## Сборка из исходников
+
+### Требования
+
+- Windows 10 или новее;
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0);
+- Git;
+- Python 3 — только для создания полного пакета;
+- Inno Setup 6.7+ — только для установщика.
+
+### Обычная сборка
+
+```powershell
+git clone https://github.com/Endennsss/SS14-Custom-launcher.git
+cd SS14-Custom-launcher
+dotnet build SS14.Launcher/SS14.Launcher.csproj -c Release
+```
+
+Исполняемый файл появится здесь:
+
+```text
+SS14.Launcher/bin/Release/net10.0/SS14.Launcher.exe
+```
+
+### Полный пакет Windows
+
+```powershell
+python publish.py windows --x64-only
+```
+
+Инструкция по созданию установщика находится в [`installer/README.md`](installer/README.md).
+
+## Публикация новостей
+
+Лаунчер получает собственные новости из файла [`news.json`](news.json) через Raw GitHub. Поэтому новую запись можно опубликовать без выпуска очередной сборки.
+
+```powershell
+.\tools\publish-news.ps1 `
+  -Title "Название обновления" `
+  -Text "Краткое описание изменений"
+```
+
+Новость со ссылкой:
+
+```powershell
+.\tools\publish-news.ps1 `
+  -Title "Версия 0.40.0" `
+  -Text "Добавлены новые возможности" `
+  -Link "https://github.com/Endennsss/SS14-Custom-launcher/releases"
+```
+
+Если GitHub временно недоступен, лаунчер показывает встроенный резервный список новостей.
+
+## Полезные параметры разработки
+
+Чтобы тестовая сборка не использовала данные основного лаунчера:
+
+```powershell
+$env:SS14_LAUNCHER_APPDATA_NAME = "launcherTest"
+dotnet run --project SS14.Launcher/SS14.Launcher.csproj
+```
+
+Для подключения к тестовому серверу авторизации:
+
+```powershell
+$env:SS14_LAUNCHER_OVERRIDE_AUTH = "https://example.test/"
+```
+
+## Структура проекта
+
+```text
+SS14.Launcher/            Основное приложение Avalonia
+SS14.Loader/              Запуск и взаимодействие с игровым клиентом
+SS14.Launcher.Bootstrap/  Обновление и запуск лаунчера
+installer/                Сценарий установщика Windows
+tools/                    Вспомогательные команды проекта
+news.json                 Удалённая лента новостей лаунчера
+```
+
+## Лицензия
+
+Проект основан на [SS14.Launcher](https://github.com/space-wizards/SS14.Launcher) и распространяется по лицензии [MIT](LICENSE.txt).
+
+Имена и материалы Space Station 14 принадлежат их соответствующим владельцам.
