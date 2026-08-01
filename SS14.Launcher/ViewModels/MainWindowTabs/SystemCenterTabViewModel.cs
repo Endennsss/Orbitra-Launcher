@@ -40,7 +40,8 @@ public sealed class SystemCenterTabViewModel : MainWindowTabViewModel
     public bool HasSelectedContent => ServerContent.Any(x => x.IsSelected);
 
     public override string Name => "Система";
-    public override string IconData => "M12,2 L12,5 M12,19 L12,22 M4.93,4.93 L7.05,7.05 M16.95,16.95 L19.07,19.07 M2,12 L5,12 M19,12 L22,12 M4.93,19.07 L7.05,16.95 M16.95,7.05 L19.07,4.93 M12,8 A4,4 0 1 1 11.99,8";
+    // Lucide "monitor-cog": kept inside the standard 24x24 viewport.
+    public override string IconData => "M12,17 L4,17 A2,2 0 0 1 2,15 L2,5 A2,2 0 0 1 4,3 L20,3 A2,2 0 0 1 22,5 L22,11 M8,21 L12,17 M16,21 L12,17 M19,14 L19,16 M19,20 L19,22 M15.54,16 L17.27,17 M20.73,19 L22.46,20 M15.54,20 L17.27,19 M20.73,17 L22.46,16";
 
     public SystemCenterTabViewModel(MainWindowViewModel main)
     {

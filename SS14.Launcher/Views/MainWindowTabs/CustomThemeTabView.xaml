@@ -130,24 +130,6 @@
 
       <Border Classes="Surface" Padding="20">
         <StackPanel Spacing="10">
-          <TextBlock Text="ФОНЫ ОТДЕЛЬНЫХ ВКЛАДОК" Classes="SectionLabel" />
-          <TextBlock Text="Если отдельный фон не выбран, используется общий фон темы." Classes="SubText" />
-          <ItemsControl ItemsSource="{Binding TabBackgroundOptions}">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate x:DataType="vm:ThemeBackgroundOptionViewModel">
-                <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,3">
-                  <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontWeight="SemiBold" />
-                  <Button Grid.Column="1" Content="Выбрать" Command="{Binding Choose}" />
-                  <Button Grid.Column="2" Content="Убрать" Command="{Binding Remove}" IsEnabled="{Binding HasBackground}" />
-                </Grid>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </StackPanel>
-      </Border>
-
-      <Border Classes="Surface" Padding="20">
-        <StackPanel Spacing="10">
           <Grid ColumnDefinitions="*,Auto">
             <StackPanel>
               <TextBlock Text="БИБЛИОТЕКА ТЕМ" Classes="SectionLabel" />

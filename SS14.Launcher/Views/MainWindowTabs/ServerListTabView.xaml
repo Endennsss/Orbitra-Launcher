@@ -26,15 +26,6 @@
       </StackPanel>
     </Grid>
     <DockPanel DockPanel.Dock="Top" Margin="0,0,0,14" Height="40">
-      <Button DockPanel.Dock="Right" Command="{Binding RefreshPressed}"
-              Classes="IconAction" ToolTip.Tip="{loc:Loc tab-servers-refresh}">
-        <Viewbox Classes="RefreshIcon" Width="20" Height="20" Stretch="Uniform">
-          <Canvas Width="24" Height="24">
-            <Path Data="M21,12 A9,9 0 0 1 5.83,18.55 L3,16 M3,22 L3,16 L9,16 M3,12 A9,9 0 0 1 18.17,5.45 L21,8 M21,2 L21,8 L15,8"
-                  Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="2" StrokeLineCap="Round" />
-          </Canvas>
-        </Viewbox>
-      </Button>
       <ToggleButton DockPanel.Dock="Right" IsChecked="{Binding FiltersVisible}" Classes="OpenRight"
                     Content="{Binding Filters.FiltersText}" />
       <TextBox Name="SearchBox" DockPanel.Dock="Right" Text="{Binding SearchString, Mode=TwoWay}"

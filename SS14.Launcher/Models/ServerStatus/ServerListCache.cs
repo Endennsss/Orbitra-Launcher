@@ -25,6 +25,7 @@ public sealed partial class ServerListCache : ObservableObject, IServerSource
     private readonly HttpClient _http = Locator.Current.GetRequiredService<HttpClient>();
 
     private CancellationTokenSource? _refreshCancel;
+    private int _quietPingRefreshRunning;
 
     public ObservableList<ServerStatusData> AllServers { get; } = [];
 
@@ -189,6 +190,26 @@ public sealed partial class ServerListCache : ObservableObject, IServerSource
         }
         catch (OperationCanceledException)
         {
+        }
+    }
+
+    /// <summary>
+    /// Updates only latency values on existing server objects. Unlike a full refresh this
+    /// deliberately leaves the Hub list, filters, scroll position and expanded cards intact.
+    /// </summary>
+    public async Task RefreshPingsQuietlyAsync(IEnumerable<ServerStatusData> servers)
+    {
+        if (Interlocked.Exchange(ref _quietPingRefreshRunning, 1) != 0)
+            return;
+
+        try
+        {
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(4));
+            await MeasureServerPingsAsync(servers.Distinct().ToArray(), timeout.Token);
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _quietPingRefreshRunning, 0);
         }
     }
 

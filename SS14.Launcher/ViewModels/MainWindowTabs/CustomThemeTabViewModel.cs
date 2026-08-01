@@ -88,9 +88,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
     public Bitmap? BackgroundBitmap => _backgroundBitmap;
     public AnimatedImageSource? BackgroundAnimation => _backgroundAnimation;
     public bool BackgroundIsAnimated => _backgroundAnimation != null;
-    public bool BackgroundVisible => Enabled &&
-        (File.Exists(_cfg.GetCVar(CVars.CustomThemeImage)) ||
-         TabBackgroundOptions.Any(option => option.HasBackground));
+    public bool BackgroundVisible => Enabled && File.Exists(_cfg.GetCVar(CVars.CustomThemeImage));
     public double ThemeTransitionOpacity
     {
         get => _themeTransitionOpacity;
@@ -111,15 +109,12 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         if (!Enabled) return null;
         var path = GetBackgroundPathFor(tabId);
         if (IsAnimatedImage(path)) return null;
-        return _tabBackgrounds.TryGetValue(tabId, out var bitmap) && bitmap != null ? bitmap : _backgroundBitmap;
+        return _backgroundBitmap;
     }
 
     public string? GetBackgroundPathFor(string tabId)
     {
         if (!Enabled) return null;
-        var tabCVar = TryGetTabBackgroundCVar(tabId);
-        var tabPath = tabCVar == null ? null : _cfg.GetCVar(tabCVar);
-        if (File.Exists(tabPath)) return tabPath;
         var commonPath = _cfg.GetCVar(CVars.CustomThemeImage);
         return File.Exists(commonPath) ? commonPath : null;
     }

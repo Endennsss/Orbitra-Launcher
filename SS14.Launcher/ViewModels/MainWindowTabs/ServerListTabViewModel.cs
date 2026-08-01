@@ -24,6 +24,7 @@ public partial class ServerListTabViewModel : MainWindowTabViewModel
 
     private string? _searchString;
     private readonly DispatcherTimer _searchThrottle = new() { Interval = TimeSpan.FromMilliseconds(200) };
+    private readonly DispatcherTimer _quietPingTimer = new() { Interval = TimeSpan.FromSeconds(5) };
 
     public override string Name => _loc.GetString("tab-servers-title");
     public override string IconData => "M4,4 L20,4 L20,10 L4,10 Z M4,14 L20,14 L20,20 L4,20 Z M8,7 L8.01,7 M8,17 L8.01,17";
@@ -117,6 +118,13 @@ public partial class ServerListTabViewModel : MainWindowTabViewModel
             _searchThrottle.Stop();
             UpdateSearchedList();
         };
+
+        _quietPingTimer.Tick += async (_, _) =>
+        {
+            if (SearchedServers.Count != 0)
+                await _serverListCache.RefreshPingsQuietlyAsync(SearchedServers.Select(x => x.CacheData));
+        };
+        _quietPingTimer.Start();
 
         _loc.LanguageSwitched += () => Filters.UpdatePresentFilters(_serverListCache.AllServers);
     }
