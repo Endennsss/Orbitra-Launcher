@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using Avalonia.Platform.Storage;
@@ -417,24 +418,50 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         SelectedIndex = Tabs.IndexOf(ServersTab);
     }
 
-    private async Task CheckCustomLauncherUpdate()
+    private async Task CheckCustomLauncherUpdate(bool manual = false)
     {
-        if (!_cfg.GetCVar(CVars.CustomUpdateChecks)) return;
+        if (!manual && !_cfg.GetCVar(CVars.CustomUpdateChecks)) return;
         try
         {
+            if (manual)
+            {
+                CustomUpdateAvailable = false;
+                ShowToast("Проверяем обновления Orbitra Launcher…");
+            }
+
             using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(6) };
             client.DefaultRequestHeaders.UserAgent.ParseAdd("Orbitra-Launcher");
             var json = await client.GetStringAsync(ConfigConstants.CustomLatestReleaseApiUrl);
             var release = JsonSerializer.Deserialize<CustomReleaseDto>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            if (release == null || release.Draft || release.Prerelease) return;
+            if (release == null || release.Draft || release.Prerelease)
+            {
+                if (manual) ShowToast("Стабильных обновлений не найдено");
+                return;
+            }
             var tag = release.TagName.TrimStart('v', 'V');
-            if (!System.Version.TryParse(tag.Split('-', 2)[0], out var latest) || LauncherVersion.Version == null || latest <= LauncherVersion.Version) return;
+            if (!System.Version.TryParse(tag.Split('-', 2)[0], out var latest) || LauncherVersion.Version == null)
+            {
+                if (manual) ShowToast("Не удалось определить версию релиза", true);
+                return;
+            }
+            if (latest <= LauncherVersion.Version)
+            {
+                if (manual) ShowToast($"Установлена актуальная версия {LauncherVersion.Version}");
+                return;
+            }
             _customUpdateUrl = release.HtmlUrl;
             CustomUpdateVersion = release.TagName;
             CustomUpdateAvailable = true;
+            if (manual) ShowToast($"Доступно обновление {release.TagName}");
         }
-        catch (Exception e) { Log.Debug(e, "Unable to check custom launcher release"); }
+        catch (Exception e)
+        {
+            Log.Debug(e, "Unable to check custom launcher release");
+            if (manual) ShowToast("Не удалось проверить обновления · проверьте интернет", true);
+        }
     }
+
+    public async void CheckCustomLauncherUpdateManually() => await CheckCustomLauncherUpdate(true);
 
     public void OpenCustomUpdate()
     {
@@ -445,7 +472,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
 
     private sealed class CustomReleaseDto
     {
+        [JsonPropertyName("tag_name")]
         public string TagName { get; init; } = string.Empty;
+        [JsonPropertyName("html_url")]
         public string HtmlUrl { get; init; } = string.Empty;
         public bool Draft { get; init; }
         public bool Prerelease { get; init; }

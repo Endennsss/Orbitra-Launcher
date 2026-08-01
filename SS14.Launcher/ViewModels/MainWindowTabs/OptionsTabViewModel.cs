@@ -130,6 +130,8 @@ public class OptionsTabViewModel : MainWindowTabViewModel
         set { Cfg.SetCVar(CVars.CustomUpdateChecks, value); Cfg.CommitConfig(); }
     }
 
+    public void CheckLauncherUpdateNow() => _mainWindow?.CheckCustomLauncherUpdateManually();
+
     public void PreviewClickSound() => UiSoundService.Preview("click.wav");
     public void PreviewNavigationSound() => UiSoundService.Preview("navigation.wav");
     public void PreviewToggleSound() => UiSoundService.Preview("toggle.wav");
