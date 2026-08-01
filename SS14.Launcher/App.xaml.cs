@@ -74,9 +74,13 @@ public class App : Application
         if (Current == null)
             return;
 
-        var family = fontName == "Noto Sans"
-            ? new FontFamily("avares://SS14.Launcher/Assets/Fonts/noto_sans/*.ttf#Noto Sans")
-            : new FontFamily(fontName);
+        // Keep the selected launcher font for text, but use the bundled color emoji
+        // family before falling back to the operating system's Segoe UI Emoji.
+        const string emojiFamily = "avares://SS14.Launcher/Assets/Fonts/noto_emoji/Noto-COLRv1.ttf#Noto Color Emoji";
+        var textFamily = fontName == "Noto Sans"
+            ? "avares://SS14.Launcher/Assets/Fonts/noto_sans/*.ttf#Noto Sans"
+            : fontName;
+        var family = new FontFamily($"{textFamily}, {emojiFamily}");
         Current.Resources["LauncherFontFamily"] = family;
     }
 
