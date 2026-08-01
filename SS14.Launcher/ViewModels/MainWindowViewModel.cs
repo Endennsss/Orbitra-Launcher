@@ -70,7 +70,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         AccountDropDown = new AccountDropDownViewModel(this);
 
         ServersTab = new ServerListTabViewModel(this);
-        NewsTab = new NewsTabViewModel();
+        NewsTab = new NewsTabViewModel(this);
         UsefulLinksTab = new UsefulLinksTabViewModel();
         HomeTab = new HomePageViewModel(this);
         OptionsTab = new OptionsTabViewModel(this);

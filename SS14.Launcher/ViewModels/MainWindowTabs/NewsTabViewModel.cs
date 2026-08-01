@@ -15,6 +15,7 @@ namespace SS14.Launcher.ViewModels.MainWindowTabs;
 public partial class NewsTabViewModel : MainWindowTabViewModel
 {
     private readonly DataManager _cfg = Locator.Current.GetRequiredService<DataManager>();
+    private readonly MainWindowViewModel? _main;
     public ObservableList<NewsEntryViewModel> NewsEntries { get; } = [];
     public ObservableList<NewsEntryViewModel> LauncherNewsEntries { get; } =
     [
@@ -25,6 +26,12 @@ public partial class NewsTabViewModel : MainWindowTabViewModel
         new("Discord RPC стал информативнее", summary: "Статус периодически обновляет сервер, ник, онлайн, пинг, карту и игровой режим с отдельными настройками приватности.", date: "Последние изменения"),
         new("Обновлён интерфейс лаунчера", summary: "Добавлены плавные переходы, Lucide-иконки, светлая тема, настраиваемая навигация, звуки интерфейса и полезные ссылки.", date: "Последние изменения")
     ];
+
+    public NewsTabViewModel(MainWindowViewModel? main = null)
+    {
+        _main = main;
+        RefreshUnreadCount();
+    }
     public override string Name => LocalizationManager.Instance.GetString("tab-news-title");
     public override string IconData => "M4,3 L18,3 L18,21 L4,21 Z M8,7 L14,7 M8,11 L14,11 M8,15 L12,15 M18,7 L21,7 L21,19 Q21,21 19,21 L18,21";
 
@@ -127,6 +134,8 @@ public partial class NewsTabViewModel : MainWindowTabViewModel
             LauncherNewsEntries.Clear();
             LauncherNewsEntries.AddRange(parsed);
             RefreshUnreadCount();
+            if (UnreadCount > 0 && parsed.FirstOrDefault(entry => entry.Important) is { } important)
+                _main?.ShowToast($"Важная новость: {important.Headline}");
         }
         catch
         {
