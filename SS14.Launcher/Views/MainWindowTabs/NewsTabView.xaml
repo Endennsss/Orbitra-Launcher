@@ -55,7 +55,13 @@
                 <Border Classes="Surface" Margin="0,0,0,8" Padding="16,14"
                         BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1">
                   <StackPanel Spacing="6">
-                    <TextBlock Text="{Binding Date}" Classes="SectionLabel" IsVisible="{Binding HasDate}" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <Border Background="#7A321F" Padding="7,2" IsVisible="{Binding Important}">
+                        <TextBlock Text="ВАЖНО" FontSize="10" FontWeight="Bold" Foreground="White" />
+                      </Border>
+                      <TextBlock Text="{Binding Date}" Classes="SectionLabel" IsVisible="{Binding HasDate}" />
+                      <TextBlock Text="{Binding Version}" Classes="SectionLabel" IsVisible="{Binding HasVersion}" />
+                    </StackPanel>
                     <TextBlock Text="{Binding Headline}" Classes="NanoHeadingMedium" TextWrapping="Wrap" />
                     <TextBlock Text="{Binding Summary}" Classes="SubText" IsVisible="{Binding HasSummary}"
                                TextWrapping="Wrap" MaxWidth="760" HorizontalAlignment="Left" />

@@ -177,6 +177,8 @@ public static class CVars
     public static readonly CVarDef<bool> DiscordRpcShowMap = CVarDef.Create("DiscordRpcShowMap", true);
     public static readonly CVarDef<bool> DiscordRpcShowGamePreset = CVarDef.Create("DiscordRpcShowGamePreset", true);
     public static readonly CVarDef<bool> FirstRunCompleted = CVarDef.Create("FirstRunCompleted", false);
+    public static readonly CVarDef<string> LastReadLauncherNews = CVarDef.Create("LastReadLauncherNews", "");
+    public static readonly CVarDef<bool> CustomUpdateChecks = CVarDef.Create("CustomUpdateChecks", true);
 
     /// <summary>
     /// The CPU architecture this launcher was last run with.

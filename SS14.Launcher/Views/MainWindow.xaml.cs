@@ -49,7 +49,12 @@ public partial class MainWindow : Window
         if (_viewModel == null)
             return;
 
-        if (e.Key == Key.K && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        if (e.Key == Key.P && e.KeyModifiers.HasFlag(KeyModifiers.Control) && e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+        {
+            _viewModel.ToggleCommandPalette();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.K && e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
             _viewModel.SelectTabServers();
             Avalonia.Threading.Dispatcher.UIThread.Post(_viewModel.ServersTab.RequestSearchFocus);
@@ -67,6 +72,7 @@ public partial class MainWindow : Window
         }
         else if (e.Key == Key.Escape)
         {
+            if (_viewModel.CommandPaletteOpen) { _viewModel.CloseCommandPalette(); e.Handled = true; return; }
             _viewModel.CloseExpandedServers();
             e.Handled = true;
         }

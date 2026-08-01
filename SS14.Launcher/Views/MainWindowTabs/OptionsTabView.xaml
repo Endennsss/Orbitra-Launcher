@@ -68,6 +68,8 @@
                   Content="Сворачивать в трей при закрытии" />
         <TextBlock Text="Крестик и Alt+F4 скрывают окно. Полностью завершить лаунчер можно через пункт «Выйти» в трее."
                    Classes="SubText" TextWrapping="Wrap" Margin="22,0,0,10" />
+        <CheckBox IsChecked="{Binding CustomUpdateChecks, Mode=TwoWay}" Content="Проверять обновления лаунчера через GitHub Releases" />
+        <TextBlock Text="Новая стабильная версия будет предложена при запуске." Classes="SubText" Margin="22,0,0,10" />
         <CheckBox IsChecked="{Binding AutoRefreshFavoritePing, Mode=TwoWay}"
                   Content="Автоматически обновлять пинг избранных серверов" />
         <TextBlock Text="Проверяет статус, онлайн и пинг каждые 3 секунды. Для фоновых уведомлений проверка продолжает работать в трее."
@@ -150,6 +152,9 @@
         <StackPanel Spacing="8">
           <TextBlock Text="MAINTENANCE" Classes="SectionLabel" Margin="0,0,0,6" />
           <WrapPanel>
+            <Button Content="Экспорт настроек" Command="{Binding ExportSettingsBackup}" />
+            <Button Content="Импорт настроек" Command="{Binding ImportSettingsBackup}" />
+            <Button Content="Последний отчёт о сбое" Command="{Binding OpenLastCrashReport}" />
             <Button Name="ClearEnginesButton" Content="{loc:Loc tab-options-clear-engines}" Click="ClearEnginesPressed" />
             <Button Name="ClearServerContentButton" Content="{loc:Loc tab-options-clear-content}" Click="ClearServerContentPressed" />
             <Button Content="{loc:Loc tab-options-open-log-directory}" Command="{Binding OpenLogDirectory}"/>

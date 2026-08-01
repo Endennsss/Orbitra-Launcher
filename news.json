@@ -1,14 +1,20 @@
 [
   {
+    "id": "remote-news-and-gif-2026-08-01",
     "title": "Фоны тем стали легче",
     "summary": "Удалена поддержка MP4. Для анимированных фонов оставлен стабильный зацикленный GIF, обычные изображения продолжают работать.",
     "date": "1 августа 2026",
-    "url": "https://github.com/Endennsss/SS14-Custom-launcher"
+    "url": "https://github.com/Endennsss/SS14-Custom-launcher",
+    "version": "0.39.1-custom",
+    "important": true
   },
   {
+    "id": "launcher-news-feed-2026-08-01",
     "title": "Добавлен раздел новостей лаунчера",
     "summary": "Новости проекта теперь можно обновлять удалённо через news.json без выпуска новой сборки.",
     "date": "1 августа 2026",
-    "url": "https://github.com/Endennsss/SS14-Custom-launcher"
+    "url": "https://github.com/Endennsss/SS14-Custom-launcher",
+    "version": "0.39.1-custom",
+    "important": false
   }
 ]

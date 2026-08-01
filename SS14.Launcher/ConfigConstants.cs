@@ -41,6 +41,7 @@ public static class ConfigConstants
     public const string DownloadUrl = "https://spacestation14.com/about/nightlies/";
     public const string NewsFeedUrl = "https://spacestation14.com/post/index.xml";
     public const string LauncherNewsUrl = "https://raw.githubusercontent.com/Endennsss/SS14-Custom-launcher/main/news.json";
+    public const string CustomLatestReleaseApiUrl = "https://api.github.com/repos/Endennsss/SS14-Custom-launcher/releases/latest";
     public const string TranslateUrl = "https://docs.spacestation14.com/en/general-development/contributing-translations.html";
     public static bool IsAuthOverride;
 

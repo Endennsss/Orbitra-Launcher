@@ -162,6 +162,20 @@
       </StackPanel>
     </ContentControl>
 
+    <ContentControl Classes="OverlayBox" IsVisible="{Binding CustomUpdateAvailable}">
+      <Border Width="520" Padding="24" Background="{DynamicResource LauncherSurfaceBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1">
+        <StackPanel Spacing="12">
+          <TextBlock Text="ДОСТУПНО ОБНОВЛЕНИЕ" Classes="SectionLabel" />
+          <TextBlock Text="{Binding CustomUpdateVersion, StringFormat='Новая версия: {0}'}" Classes="NanoHeadingMedium" />
+          <TextBlock Text="Откройте страницу релиза, чтобы скачать и установить новую сборку." Classes="SubText" TextWrapping="Wrap" />
+          <WrapPanel HorizontalAlignment="Right">
+            <Button Content="Позже" Command="{Binding DismissCustomUpdate}" />
+            <Button Content="Открыть релиз" Command="{Binding OpenCustomUpdate}" />
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+    </ContentControl>
+
     <Border Background="{DynamicResource LauncherWorkspaceBrush}" Opacity="{Binding CustomThemeTab.ThemeTransitionOpacity}"
             IsHitTestVisible="False">
       <Border.Transitions>
@@ -196,6 +210,27 @@
           </Grid>
           <Button Content="НАЧАТЬ" Command="{Binding CompleteFirstRun}" HorizontalAlignment="Right" MinWidth="140" />
         </StackPanel>
+      </Border>
+    </ContentControl>
+
+    <ContentControl Classes="OverlayBox" IsVisible="{Binding CommandPaletteOpen}">
+      <Border Width="620" MaxHeight="480" Padding="18" Background="{DynamicResource LauncherSurfaceBrush}"
+              BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" VerticalAlignment="Center">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="0,0,0,12">
+            <TextBlock Text="КОМАНДНАЯ ПАЛИТРА · CTRL+SHIFT+P" Classes="SectionLabel" />
+            <TextBox Text="{Binding CommandPaletteQuery, Mode=TwoWay}" Watermark="Введите действие…" />
+          </StackPanel>
+          <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding FilteredCommandPaletteItems}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:CommandPaletteItem">
+                  <Button Content="{Binding Title}" Command="{Binding Invoke}" HorizontalContentAlignment="Left" Margin="0,2" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </DockPanel>
       </Border>
     </ContentControl>
 

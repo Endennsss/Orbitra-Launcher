@@ -7,11 +7,14 @@ using CodeHollow.FeedReader;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using SS14.Launcher.Localization;
 using SS14.Launcher.Utility;
+using SS14.Launcher.Models.Data;
+using Splat;
 
 namespace SS14.Launcher.ViewModels.MainWindowTabs;
 
 public partial class NewsTabViewModel : MainWindowTabViewModel
 {
+    private readonly DataManager _cfg = Locator.Current.GetRequiredService<DataManager>();
     public ObservableList<NewsEntryViewModel> NewsEntries { get; } = [];
     public ObservableList<NewsEntryViewModel> LauncherNewsEntries { get; } =
     [
@@ -27,6 +30,14 @@ public partial class NewsTabViewModel : MainWindowTabViewModel
 
     private bool _startedPullingNews;
     private bool _startedPullingLauncherNews;
+    private int _unreadCount;
+
+    public int UnreadCount
+    {
+        get => _unreadCount;
+        private set { _unreadCount = value; BadgeChanged(); }
+    }
+    public override string BadgeText => UnreadCount > 0 ? UnreadCount.ToString() : string.Empty;
 
     private bool _launcherNewsSelected;
 
@@ -51,7 +62,11 @@ public partial class NewsTabViewModel : MainWindowTabViewModel
     private bool _newsLoadFailed;
 
     public void ShowOriginalNews() => LauncherNewsSelected = false;
-    public void ShowLauncherNews() => LauncherNewsSelected = true;
+    public void ShowLauncherNews()
+    {
+        LauncherNewsSelected = true;
+        MarkLauncherNewsRead();
+    }
 
     public override void Selected()
     {
@@ -102,17 +117,37 @@ public partial class NewsTabViewModel : MainWindowTabViewModel
                     entry.Title,
                     Uri.TryCreate(entry.Url, UriKind.Absolute, out var link) ? link : null,
                     entry.Summary,
-                    entry.Date))
+                    entry.Date,
+                    entry.Id,
+                    entry.Version,
+                    entry.Important))
                 .ToArray();
             if (parsed.Length == 0) return;
 
             LauncherNewsEntries.Clear();
             LauncherNewsEntries.AddRange(parsed);
+            RefreshUnreadCount();
         }
         catch
         {
             // Built-in entries remain available when GitHub is unavailable.
         }
+    }
+
+    private void RefreshUnreadCount()
+    {
+        var lastRead = _cfg.GetCVar(CVars.LastReadLauncherNews);
+        UnreadCount = string.IsNullOrWhiteSpace(lastRead)
+            ? LauncherNewsEntries.Count
+            : LauncherNewsEntries.TakeWhile(entry => !string.Equals(entry.Id, lastRead, StringComparison.Ordinal)).Count();
+    }
+
+    private void MarkLauncherNewsRead()
+    {
+        if (LauncherNewsEntries.FirstOrDefault() is not { } latest) return;
+        _cfg.SetCVar(CVars.LastReadLauncherNews, latest.Id);
+        _cfg.CommitConfig();
+        UnreadCount = 0;
     }
 
     private sealed class LauncherNewsDto
@@ -121,5 +156,8 @@ public partial class NewsTabViewModel : MainWindowTabViewModel
         public string Summary { get; init; } = string.Empty;
         public string Date { get; init; } = string.Empty;
         public string? Url { get; init; }
+        public string Id { get; init; } = string.Empty;
+        public string Version { get; init; } = string.Empty;
+        public bool Important { get; init; }
     }
 }

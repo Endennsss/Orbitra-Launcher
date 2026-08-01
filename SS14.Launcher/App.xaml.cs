@@ -60,7 +60,7 @@ public class App : Application
 
         var cfg = Locator.Current.GetRequiredService<Models.Data.DataManager>();
         ApplyLauncherFont(cfg.GetCVar(Models.Data.CVars.LauncherFont));
-        ApplyConfiguredTheme(cfg);
+        if (Program.SafeModeActive) ApplyColorTheme(false); else ApplyConfiguredTheme(cfg);
 
         LoadBaseAssets();
         IconsLoader.Load(this);

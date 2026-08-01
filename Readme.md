@@ -10,7 +10,7 @@
   [![License](https://img.shields.io/badge/license-MIT-242424)](LICENSE.txt)
   [![Platform](https://img.shields.io/badge/platform-Windows-242424?logo=windows)](#установка)
 
-  [Возможности](#возможности) · [Установка](#установка) · [Сборка](#сборка-из-исходников) · [Новости](#публикация-новостей)
+  [Сайт](https://endennsss.github.io/SS14-Custom-launcher/) · [Возможности](#возможности) · [Установка](#установка) · [Сборка](#сборка-из-исходников) · [Новости](#публикация-новостей)
 </div>
 
 > [!IMPORTANT]

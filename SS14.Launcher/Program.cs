@@ -30,6 +30,7 @@ namespace SS14.Launcher;
 
 internal static class Program
 {
+    public static bool SafeModeActive { get; private set; }
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
@@ -89,6 +90,9 @@ internal static class Program
 
         VcRedistCheck.Check();
         LauncherPaths.CreateDirs();
+        var recovery = new LauncherRecoveryService();
+        recovery.Begin();
+        SafeModeActive = recovery.PreviousRunFailed || args.Contains("--safe-mode", StringComparer.OrdinalIgnoreCase);
 
         var cfg = new DataManager();
         cfg.Load();
@@ -115,12 +119,21 @@ internal static class Program
             .CreateLogger());
 #endif
 
+        var cleanExit = false;
         try
         {
             BuildAvaloniaApp(cfg).StartWithClassicDesktopLifetime(args);
+            cleanExit = true;
+        }
+        catch (Exception e)
+        {
+            recovery.RecordCrash(e);
+            Log.Fatal(e, "Launcher terminated unexpectedly");
+            throw;
         }
         finally
         {
+            if (cleanExit) recovery.CompleteCleanExit();
             Log.CloseAndFlush();
             cfg.Close();
         }

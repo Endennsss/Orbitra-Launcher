@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.IO;
+using Avalonia.Platform.Storage;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Splat;
 using SS14.Launcher.Localization;
@@ -122,6 +124,12 @@ public class OptionsTabViewModel : MainWindowTabViewModel
         set { Cfg.SetCVar(CVars.CloseToTray, value); Cfg.CommitConfig(); }
     }
 
+    public bool CustomUpdateChecks
+    {
+        get => Cfg.GetCVar(CVars.CustomUpdateChecks);
+        set { Cfg.SetCVar(CVars.CustomUpdateChecks, value); Cfg.CommitConfig(); }
+    }
+
     public void PreviewClickSound() => UiSoundService.Preview("click.wav");
     public void PreviewNavigationSound() => UiSoundService.Preview("navigation.wav");
     public void PreviewToggleSound() => UiSoundService.Preview("toggle.wav");
@@ -230,6 +238,31 @@ public class OptionsTabViewModel : MainWindowTabViewModel
     {
         Helpers.OpenUri(ConfigConstants.AccountManagementUrl);
     }
+
+    public void OpenLastCrashReport()
+    {
+        var path = Path.Combine(LauncherPaths.DirLogs, "last-crash.txt");
+        if (File.Exists(path)) Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = path });
+        else _mainWindow?.ShowToast("Отчёт о последнем сбое отсутствует");
+    }
+
+    public async void ExportSettingsBackup()
+    {
+        if (_mainWindow?.Control?.StorageProvider is not { } storage) return;
+        var file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions { Title = "Резервная копия настроек", SuggestedFileName = "ss14-launcher-settings.zip", DefaultExtension = "zip" });
+        var path = file?.TryGetLocalPath(); if (path == null) return;
+        try { SettingsBackupService.Export(path, Cfg); _mainWindow.ShowToast("Резервная копия создана"); }
+        catch { _mainWindow.ShowToast("Не удалось создать резервную копию", true); }
+    }
+
+    public async void ImportSettingsBackup()
+    {
+        if (_mainWindow?.Control?.StorageProvider is not { } storage) return;
+        var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions { Title = "Восстановление настроек", AllowMultiple = false, FileTypeFilter = [new FilePickerFileType("Архив настроек") { Patterns = ["*.zip"] }] });
+        var path = files.FirstOrDefault()?.TryGetLocalPath(); if (path == null) return;
+        try { SettingsBackupService.Import(path, Cfg); App.ApplyConfiguredTheme(Cfg); _mainWindow.ShowToast("Настройки восстановлены. Перезапустите лаунчер"); }
+        catch { _mainWindow.ShowToast("Архив настроек повреждён", true); }
+    }
 }
 
 public sealed class NavigationTabOptionViewModel : ObservableObject
@@ -249,6 +282,7 @@ public sealed class NavigationTabOptionViewModel : ObservableObject
             _owner.InitializeNavigation();
         }
     }
+
     private int Index => _mainWindow.AllTabs.ToList().FindIndex(t => _mainWindow.GetNavigationId(t) == _id);
     public bool CanMoveUp => Index > 0;
     public bool CanMoveDown => Index >= 0 && Index < _mainWindow.AllTabs.Count - 1;

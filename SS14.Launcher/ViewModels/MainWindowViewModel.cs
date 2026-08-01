@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using Avalonia.Platform.Storage;
@@ -31,6 +32,7 @@ namespace SS14.Launcher.ViewModels;
 public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
 {
     public ObservableCollection<LauncherToast> Toasts { get; } = [];
+    public ObservableCollection<CommandPaletteItem> CommandPaletteItems { get; } = [];
     private readonly DataManager _cfg;
     private readonly LoginManager _loginMgr;
     private readonly LauncherInfoManager _infoManager;
@@ -42,6 +44,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
     public DataManager Cfg => _cfg;
     public ICVarEntry<bool> UseTextLogo => Cfg.GetCVarEntry(CVars.UseTextLogo);
     [ObservableProperty] private bool _outOfDate;
+    [ObservableProperty] private bool _customUpdateAvailable;
+    [ObservableProperty] private string _customUpdateVersion = string.Empty;
+    private string? _customUpdateUrl;
 
     private IDisposable? _authOverrideCountdownTimer;
 
@@ -60,7 +65,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         _loginMgr = Locator.Current.GetRequiredService<LoginManager>();
         _infoManager = Locator.Current.GetRequiredService<LauncherInfoManager>();
         _loc = LocalizationManager.Instance;
-        DiscordRichPresenceService.Instance.ShowLauncher();
+        if (!Program.SafeModeActive) DiscordRichPresenceService.Instance.ShowLauncher();
 
         AccountDropDown = new AccountDropDownViewModel(this);
 
@@ -109,6 +114,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
 
         _cfg.Logins.Connect()
             .Subscribe(_ => OnPropertyChanged(new PropertyChangedEventArgs(nameof(AccountDropDownVisible))));
+
+        BuildCommandPalette();
     }
 
     public MainWindow? Control { get; set; }
@@ -201,6 +208,15 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
 
     [ObservableProperty] private string? _busyTask;
     [ObservableProperty] private ViewModelBase? _overlayViewModel;
+    [ObservableProperty] private bool _commandPaletteOpen;
+    private string _commandPaletteQuery = string.Empty;
+    public string CommandPaletteQuery
+    {
+        get => _commandPaletteQuery;
+        set { _commandPaletteQuery = value ?? string.Empty; OnPropertyChanged(); OnPropertyChanged(nameof(FilteredCommandPaletteItems)); }
+    }
+    public IEnumerable<CommandPaletteItem> FilteredCommandPaletteItems => CommandPaletteItems.Where(item =>
+        string.IsNullOrWhiteSpace(CommandPaletteQuery) || item.Title.Contains(CommandPaletteQuery, StringComparison.OrdinalIgnoreCase));
 
     public int SelectedIndex
     {
@@ -252,6 +268,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
             TrySwitchToAccount(login);
         }
 
+        if (Program.SafeModeActive)
+            ShowToast("Включён безопасный режим после некорректного завершения", true);
+        await CheckCustomLauncherUpdate();
+
         // We should now start reacting to commands.
     }
 
@@ -278,6 +298,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
             if (Tabs.Count == 0 || _selectedIndex < 0 || _selectedIndex >= Tabs.Count) return null;
             return CustomThemeTab.GetBackgroundFor(GetNavigationId(Tabs[_selectedIndex]));
         }
+
     }
 
     public AnimatedImageSource? ActiveAnimatedThemeBackground
@@ -396,6 +417,40 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         SelectedIndex = Tabs.IndexOf(ServersTab);
     }
 
+    private async Task CheckCustomLauncherUpdate()
+    {
+        if (!_cfg.GetCVar(CVars.CustomUpdateChecks)) return;
+        try
+        {
+            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(6) };
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("SS14-Custom-Launcher");
+            var json = await client.GetStringAsync(ConfigConstants.CustomLatestReleaseApiUrl);
+            var release = JsonSerializer.Deserialize<CustomReleaseDto>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            if (release == null || release.Draft || release.Prerelease) return;
+            var tag = release.TagName.TrimStart('v', 'V');
+            if (!System.Version.TryParse(tag.Split('-', 2)[0], out var latest) || LauncherVersion.Version == null || latest <= LauncherVersion.Version) return;
+            _customUpdateUrl = release.HtmlUrl;
+            CustomUpdateVersion = release.TagName;
+            CustomUpdateAvailable = true;
+        }
+        catch (Exception e) { Log.Debug(e, "Unable to check custom launcher release"); }
+    }
+
+    public void OpenCustomUpdate()
+    {
+        if (Uri.TryCreate(_customUpdateUrl, UriKind.Absolute, out var uri)) Helpers.OpenUri(uri);
+    }
+
+    public void DismissCustomUpdate() => CustomUpdateAvailable = false;
+
+    private sealed class CustomReleaseDto
+    {
+        public string TagName { get; init; } = string.Empty;
+        public string HtmlUrl { get; init; } = string.Empty;
+        public bool Draft { get; init; }
+        public bool Prerelease { get; init; }
+    }
+
     public void SelectTabHome()
     {
         var index = Tabs.IndexOf(HomeTab);
@@ -423,6 +478,31 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         ServersTab.CloseExpanded();
         foreach (var server in HomeTab.Favorites.Where(x => x.IsExpanded))
             server.IsExpanded = false;
+    }
+
+    public void ToggleCommandPalette()
+    {
+        CommandPaletteOpen = !CommandPaletteOpen;
+        if (CommandPaletteOpen) CommandPaletteQuery = string.Empty;
+    }
+
+    public void CloseCommandPalette() => CommandPaletteOpen = false;
+
+    private void BuildCommandPalette()
+    {
+        void Add(string title, Action action) => CommandPaletteItems.Add(new CommandPaletteItem(this, title, action));
+        Add("Перейти: Главная", SelectTabHome);
+        Add("Перейти: Серверы", SelectTabServers);
+        Add("Перейти: Новости", () => SelectTab(NewsTab));
+        Add("Перейти: Настройки", () => SelectTab(OptionsTab));
+        Add("Обновить текущую вкладку", RefreshCurrentTab);
+        Add("Открыть папку логов", OptionsTab.OpenLogDirectory);
+        Add("Экспортировать настройки", OptionsTab.ExportSettingsBackup);
+    }
+
+    private void SelectTab(MainWindowTabViewModel tab)
+    {
+        var index = Tabs.IndexOf(tab); if (index >= 0) SelectedIndex = index;
     }
 
     public void CompleteFirstRun()
@@ -532,6 +612,15 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
 
         return processor.Contains("VirtualApple") && !cfg.GetCVar(CVars.HasDismissedRosettaWarning);
     }
+}
+
+public sealed class CommandPaletteItem
+{
+    private readonly MainWindowViewModel _owner;
+    private readonly Action _action;
+    public string Title { get; }
+    public CommandPaletteItem(MainWindowViewModel owner, string title, Action action) { _owner = owner; Title = title; _action = action; }
+    public void Invoke() { _action(); _owner.CloseCommandPalette(); }
 }
 
 public sealed record LauncherToast(string Message, bool IsError);
