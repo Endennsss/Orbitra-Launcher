@@ -74,13 +74,15 @@ public class App : Application
         if (Current == null)
             return;
 
-        // Keep the selected launcher font for text, but use the bundled color emoji
-        // family before falling back to the operating system's Segoe UI Emoji.
-        const string emojiFamily = "avares://SS14.Launcher/Assets/Fonts/noto_emoji/Noto-COLRv1.ttf#Noto Color Emoji";
+        // Put the bundled emoji family first. If the text family is first, Skia can
+        // resolve a missing emoji through Windows (Segoe UI Emoji) before it reaches
+        // our explicit second family. Noto contains no regular Cyrillic/Latin glyphs,
+        // so ordinary launcher text still falls through to the selected text family.
+        const string emojiFamily = "avares://SS14.Launcher/Assets/Fonts/noto_emoji/NotoColorEmoji_WindowsCompatible.ttf#Noto Color Emoji";
         var textFamily = fontName == "Noto Sans"
             ? "avares://SS14.Launcher/Assets/Fonts/noto_sans/*.ttf#Noto Sans"
             : fontName;
-        var family = new FontFamily($"{textFamily}, {emojiFamily}");
+        var family = new FontFamily($"{emojiFamily}, {textFamily}");
         Current.Resources["LauncherFontFamily"] = family;
     }
 
