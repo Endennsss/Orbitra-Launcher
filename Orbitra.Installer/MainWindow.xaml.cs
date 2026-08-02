@@ -110,7 +110,16 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
             AllowMultiple = false
         });
         if (folders.Count == 0) return;
-        InstallDirectory = Path.Combine(folders[0].Path.LocalPath, "Orbitra Launcher");
+        var selectedPath = folders[0].TryGetLocalPath();
+        if (string.IsNullOrWhiteSpace(selectedPath))
+        {
+            ErrorText = _english
+                ? "The selected folder is not available as a local Windows path."
+                : "Выбранная папка недоступна как локальный путь Windows.";
+            SetPage(Page.Error);
+            return;
+        }
+        InstallDirectory = Path.Combine(selectedPath, "Orbitra Launcher");
         OnChanged(nameof(InstallDirectory));
     }
 

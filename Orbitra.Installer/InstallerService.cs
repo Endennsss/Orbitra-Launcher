@@ -194,10 +194,14 @@ internal sealed class InstallerService : IDisposable
         // InternetShortcut is understood natively by Windows Explorer and avoids runtime COM,
         // which keeps the installer compatible with Native AOT.
         var urlPath = Path.ChangeExtension(shortcutPath, ".url");
-        var fileUri = new Uri(executable).AbsoluteUri;
+        var fullExecutable = Path.GetFullPath(executable);
+        var fileUri = new UriBuilder(Uri.UriSchemeFile, string.Empty)
+        {
+            Path = fullExecutable
+        }.Uri.AbsoluteUri;
         File.WriteAllText(urlPath,
             $"[InternetShortcut]{Environment.NewLine}URL={fileUri}{Environment.NewLine}" +
-            $"IconFile={executable}{Environment.NewLine}IconIndex=0{Environment.NewLine}");
+            $"IconFile={fullExecutable}{Environment.NewLine}IconIndex=0{Environment.NewLine}");
     }
 
     public static void Launch(string executable) => Process.Start(new ProcessStartInfo(executable)
