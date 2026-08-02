@@ -1,5 +1,5 @@
 #define AppName "Orbitra Launcher"
-#define AppVersion "0.39.1"
+#define AppVersion "0.41.1"
 #define AppPublisher "ChemHelper"
 #define AppExeName "Orbitra Launcher.exe"
 
