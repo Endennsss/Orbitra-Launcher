@@ -31,6 +31,7 @@ public class App : Application
     private static readonly Dictionary<string, AssetDef> AssetDefs = new()
     {
         ["WindowIcon"] = new AssetDef("icon.ico", AssetType.WindowIcon),
+        ["OrbitraLogo"] = new AssetDef("orbitra-logo.png", AssetType.Bitmap),
         ["LogoLong"] = new AssetDef("logo-long.png", AssetType.Bitmap),
     };
 

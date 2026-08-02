@@ -16,13 +16,9 @@
     <Border Grid.Row="0" Background="{DynamicResource LauncherChromeBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,0,0,1"
             PointerPressed="TitleBarPressed">
       <Grid ColumnDefinitions="*,Auto">
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0" Spacing="9">
-          <Border Width="18" Height="18" Background="{DynamicResource LauncherWorkspaceBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1">
-            <Viewbox Margin="3">
-              <Path Data="M8,7.3107 L1,14.3107 L1,15.3107 L2,15.3107 L9,8.3107 M7,6.3107 L5.18931,4.50001 L8.68931,1 L14,6.31069 L14.5,10.3107 L13,11.8107 L10,9.31069 M9,3.31069 L9.5,3.81069"
-                    Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1" StrokeLineCap="Round" />
-            </Viewbox>
-          </Border>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0" Spacing="8">
+          <Image Width="34" Height="34" Source="{DynamicResource OrbitraLogo}"
+                 Stretch="Uniform" IsHitTestVisible="False" />
           <TextBlock Text="ORBITRA LAUNCHER" VerticalAlignment="Center"
                      FontSize="11" FontWeight="Bold" LetterSpacing="1.2" Foreground="{DynamicResource ThemeSubTextBrush}" />
         </StackPanel>
