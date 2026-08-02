@@ -75,8 +75,6 @@ public class App : Application
         if (Current == null)
             return;
 
-        // Emoji are selected through Unicode-scoped fallbacks in Program.cs. Keeping
-        // only the text family here prevents Noto Emoji from taking over digits.
         var family = fontName == "Noto Sans"
             ? new FontFamily("avares://SS14.Launcher/Assets/Fonts/noto_sans/*.ttf#Noto Sans")
             : new FontFamily(fontName);

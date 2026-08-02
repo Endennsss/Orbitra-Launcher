@@ -256,25 +256,7 @@ internal static class Program
             .With(new FontManagerOptions
             {
                 // Necessary workaround for #84 on Linux
-                DefaultFamilyName = "avares://SS14.Launcher/Assets/Fonts/noto_sans/*.ttf#Noto Sans",
-                // Use the bundled color font only for actual emoji/symbol blocks.
-                // ASCII digits (U+0030–U+0039) intentionally stay in the UI font.
-                FontFallbacks =
-                [
-                    new FontFallback
-                    {
-                        FontFamily = new FontFamily(
-                            "avares://SS14.Launcher/Assets/Fonts/noto_emoji/NotoColorEmoji_WindowsCompatible.ttf#Noto Color Emoji"),
-                        UnicodeRange = new UnicodeRange(
-                        [
-                            new UnicodeRangeSegment(0x2190, 0x21FF),
-                            new UnicodeRangeSegment(0x2300, 0x23FF),
-                            new UnicodeRangeSegment(0x2600, 0x27BF),
-                            new UnicodeRangeSegment(0x2B00, 0x2BFF),
-                            new UnicodeRangeSegment(0x1F000, 0x1FAFF)
-                        ])
-                    }
-                ]
+                DefaultFamilyName = "avares://SS14.Launcher/Assets/Fonts/noto_sans/*.ttf#Noto Sans"
             });
     }
 
