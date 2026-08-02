@@ -5,6 +5,7 @@ import os
 import subprocess
 import shutil
 import glob
+import zipfile
 
 from download_net_runtime import update_netcore_runtime, PLATFORM_WINDOWS, PLATFORM_WINDOWS_ARM64, PLATFORM_LINUX, PLATFORM_LINUX_ARM64, PLATFORM_MACOS, PLATFORM_MACOS_ARM64
 from exe_set_subsystem import set_subsystem
@@ -76,7 +77,7 @@ def publish_windows(x64_only: bool):
         shutil.copytree(f"SS14.Launcher/bin/Release/{TFM}/win-arm64/publish", "bin/publish/Windows/bin_arm64", dirs_exist_ok=True)
         shutil.copytree(f"SS14.Loader/bin/Release/{TFM}/win-arm64/publish", "bin/publish/Windows/bin_arm64/loader", dirs_exist_ok=True)
 
-    shutil.make_archive("Orbitra_Launcher_Windows", "zip", "bin/publish/Windows")
+    make_verified_zip("Orbitra_Launcher_Windows", "bin/publish/Windows")
 
 def publish_linux(x64_only: bool):
     update_netcore_runtime([PLATFORM_LINUX])
@@ -139,7 +140,22 @@ def publish_osx():
     shutil.copytree("Dependencies/dotnet/mac", f"{res_root}/x86_64/dotnet")
     shutil.copytree("Dependencies/dotnet/mac-arm64", f"{res_root}/arm64/dotnet")
 
-    shutil.make_archive("SS14.Launcher_macOS", "zip", "bin/publish/macOS/")
+    make_verified_zip("SS14.Launcher_macOS", "bin/publish/macOS/")
+
+
+def make_verified_zip(base_name: str, root_dir: str):
+    """Build atomically and reject an archive with even one bad CRC entry."""
+    building_base = base_name + ".building"
+    building_zip = building_base + ".zip"
+    final_zip = base_name + ".zip"
+    if os.path.exists(building_zip):
+        os.remove(building_zip)
+    shutil.make_archive(building_base, "zip", root_dir)
+    with zipfile.ZipFile(building_zip, "r") as archive:
+        bad_entry = archive.testzip()
+        if bad_entry is not None:
+            raise RuntimeError(f"Corrupt ZIP entry after packaging: {bad_entry}")
+    os.replace(building_zip, final_zip)
 
 def clear_prev_publish(publish_dir: str):
     shutil.rmtree(f"bin/publish/{publish_dir}", ignore_errors=True)
