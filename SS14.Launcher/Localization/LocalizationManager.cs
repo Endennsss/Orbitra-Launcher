@@ -23,28 +23,8 @@ public sealed class LocalizationManager
 
     public static readonly ImmutableArray<LanguageInfo> AvailableLanguages =
     [
-        new LanguageInfo(FallbackCulture),
-        new LanguageInfo("nl"),
-        new LanguageInfo("el"),
-        new LanguageInfo("de"),
+        new LanguageInfo(FallbackCultureSub),
         new LanguageInfo("ru"),
-        new LanguageInfo("pt-BR"),
-        new LanguageInfo("es"),
-        new LanguageInfo("uk"),
-        new LanguageInfo("fr"),
-        new LanguageInfo("tr"),
-        new LanguageInfo("sv"),
-        new LanguageInfo("fi"),
-        new LanguageInfo("zh-Hans"),
-        new LanguageInfo("et"),
-        new LanguageInfo("pl"),
-        new LanguageInfo("ja"),
-        new LanguageInfo("it"),
-        new LanguageInfo("nb-NO"),
-        new LanguageInfo("hu"),
-        new LanguageInfo("eo"),
-        new LanguageInfo("ro"),
-        new LanguageInfo("ga"),
     ];
 
     private const string FallbackCulture = "en";
@@ -73,10 +53,18 @@ public sealed class LocalizationManager
             Log.Verbose("No language saved in options, using system culture");
             LoadCulture(SystemCulture);
         }
-        else
+        else if (AvailableLanguages.Any(language =>
+                     language.Name.Equals(setLanguage, StringComparison.OrdinalIgnoreCase)))
         {
             Log.Verbose("Using culture from options: {Culture}", setLanguage);
             LoadCulture(new CultureInfo(setLanguage));
+        }
+        else
+        {
+            Log.Information("Configured language {Culture} is no longer available; using system language", setLanguage);
+            _dataManager.SetCVar(CVars.Language, null);
+            _dataManager.CommitConfig();
+            LoadCulture(SystemCulture);
         }
     }
 
