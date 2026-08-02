@@ -1,0 +1,105 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Orbitra.Installer.MainWindow"
+        Width="900" Height="570" MinWidth="760" MinHeight="500"
+        CanResize="False"
+        SystemDecorations="None" ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome" TransparencyLevelHint="None"
+        Icon="/Assets/icon.ico" Title="Orbitra Installer">
+  <Grid RowDefinitions="46,*" ClipToBounds="True">
+    <Border Grid.Row="0" Background="#111111" BorderBrush="#383838" BorderThickness="0,0,0,1"
+            PointerPressed="TitleBarPressed">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Orientation="Horizontal" Margin="12,0" Spacing="10" VerticalAlignment="Center">
+          <Border Width="30" Height="30" CornerRadius="7" ClipToBounds="True" Background="#000000">
+            <Image Source="/Assets/logo.png" Stretch="UniformToFill" />
+          </Border>
+          <TextBlock Text="{Binding Text.AppTitle}" FontSize="11" FontWeight="Bold" LetterSpacing="1.4"
+                     Foreground="#C8C8C8" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal">
+          <Button Width="44" Height="45" Padding="0" BorderThickness="0" Background="Transparent" Click="MinimizeClicked">
+            <Path Data="M2,8 L14,8" Stroke="#D8D8D8" StrokeThickness="1.3" Width="16" Height="10" />
+          </Button>
+          <Button Width="44" Height="45" Padding="0" BorderThickness="0" Background="Transparent" Click="CloseClicked">
+            <Path Data="M2,2 L14,14 M14,2 L2,14" Stroke="#D8D8D8" StrokeThickness="1.3" Width="16" Height="16" />
+          </Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="310,*">
+      <Border Background="#0A0A0A" BorderBrush="#343434" BorderThickness="0,0,1,0">
+        <Grid RowDefinitions="*,Auto" Margin="36">
+          <StackPanel Spacing="18" VerticalAlignment="Center">
+            <Image Source="/Assets/logo.png" Width="220" Height="220" Stretch="Uniform" />
+            <StackPanel Spacing="5">
+              <TextBlock Text="ORBITRA" FontSize="30" FontWeight="Bold" LetterSpacing="4" HorizontalAlignment="Center" />
+              <TextBlock Text="{Binding Text.Kicker}" FontSize="9" LetterSpacing="2" Foreground="#898989" HorizontalAlignment="Center" />
+            </StackPanel>
+          </StackPanel>
+          <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="6">
+            <Button Content="RU" Padding="10,5" Click="RussianClicked" />
+            <Button Content="EN" Padding="10,5" Click="EnglishClicked" />
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <Grid Grid.Column="1" Margin="42,34" RowDefinitions="Auto,*,Auto">
+        <StackPanel Spacing="8">
+          <TextBlock Text="{Binding Text.LatestRelease}" FontSize="10" FontWeight="Bold" LetterSpacing="1.5" Foreground="#8F8F8F" />
+          <TextBlock Text="{Binding Text.Heading}" FontSize="28" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding Text.Description}" FontSize="14" Foreground="#A8A8A8" TextWrapping="Wrap" MaxWidth="500" />
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+          <StackPanel IsVisible="{Binding IsSetupPage}" VerticalAlignment="Center" Spacing="10">
+            <TextBlock Text="{Binding Text.InstallPath}" FontSize="12" FontWeight="Bold" />
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox Text="{Binding InstallDirectory, Mode=TwoWay}" MinHeight="43" VerticalContentAlignment="Center" />
+              <Button Grid.Column="1" Content="{Binding Text.Browse}" Margin="8,0,0,0" Click="BrowseClicked" />
+            </Grid>
+            <TextBlock Text="{Binding Text.PathHint}" FontSize="12" Foreground="#858585" TextWrapping="Wrap" />
+            <CheckBox Content="{Binding DesktopShortcutText}" IsChecked="{Binding CreateDesktopShortcut, Mode=TwoWay}" Margin="0,8,0,0" />
+            <CheckBox Content="{Binding StartMenuShortcutText}" IsChecked="{Binding CreateStartMenuShortcut, Mode=TwoWay}" />
+          </StackPanel>
+
+          <StackPanel IsVisible="{Binding IsProgressPage}" VerticalAlignment="Center" Spacing="15">
+            <Border Width="64" Height="64" BorderBrush="#454545" BorderThickness="1" HorizontalAlignment="Center">
+              <Path Data="M12,2 A10,10 0 1 1 4.93,4.93" Stroke="#E1E1E1" StrokeThickness="1.7"
+                    Width="30" Height="30" Stretch="Uniform" RenderTransformOrigin="50%,50%">
+                <Path.Transitions><Transitions><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.3" /></Transitions></Path.Transitions>
+              </Path>
+            </Border>
+            <TextBlock Text="{Binding Text.Installing}" HorizontalAlignment="Center" FontWeight="Bold" LetterSpacing="1.4" />
+            <TextBlock Text="{Binding StatusText}" HorizontalAlignment="Center" Foreground="#A8A8A8" TextAlignment="Center" TextWrapping="Wrap" />
+            <ProgressBar Value="{Binding ProgressValue}" Minimum="0" Maximum="1" />
+            <TextBlock Text="{Binding ProgressPercent}" HorizontalAlignment="Right" FontSize="11" Foreground="#868686" />
+          </StackPanel>
+
+          <StackPanel IsVisible="{Binding IsCompletePage}" VerticalAlignment="Center" Spacing="12">
+            <Border Width="64" Height="64" BorderBrush="#4B4B4B" BorderThickness="1" HorizontalAlignment="Center">
+              <Path Data="M5,16 L11,22 L25,7" Stroke="#E6E6E6" StrokeThickness="2.2" Width="30" Height="30" Stretch="Uniform" />
+            </Border>
+            <TextBlock Text="{Binding Text.ReadyTitle}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" />
+            <TextBlock Text="{Binding InstalledVersion}" Foreground="#9B9B9B" HorizontalAlignment="Center" />
+            <TextBlock Text="{Binding Text.ReadyDescription}" Foreground="#A8A8A8" TextWrapping="Wrap" TextAlignment="Center" />
+          </StackPanel>
+
+          <StackPanel IsVisible="{Binding IsErrorPage}" VerticalAlignment="Center" Spacing="12">
+            <Border Width="64" Height="64" BorderBrush="#713B3B" BorderThickness="1" HorizontalAlignment="Center">
+              <Path Data="M4,4 L24,24 M24,4 L4,24" Stroke="#DF7777" StrokeThickness="2" Width="28" Height="28" />
+            </Border>
+            <TextBlock Text="{Binding Text.ErrorTitle}" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" />
+            <TextBlock Text="{Binding ErrorText}" Foreground="#C79A9A" TextWrapping="Wrap" TextAlignment="Center" MaxHeight="100" />
+          </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="0,18,0,0">
+          <TextBlock Text="GitHub Releases · SHA-256 · C# / Avalonia" VerticalAlignment="Center" FontSize="10" Foreground="#676767" />
+          <Button Grid.Column="1" Classes="primary" Content="{Binding PrimaryButtonText}" MinWidth="190" Click="PrimaryClicked" IsEnabled="{Binding PrimaryEnabled}" />
+        </Grid>
+      </Grid>
+    </Grid>
+  </Grid>
+</Window>

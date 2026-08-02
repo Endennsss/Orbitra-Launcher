@@ -1,0 +1,15 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Orbitra.Installer.App"
+             RequestedThemeVariant="Dark">
+  <Application.Styles>
+    <SimpleTheme />
+    <Style Selector="Window"><Setter Property="FontFamily" Value="Segoe UI" /><Setter Property="Background" Value="#0D0D0D" /><Setter Property="Foreground" Value="#F2F2F2" /></Style>
+    <Style Selector="Button"><Setter Property="Background" Value="#292929" /><Setter Property="Foreground" Value="#F2F2F2" /><Setter Property="BorderBrush" Value="#414141" /><Setter Property="BorderThickness" Value="1" /><Setter Property="CornerRadius" Value="0" /><Setter Property="Padding" Value="18,11" /></Style>
+    <Style Selector="Button:pointerover"><Setter Property="Background" Value="#353535" /><Setter Property="BorderBrush" Value="#777777" /></Style>
+    <Style Selector="Button.primary"><Setter Property="Background" Value="#E3E3E3" /><Setter Property="Foreground" Value="#101010" /><Setter Property="BorderBrush" Value="#E3E3E3" /></Style>
+    <Style Selector="Button.primary:pointerover"><Setter Property="Background" Value="#FFFFFF" /></Style>
+    <Style Selector="TextBox"><Setter Property="Background" Value="#161616" /><Setter Property="Foreground" Value="#F2F2F2" /><Setter Property="BorderBrush" Value="#3D3D3D" /><Setter Property="CornerRadius" Value="0" /><Setter Property="Padding" Value="12,10" /></Style>
+    <Style Selector="ProgressBar"><Setter Property="Background" Value="#222222" /><Setter Property="Foreground" Value="#D8D8D8" /><Setter Property="Height" Value="5" /></Style>
+  </Application.Styles>
+</Application>

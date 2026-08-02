@@ -121,12 +121,14 @@ Orbitra Launcher развивает оригинальный SS14 Launcher, со
 ### Готовая сборка Windows
 
 1. Откройте [последний релиз](https://github.com/Endennsss/Orbitra-Launcher/releases/latest).
-2. Скачайте `Orbitra_Launcher_Windows.zip`.
-3. Распакуйте архив в отдельную папку.
-4. Запустите `Orbitra Launcher.exe`.
+2. Скачайте `Orbitra_Launcher_Installer.exe` — фирменный установщик на C# и Avalonia.
+3. Выберите русский или английский язык и папку установки.
+4. После установки нажмите «Запустить и войти»: Orbitra откроет экран авторизации SS14 и первичную настройку.
+
+Для портативного использования скачайте `Orbitra_Launcher_Windows.zip` и распакуйте его вручную.
 
 > [!TIP]
-> Для корректной работы обновлений не запускайте лаунчер непосредственно из ZIP-архива.
+> Установщик всегда получает последний стабильный GitHub Release и проверяет SHA-256 перед распаковкой.
 
 ### Системные требования
 
@@ -176,7 +178,13 @@ dotnet test SS14.Launcher.Tests/SS14.Launcher.Tests.csproj -c Release
 python publish.py windows --x64-only
 ```
 
-Результат появится в `Orbitra_Launcher_Windows.zip`. Инструкция для установщика находится в [`installer/README.md`](installer/README.md).
+Результат появится в `Orbitra_Launcher_Windows.zip`.
+
+Сборка фирменного C#-установщика одним EXE:
+
+```powershell
+dotnet publish Orbitra.Installer/Orbitra.Installer.csproj -c Release -r win-x64 --self-contained true -o bin/installer-csharp
+```
 
 ### Изолированный профиль разработки
 
@@ -204,9 +212,9 @@ GitHub Pages автоматически обновляет новостной р
 SS14.Launcher/            Основное приложение Avalonia
 SS14.Loader/              Загрузка и запуск игрового клиента
 SS14.Launcher.Bootstrap/  Обновление и запуск Orbitra
+Orbitra.Installer/        Фирменный сетевой установщик C# / Avalonia
 SS14.Launcher.Tests/      Автоматические тесты
 docs/                     Сайт и скриншоты проекта
-installer/                Сценарий установщика Windows
 tools/                    Команды обслуживания проекта
 news.json                 Удалённая лента новостей
 publish.py                Создание релизных пакетов

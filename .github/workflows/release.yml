@@ -19,12 +19,18 @@ jobs:
         with:
           python-version: "3.x"
       - run: python publish.py windows --x64-only
+      - name: Build C# Orbitra Installer
+        run: dotnet publish Orbitra.Installer/Orbitra.Installer.csproj -c Release -r win-x64 --self-contained true --nologo -o bin/installer-csharp
       - uses: actions/upload-artifact@v4
         with:
           name: Orbitra-Launcher-Windows-x64
-          path: Orbitra_Launcher_Windows.zip
+          path: |
+            Orbitra_Launcher_Windows.zip
+            bin/installer-csharp/Orbitra_Launcher_Installer.exe
       - if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: Orbitra_Launcher_Windows.zip
+          files: |
+            Orbitra_Launcher_Windows.zip
+            bin/installer-csharp/Orbitra_Launcher_Installer.exe
           generate_release_notes: true
