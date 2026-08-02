@@ -220,7 +220,7 @@ public sealed class DiscordRichPresenceService : IDisposable
         if (Config.GetCVar(CVars.DiscordRpcShowNickname)) parts.Add(username);
         if (Config.GetCVar(CVars.DiscordRpcShowOnline)) parts.Add($"Онлайн {online}");
         if (Config.GetCVar(CVars.DiscordRpcShowPing)) parts.Add($"Пинг {ping}");
-        SetPresence(details, parts.Count == 0 ? "В игре" : string.Join(" · ", parts));
+        SetPresence(details, parts.Count == 0 ? "В игре" : string.Join(" · ", parts), "in_the_game");
     }
 
     public void RefreshSettings()
@@ -244,7 +244,7 @@ public sealed class DiscordRichPresenceService : IDisposable
         _gamePreset = gamePreset;
     }
 
-    private void SetPresence(string details, string state)
+    private void SetPresence(string details, string state, string? largeImageKey = null)
     {
         if (!Config.GetCVar(CVars.DiscordRpcEnabled))
         {
@@ -261,6 +261,13 @@ public sealed class DiscordRichPresenceService : IDisposable
                 Details = details,
                 State = state,
                 Timestamps = new Timestamps(_startedAt),
+                Assets = largeImageKey == null
+                    ? null
+                    : new Assets
+                    {
+                        LargeImageKey = largeImageKey,
+                        LargeImageText = "Orbitra Launcher — в игре"
+                    }
             };
 
             _lastPresence = presence;
