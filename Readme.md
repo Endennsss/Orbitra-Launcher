@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="SS14.Launcher/Assets/brand-mark.svg" width="96" height="96" alt="Orbitra Launcher" />
+  <img src="SS14.Launcher/Assets/brand-mark.png" width="96" height="96" alt="Orbitra Launcher" />
 
   # Orbitra Launcher
 

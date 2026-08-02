@@ -3,7 +3,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:SS14.Launcher.Views"
-        xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
         mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="720"
         MinWidth="960" MinHeight="600"
         Width="1180" Height="720"
@@ -20,7 +19,7 @@
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0" Spacing="8">
           <Border Width="32" Height="32" CornerRadius="8" ClipToBounds="True"
                   Background="#000000" IsHitTestVisible="False">
-            <Image Source="{svg:SvgImage /Assets/brand-mark.svg}"
+            <Image Source="{DynamicResource OrbitraLogo}"
                    Stretch="UniformToFill" IsHitTestVisible="False" />
           </Border>
           <TextBlock Text="ORBITRA LAUNCHER" VerticalAlignment="Center"
