@@ -1,9 +1,4 @@
-files: ["icon.ico"]
-  license: "CC-BY-SA-4.0"
-  copyright: "By AftrLite"
-  source: "https://github.com/space-wizards/SS14.Launcher/pull/290/"
-
-- files: ["logo-long.png"]
-  license: "CC-BY-SA-4.0"
-  copyright: "By AftrLite"
-  source: "https://github.com/space-wizards/SS14.Launcher/pull/290/"
+files: ["icon.ico", "logo-long.png", "brand-mark.svg", "orbitra-logo.png"]
+  license: "LicenseRef-Orbitra-Brand"
+  copyright: "Orbitra Launcher project"
+  source: "https://github.com/Endennsss/Orbitra-Launcher"

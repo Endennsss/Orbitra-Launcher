@@ -19,6 +19,7 @@ public partial class NewsTabViewModel : MainWindowTabViewModel
     public ObservableList<NewsEntryViewModel> NewsEntries { get; } = [];
     public ObservableList<NewsEntryViewModel> LauncherNewsEntries { get; } =
     [
+        new("Orbitra получила новый логотип", summary: "Фирменный знак обновлён в интерфейсе, окнах Windows, панели задач, установщике, сборках Linux и macOS, README и на сайте проекта.", date: "2 августа 2026"),
         new("Вышел Orbitra Launcher 0.41.0", summary: "Системный центр, безопасное автообновление, диагностика, управление серверным контентом, тихий пинг, современный emoji-набор и новости сайта вошли в новый релиз.", date: "2 августа 2026"),
         new("Вышел Orbitra Launcher 0.40.1", summary: "Перед подключением Orbitra проверяет адрес, сеть, аккаунт, Loader и базу контента. Ошибки получили понятные причины, автовосстановление, быстрый переход к журналам и ручную проверку обновлений.", date: "2 августа 2026"),
         new("Фоны тем стали легче", summary: "Удалена поддержка MP4 и видеобиблиотеки. Для анимированных фонов оставлен стабильный зацикленный GIF, обычные изображения продолжают работать.", date: "1 августа 2026"),
