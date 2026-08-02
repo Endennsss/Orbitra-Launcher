@@ -21,6 +21,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
 {
     private readonly MainWindowViewModel _main;
     private readonly DataManager _cfg;
+    private readonly ThemeWorkshopService _workshop = new();
     private Bitmap? _backgroundBitmap;
     private AnimatedImageSource? _backgroundAnimation;
     private readonly Dictionary<string, Bitmap?> _tabBackgrounds = new(StringComparer.OrdinalIgnoreCase);
@@ -30,6 +31,14 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
     private CancellationTokenSource? _transitionCancellation;
     public ObservableCollection<ThemeBackgroundOptionViewModel> TabBackgroundOptions { get; } = [];
     public ObservableCollection<ThemeLibraryItemViewModel> ThemeLibrary { get; } = [];
+    public ObservableCollection<WorkshopThemeItemViewModel> WorkshopThemes { get; } = [];
+    public ObservableCollection<WorkshopCommentItemViewModel> WorkshopComments { get; } = [];
+    private WorkshopThemeItemViewModel? _selectedWorkshopTheme;
+    private bool _workshopBusy;
+    private string _workshopStatus = "Загрузка мастерской…";
+    private string _publishName = "";
+    private string _publishDescription = "";
+    private string _newComment = "";
 
     public CustomThemeTabViewModel(MainWindowViewModel main)
     {
@@ -39,6 +48,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         foreach (var (key, name) in new[] { ("home", "Главная"), ("servers", "Серверы"), ("options", "Настройки") })
             TabBackgroundOptions.Add(new ThemeBackgroundOptionViewModel(this, key, name));
         LoadThemeLibrary();
+        _ = RefreshWorkshopAsync();
     }
 
     public override string Name => "Кастом тема";
@@ -509,6 +519,144 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
 
     public bool IsLibraryEmpty => ThemeLibrary.Count == 0;
 
+    public bool WorkshopBusy { get => _workshopBusy; private set => SetProperty(ref _workshopBusy, value); }
+    public string WorkshopStatus { get => _workshopStatus; private set => SetProperty(ref _workshopStatus, value); }
+    public bool IsWorkshopEmpty => WorkshopThemes.Count == 0;
+    public bool HasSelectedWorkshopTheme => _selectedWorkshopTheme != null;
+    public WorkshopThemeItemViewModel? SelectedWorkshopTheme
+    {
+        get => _selectedWorkshopTheme;
+        private set
+        {
+            if (!SetProperty(ref _selectedWorkshopTheme, value)) return;
+            OnPropertyChanged(nameof(HasSelectedWorkshopTheme));
+        }
+    }
+    public string PublishName { get => _publishName; set => SetProperty(ref _publishName, value); }
+    public string PublishDescription { get => _publishDescription; set => SetProperty(ref _publishDescription, value); }
+    public string NewComment { get => _newComment; set => SetProperty(ref _newComment, value); }
+
+    public async void RefreshWorkshop() => await RefreshWorkshopAsync();
+
+    private async Task RefreshWorkshopAsync()
+    {
+        if (WorkshopBusy) return;
+        WorkshopBusy = true;
+        WorkshopStatus = "Загрузка мастерской…";
+        try
+        {
+            var themes = await _workshop.GetThemesAsync(_main.ActiveAccount?.UserId);
+            WorkshopThemes.Clear();
+            foreach (var theme in themes) WorkshopThemes.Add(new WorkshopThemeItemViewModel(this, theme));
+            WorkshopStatus = themes.Count == 0 ? "В мастерской пока нет тем." : $"Тем в мастерской: {themes.Count}";
+            OnPropertyChanged(nameof(IsWorkshopEmpty));
+        }
+        catch (Exception exception)
+        {
+            WorkshopStatus = exception.Message;
+        }
+        finally { WorkshopBusy = false; }
+    }
+
+    public async void PublishToWorkshop()
+    {
+        var account = _main.ActiveAccount;
+        if (account == null) { _main.ShowToast("Сначала войдите в аккаунт SS14", true); return; }
+        if (string.IsNullOrWhiteSpace(PublishName)) { _main.ShowToast("Введите название темы", true); return; }
+        if (PublishName.Trim().Length > 60 || PublishDescription.Trim().Length > 2000)
+        { _main.ShowToast("Название или описание слишком длинное", true); return; }
+        WorkshopBusy = true;
+        try
+        {
+            var request = new WorkshopPublishRequest(Guid.NewGuid(), account.UserId, account.Username,
+                PublishName, PublishDescription, Background, Surface, Accent, Text, Blur);
+            await _workshop.PublishAsync(request, CreateThemeArchiveBytes());
+            PublishName = ""; PublishDescription = "";
+            _main.ShowToast("Тема опубликована в мастерской");
+        }
+        catch (Exception exception) { _main.ShowToast(exception.Message, true); }
+        finally { WorkshopBusy = false; }
+        await RefreshWorkshopAsync();
+    }
+
+    internal async void InstallWorkshopTheme(WorkshopThemeItemViewModel item)
+    {
+        if (WorkshopBusy) return;
+        WorkshopBusy = true;
+        try
+        {
+            ApplyWorkshopArchive(await _workshop.DownloadAsync(item.Theme));
+            _main.ShowToast($"Тема «{item.Name}» установлена");
+        }
+        catch (Exception exception) { _main.ShowToast(exception.Message, true); }
+        finally { WorkshopBusy = false; }
+    }
+
+    internal async void ToggleWorkshopLike(WorkshopThemeItemViewModel item)
+    {
+        var account = _main.ActiveAccount;
+        if (account == null) { _main.ShowToast("Сначала войдите в аккаунт SS14", true); return; }
+        try
+        {
+            await _workshop.SetLikeAsync(item.Theme.Id, account.UserId, !item.IsLiked);
+            await RefreshWorkshopAsync();
+        }
+        catch (Exception exception) { _main.ShowToast(exception.Message, true); }
+    }
+
+    internal async void OpenWorkshopTheme(WorkshopThemeItemViewModel item)
+    {
+        SelectedWorkshopTheme = item;
+        NewComment = "";
+        await LoadCommentsAsync(item.Theme.Id);
+    }
+
+    public void CloseWorkshopTheme()
+    {
+        SelectedWorkshopTheme = null;
+        WorkshopComments.Clear();
+    }
+
+    public async void AddWorkshopComment()
+    {
+        var account = _main.ActiveAccount;
+        if (account == null) { _main.ShowToast("Сначала войдите в аккаунт SS14", true); return; }
+        if (SelectedWorkshopTheme == null || string.IsNullOrWhiteSpace(NewComment)) return;
+        if (NewComment.Trim().Length > 1000) { _main.ShowToast("Комментарий длиннее 1000 символов", true); return; }
+        try
+        {
+            await _workshop.AddCommentAsync(SelectedWorkshopTheme.Theme.Id, account.UserId, account.Username, NewComment);
+            NewComment = "";
+            await LoadCommentsAsync(SelectedWorkshopTheme.Theme.Id);
+        }
+        catch (Exception exception) { _main.ShowToast(exception.Message, true); }
+    }
+
+    private async Task LoadCommentsAsync(Guid themeId)
+    {
+        try
+        {
+            var comments = await _workshop.GetCommentsAsync(themeId);
+            WorkshopComments.Clear();
+            foreach (var comment in comments) WorkshopComments.Add(new WorkshopCommentItemViewModel(comment));
+        }
+        catch (Exception exception) { _main.ShowToast(exception.Message, true); }
+    }
+
+    private byte[] CreateThemeArchiveBytes()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"orbitra-theme-{Guid.NewGuid():N}.zip");
+        try { WriteThemeArchive(path); return File.ReadAllBytes(path); }
+        finally { try { File.Delete(path); } catch { } }
+    }
+
+    private void ApplyWorkshopArchive(byte[] bytes)
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"orbitra-theme-{Guid.NewGuid():N}.zip");
+        try { File.WriteAllBytes(path, bytes); ApplyPackage(ReadThemeArchive(path)); }
+        finally { try { File.Delete(path); } catch { } }
+    }
+
     public void SaveToLibrary()
     {
         try
@@ -573,4 +721,33 @@ public sealed class ThemeLibraryItemViewModel
     { _owner = owner; _path = path; }
     public void Apply() => _owner.ApplyLibraryTheme(_path);
     public void Delete() => _owner.DeleteLibraryTheme(_path);
+}
+
+public sealed class WorkshopThemeItemViewModel
+{
+    private readonly CustomThemeTabViewModel _owner;
+    public WorkshopThemeDto Theme { get; }
+    public string Name => Theme.Name;
+    public string Description => Theme.Description;
+    public string Author => $"Автор: {Theme.AuthorName}";
+    public string Version => $"v{Theme.Version}";
+    public string Date => Theme.CreatedAt.LocalDateTime.ToString("dd.MM.yyyy");
+    public string Stats => $"♥ {Theme.LikeCount}   ↓ {Theme.Downloads}   Комментарии: {Theme.CommentCount}";
+    public string LikeText => Theme.IsLiked ? "Убрать лайк" : "Нравится";
+    public bool IsLiked => Theme.IsLiked;
+    public string Palette => $"{Theme.Background}  {Theme.Surface}  {Theme.Accent}  {Theme.TextColor}";
+    public WorkshopThemeItemViewModel(CustomThemeTabViewModel owner, WorkshopThemeDto theme)
+    { _owner = owner; Theme = theme; }
+    public void Install() => _owner.InstallWorkshopTheme(this);
+    public void ToggleLike() => _owner.ToggleWorkshopLike(this);
+    public void Open() => _owner.OpenWorkshopTheme(this);
+}
+
+public sealed class WorkshopCommentItemViewModel
+{
+    private readonly WorkshopCommentDto _comment;
+    public string Author => _comment.UserName;
+    public string Content => _comment.Content;
+    public string Date => _comment.CreatedAt.LocalDateTime.ToString("dd.MM.yyyy · HH:mm");
+    public WorkshopCommentItemViewModel(WorkshopCommentDto comment) => _comment = comment;
 }

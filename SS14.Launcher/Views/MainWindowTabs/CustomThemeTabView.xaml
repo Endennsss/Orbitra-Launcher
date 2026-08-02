@@ -23,6 +23,106 @@
         </Grid>
       </StackPanel>
 
+      <Expander IsExpanded="False">
+        <Expander.Header>
+          <Grid ColumnDefinitions="Auto,*,Auto" MinHeight="48">
+            <Path Width="22" Height="22" Stretch="Uniform" VerticalAlignment="Center"
+                  Data="M3,9 L4,4 L20,4 L21,9 M5,13 L5,21 L19,21 L19,13 M9,21 L9,15 L15,15 L15,21"
+                  Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.7" StrokeLineCap="Round" />
+            <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
+              <TextBlock Text="МАСТЕРСКАЯ ТЕМ" Classes="SectionLabel" />
+              <TextBlock Text="Публикация, установка, лайки и комментарии сообщества" Classes="SubText" />
+            </StackPanel>
+            <Button Grid.Column="2" Content="Обновить" Command="{Binding RefreshWorkshop}" />
+          </Grid>
+        </Expander.Header>
+        <StackPanel Spacing="14" Margin="0,12,0,0">
+          <Border Classes="Surface" Padding="18">
+            <StackPanel Spacing="9">
+              <TextBlock Text="ОПУБЛИКОВАТЬ ТЕКУЩУЮ ТЕМУ" Classes="SectionLabel" />
+              <Grid ColumnDefinitions="220,*">
+                <TextBox Text="{Binding PublishName, Mode=TwoWay}" Watermark="Название темы" MaxLength="60" />
+                <TextBox Grid.Column="1" Text="{Binding PublishDescription, Mode=TwoWay}" Watermark="Короткое описание"
+                         MaxLength="2000" Margin="8,0,0,0" />
+              </Grid>
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Автором будет указан активный аккаунт Space Station 14. Публикация появится сразу."
+                           Classes="SubText" VerticalAlignment="Center" TextWrapping="Wrap" />
+                <Button Grid.Column="1" Content="Опубликовать" Command="{Binding PublishToWorkshop}"
+                        IsEnabled="{Binding !WorkshopBusy}" />
+              </Grid>
+            </StackPanel>
+          </Border>
+
+          <TextBlock Text="{Binding WorkshopStatus}" Classes="SubText" />
+          <ProgressBar IsIndeterminate="True" Height="3" IsVisible="{Binding WorkshopBusy}" />
+          <ItemsControl ItemsSource="{Binding WorkshopThemes}" IsVisible="{Binding !HasSelectedWorkshopTheme}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:WorkshopThemeItemViewModel">
+                <Border Classes="Surface" Padding="16" Margin="0,0,0,8">
+                  <Grid ColumnDefinitions="8,*,Auto">
+                    <Border Background="{Binding Theme.Accent}" />
+                    <StackPanel Grid.Column="1" Margin="14,0" Spacing="5">
+                      <WrapPanel>
+                        <TextBlock Text="{Binding Name}" FontSize="19" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding Version}" Classes="SubText" Margin="10,4,0,0" />
+                      </WrapPanel>
+                      <TextBlock Text="{Binding Description}" TextWrapping="Wrap" MaxLines="2" />
+                      <TextBlock Text="{Binding Author}" Classes="SubText" />
+                      <TextBlock Text="{Binding Stats}" Classes="SubText" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Spacing="6" Width="145">
+                      <Button Content="Установить" Command="{Binding Install}" />
+                      <Button Content="{Binding LikeText}" Command="{Binding ToggleLike}" />
+                      <Button Content="Подробнее" Command="{Binding Open}" />
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <Border Classes="Surface" Padding="18" IsVisible="{Binding HasSelectedWorkshopTheme}">
+            <StackPanel Spacing="12">
+              <Grid ColumnDefinitions="*,Auto">
+                <StackPanel>
+                  <TextBlock Text="{Binding SelectedWorkshopTheme.Name}" FontSize="22" FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding SelectedWorkshopTheme.Author}" Classes="SubText" />
+                </StackPanel>
+                <Button Grid.Column="1" Content="Назад к темам" Command="{Binding CloseWorkshopTheme}" />
+              </Grid>
+              <TextBlock Text="{Binding SelectedWorkshopTheme.Description}" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding SelectedWorkshopTheme.Palette}" Classes="SubText" FontFamily="Consolas" />
+              <WrapPanel>
+                <Button Content="Установить" Command="{Binding SelectedWorkshopTheme.Install}" />
+                <Button Content="{Binding SelectedWorkshopTheme.LikeText}" Command="{Binding SelectedWorkshopTheme.ToggleLike}" />
+              </WrapPanel>
+              <TextBlock Text="КОММЕНТАРИИ" Classes="SectionLabel" Margin="0,8,0,0" />
+              <ItemsControl ItemsSource="{Binding WorkshopComments}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:WorkshopCommentItemViewModel">
+                    <Border Background="{DynamicResource LauncherSurfaceAltBrush}" Padding="11" Margin="0,0,0,6">
+                      <StackPanel>
+                        <Grid ColumnDefinitions="*,Auto">
+                          <TextBlock Text="{Binding Author}" FontWeight="SemiBold" />
+                          <TextBlock Grid.Column="1" Text="{Binding Date}" Classes="SubText" />
+                        </Grid>
+                        <TextBlock Text="{Binding Content}" TextWrapping="Wrap" Margin="0,5,0,0" />
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBox Text="{Binding NewComment, Mode=TwoWay}" Watermark="Комментарий от активного аккаунта SS14"
+                         MaxLength="1000" />
+                <Button Grid.Column="1" Content="Отправить" Command="{Binding AddWorkshopComment}" Margin="8,0,0,0" />
+              </Grid>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Expander>
+
       <Border Classes="Surface" Padding="20">
         <StackPanel Spacing="9">
           <CheckBox Content="Использовать кастомную тему" IsChecked="{Binding Enabled, Mode=TwoWay}" />

@@ -43,6 +43,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
     private readonly List<MainWindowTabViewModel> _allTabs = [];
 
     public DataManager Cfg => _cfg;
+    public LoggedInAccount? ActiveAccount => _loginMgr.ActiveAccount;
     public ICVarEntry<bool> UseTextLogo => Cfg.GetCVarEntry(CVars.UseTextLogo);
     [ObservableProperty] private bool _outOfDate;
     [ObservableProperty] private bool _customUpdateAvailable;
