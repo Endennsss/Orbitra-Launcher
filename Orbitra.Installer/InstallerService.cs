@@ -29,8 +29,7 @@ internal sealed class InstallerService : IDisposable
 
         progress.Report(new(0.02, "Получение последнего релиза…", "Checking the latest release…"));
         var releaseJson = await _http.GetStringAsync(LatestReleaseApi, cancellationToken);
-        var release = JsonSerializer.Deserialize<ReleaseDto>(releaseJson,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+        var release = JsonSerializer.Deserialize(releaseJson, InstallerJsonContext.Default.ReleaseDto)
             ?? throw new InvalidDataException("GitHub вернул пустое описание релиза.");
         if (release.Draft || release.Prerelease)
             throw new InvalidDataException("Последний релиз не является стабильным.");
@@ -192,15 +191,13 @@ internal sealed class InstallerService : IDisposable
 
     private static void CreateShortcut(string shortcutPath, string executable)
     {
-        var shellType = Type.GetTypeFromProgID("WScript.Shell")
-                        ?? throw new PlatformNotSupportedException("Windows Script Host недоступен.");
-        dynamic shell = Activator.CreateInstance(shellType)!;
-        dynamic shortcut = shell.CreateShortcut(shortcutPath);
-        shortcut.TargetPath = executable;
-        shortcut.WorkingDirectory = Path.GetDirectoryName(executable)!;
-        shortcut.Description = "Orbitra Launcher";
-        shortcut.IconLocation = executable + ",0";
-        shortcut.Save();
+        // InternetShortcut is understood natively by Windows Explorer and avoids runtime COM,
+        // which keeps the installer compatible with Native AOT.
+        var urlPath = Path.ChangeExtension(shortcutPath, ".url");
+        var fileUri = new Uri(executable).AbsoluteUri;
+        File.WriteAllText(urlPath,
+            $"[InternetShortcut]{Environment.NewLine}URL={fileUri}{Environment.NewLine}" +
+            $"IconFile={executable}{Environment.NewLine}IconIndex=0{Environment.NewLine}");
     }
 
     public static void Launch(string executable) => Process.Start(new ProcessStartInfo(executable)
@@ -215,18 +212,22 @@ internal sealed class InstallerService : IDisposable
 
     public void Dispose() => _http.Dispose();
 
-    private sealed record ReleaseDto(
-        [property: JsonPropertyName("tag_name")] string TagName,
-        [property: JsonPropertyName("draft")] bool Draft,
-        [property: JsonPropertyName("prerelease")] bool Prerelease,
-        [property: JsonPropertyName("assets")] AssetDto[] Assets);
-
-    private sealed record AssetDto(
-        [property: JsonPropertyName("name")] string Name,
-        [property: JsonPropertyName("browser_download_url")] string BrowserDownloadUrl,
-        [property: JsonPropertyName("size")] long Size,
-        [property: JsonPropertyName("digest")] string? Digest);
 }
 
 internal sealed record InstallProgress(double Value, string Russian, string English);
 internal sealed record InstallResult(string Directory, string Version, string Executable);
+
+internal sealed record ReleaseDto(
+    [property: JsonPropertyName("tag_name")] string TagName,
+    [property: JsonPropertyName("draft")] bool Draft,
+    [property: JsonPropertyName("prerelease")] bool Prerelease,
+    [property: JsonPropertyName("assets")] AssetDto[] Assets);
+
+internal sealed record AssetDto(
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("browser_download_url")] string BrowserDownloadUrl,
+    [property: JsonPropertyName("size")] long Size,
+    [property: JsonPropertyName("digest")] string? Digest);
+
+[JsonSerializable(typeof(ReleaseDto))]
+internal sealed partial class InstallerJsonContext : JsonSerializerContext;

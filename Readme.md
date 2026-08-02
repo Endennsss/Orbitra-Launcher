@@ -183,7 +183,7 @@ python publish.py windows --x64-only
 Сборка фирменного C#-установщика одним EXE:
 
 ```powershell
-dotnet publish Orbitra.Installer/Orbitra.Installer.csproj -c Release -r win-x64 --self-contained true -o bin/installer-csharp -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true
+.\tools\build-installer.ps1
 ```
 
 ### Изолированный профиль разработки

@@ -20,7 +20,8 @@ jobs:
           python-version: "3.x"
       - run: python publish.py windows --x64-only
       - name: Build C# Orbitra Installer
-        run: dotnet publish Orbitra.Installer/Orbitra.Installer.csproj -c Release -r win-x64 --self-contained true --nologo -o bin/installer-csharp -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true
+        shell: pwsh
+        run: ./tools/build-installer.ps1
       - uses: actions/upload-artifact@v4
         with:
           name: Orbitra-Launcher-Windows-x64

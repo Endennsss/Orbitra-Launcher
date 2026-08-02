@@ -8,10 +8,15 @@
     <ApplicationIcon>../SS14.Launcher/Assets/icon.ico</ApplicationIcon>
     <AssemblyName>Orbitra_Launcher_Installer</AssemblyName>
     <RootNamespace>Orbitra.Installer</RootNamespace>
+    <PublishAot>true</PublishAot>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <TrimMode>partial</TrimMode>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <IlcOptimizationPreference>Size</IlcOptimizationPreference>
+    <StackTraceSupport>false</StackTraceSupport>
+    <EnableSourceLink>false</EnableSourceLink>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageVersion Remove="Microsoft.NET.ILLink.Tasks" />
-  </ItemGroup>
+  <ItemGroup><PackageVersion Remove="Microsoft.NET.ILLink.Tasks" /></ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Desktop" />
