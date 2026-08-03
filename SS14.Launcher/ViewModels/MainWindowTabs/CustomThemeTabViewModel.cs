@@ -14,6 +14,7 @@ using Avalonia.Platform.Storage;
 using AnimatedImage.Avalonia;
 using SS14.Launcher.Models.Data;
 using SS14.Launcher.Utility;
+using SS14.Launcher.Views;
 
 namespace SS14.Launcher.ViewModels.MainWindowTabs;
 
@@ -39,6 +40,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
     private string _publishName = "";
     private string _publishDescription = "";
     private string _newComment = "";
+    private ThemeWorkshopWindow? _workshopWindow;
 
     public CustomThemeTabViewModel(MainWindowViewModel main)
     {
@@ -95,6 +97,22 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         }
     }
 
+    public int Dimming
+    {
+        get => _cfg.GetCVar(CVars.CustomThemeDimming);
+        set
+        {
+            var dimming = Math.Clamp(value, 0, 90);
+            if (dimming == Dimming) return;
+            _cfg.SetCVar(CVars.CustomThemeDimming, dimming);
+            _cfg.CommitConfig();
+            OnPropertyChanged(nameof(Dimming));
+            OnPropertyChanged(nameof(BackgroundDimmingOpacity));
+        }
+    }
+
+    public double BackgroundDimmingOpacity => Dimming / 100d;
+
     public Bitmap? BackgroundBitmap => _backgroundBitmap;
     public AnimatedImageSource? BackgroundAnimation => _backgroundAnimation;
     public bool BackgroundIsAnimated => _backgroundAnimation != null;
@@ -109,6 +127,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
     public string ImportPreviewColors => _pendingTheme == null ? "" :
         $"{_pendingTheme.Manifest.Background}  {_pendingTheme.Manifest.Surface}  {_pendingTheme.Manifest.Accent}  {_pendingTheme.Manifest.Text}";
     public int ImportPreviewBlur => _pendingTheme?.Manifest.Blur ?? 0;
+    public double ImportPreviewDimmingOpacity => (_pendingTheme?.Manifest.Dimming ?? 28) / 100d;
     public bool HasContrastWarning => CalculateContrast(ParseColor(Text), ParseColor(Background)) < 4.5;
     public string ContrastMessage => HasContrastWarning
         ? $"Контраст текста и фона: {CalculateContrast(ParseColor(Text), ParseColor(Background)):0.00}:1. Рекомендуется минимум 4.5:1."
@@ -183,6 +202,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         _cfg.SetCVar(CVars.CustomThemeText, "#F2F2F2");
         _cfg.SetCVar(CVars.CustomThemeMuted, "#999999");
         _cfg.SetCVar(CVars.CustomThemeBlur, 8);
+        _cfg.SetCVar(CVars.CustomThemeDimming, 28);
         _cfg.SetCVar(CVars.CustomThemeImage, "");
         _cfg.CommitConfig();
         _backgroundBitmap?.Dispose();
@@ -193,6 +213,8 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
             OnPropertyChanged(property + "Color");
         }
         OnPropertyChanged(nameof(Blur));
+        OnPropertyChanged(nameof(Dimming));
+        OnPropertyChanged(nameof(BackgroundDimmingOpacity));
         OnPropertyChanged(nameof(BackgroundBitmap));
         OnPropertyChanged(nameof(BackgroundVisible));
         if (Enabled) BeginThemeTransition();
@@ -252,6 +274,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         OnPropertyChanged(nameof(ImportPreviewBackground));
         OnPropertyChanged(nameof(ImportPreviewColors));
         OnPropertyChanged(nameof(ImportPreviewBlur));
+        OnPropertyChanged(nameof(ImportPreviewDimmingOpacity));
     }
 
     private void RefreshAllProperties()
@@ -263,6 +286,8 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
             OnPropertyChanged(property + "Color");
         }
         OnPropertyChanged(nameof(Blur));
+        OnPropertyChanged(nameof(Dimming));
+        OnPropertyChanged(nameof(BackgroundDimmingOpacity));
         OnPropertyChanged(nameof(BackgroundVisible));
     }
 
@@ -284,7 +309,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
             var entry = AddImage(_cfg.GetCVar(GetTabBackgroundCVar(key)), "background-" + key);
             if (entry != null) tabs[key] = entry;
         }
-        var manifest = new ThemeArchive(1, Enabled, Background, Surface, Control, Accent, Text, Muted, Blur, imageName, tabs);
+        var manifest = new ThemeArchive(1, Enabled, Background, Surface, Control, Accent, Text, Muted, Blur, imageName, tabs, Dimming);
         var manifestEntry = archive.CreateEntry("theme.json", CompressionLevel.Optimal);
         using var writer = new StreamWriter(manifestEntry.Open());
         writer.Write(JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true }));
@@ -330,6 +355,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         OnPropertyChanged(nameof(ImportPreviewBackground));
         OnPropertyChanged(nameof(ImportPreviewColors));
         OnPropertyChanged(nameof(ImportPreviewBlur));
+        OnPropertyChanged(nameof(ImportPreviewDimmingOpacity));
     }
 
     private void ApplyPackage(ThemePackage package)
@@ -351,6 +377,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         _cfg.SetCVar(CVars.CustomThemeText, manifest.Text);
         _cfg.SetCVar(CVars.CustomThemeMuted, manifest.Muted);
         _cfg.SetCVar(CVars.CustomThemeBlur, Math.Clamp(manifest.Blur, 0, 40));
+        _cfg.SetCVar(CVars.CustomThemeDimming, Math.Clamp(manifest.Dimming, 0, 90));
         _cfg.SetCVar(CVars.CustomThemeImage, SaveImage(manifest.BackgroundFile, "custom-theme-background"));
         foreach (var key in new[] { "home", "servers", "options" })
         {
@@ -367,7 +394,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
 
     private sealed record ThemeArchive(int Version, bool Enabled, string Background, string Surface,
         string Control, string Accent, string Text, string Muted, int Blur, string? BackgroundFile,
-        Dictionary<string, string>? TabBackgroundFiles = null);
+        Dictionary<string, string>? TabBackgroundFiles = null, int Dimming = 28);
     private sealed record ThemePackage(ThemeArchive Manifest, Dictionary<string, byte[]> Images);
 
     private void SetColor(CVarDef<string> cvar, string value, string property)
@@ -535,6 +562,21 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
     public string PublishName { get => _publishName; set => SetProperty(ref _publishName, value); }
     public string PublishDescription { get => _publishDescription; set => SetProperty(ref _publishDescription, value); }
     public string NewComment { get => _newComment; set => SetProperty(ref _newComment, value); }
+
+    public async void OpenWorkshop()
+    {
+        if (_workshopWindow is { IsVisible: true })
+        {
+            _workshopWindow.Activate();
+            return;
+        }
+
+        _workshopWindow = new ThemeWorkshopWindow { DataContext = this };
+        _workshopWindow.Closed += (_, _) => _workshopWindow = null;
+        if (_main.Control is { } owner) _workshopWindow.Show(owner);
+        else _workshopWindow.Show();
+        await RefreshWorkshopAsync();
+    }
 
     public async void RefreshWorkshop() => await RefreshWorkshopAsync();
 

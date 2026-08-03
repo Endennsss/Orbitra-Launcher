@@ -145,6 +145,7 @@ public static class CVars
     public static readonly CVarDef<string> CustomThemeImageServers = CVarDef.Create("CustomThemeImageServers", "");
     public static readonly CVarDef<string> CustomThemeImageOptions = CVarDef.Create("CustomThemeImageOptions", "");
     public static readonly CVarDef<int> CustomThemeBlur = CVarDef.Create("CustomThemeBlur", 8);
+    public static readonly CVarDef<int> CustomThemeDimming = CVarDef.Create("CustomThemeDimming", 28);
     public static readonly CVarDef<bool> UiSoundsEnabled = CVarDef.Create("UiSoundsEnabled", true);
     public static readonly CVarDef<int> UiSoundVolume = CVarDef.Create("UiSoundVolume", 65);
     public static readonly CVarDef<bool> CloseToTray = CVarDef.Create("CloseToTray", true);

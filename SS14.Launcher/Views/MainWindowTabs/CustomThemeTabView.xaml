@@ -9,20 +9,23 @@
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
     <StackPanel Spacing="16">
       <StackPanel Margin="0,0,0,4">
-        <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+        <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
           <StackPanel>
             <TextBlock Text="APPEARANCE" Classes="SectionLabel" />
             <TextBlock Text="Кастом тема" Classes="NanoHeadingMedium" />
           </StackPanel>
-          <Button Grid.Column="1" Content="Импорт ZIP" Command="{Binding ImportTheme}"
+          <Button Grid.Column="1" Content="Мастерская" Command="{Binding OpenWorkshop}"
                   VerticalAlignment="Center" />
-          <Button Grid.Column="2" Content="Экспорт ZIP" Command="{Binding ExportTheme}"
+          <Button Grid.Column="2" Content="Импорт ZIP" Command="{Binding ImportTheme}"
                   VerticalAlignment="Center" />
-          <Button Grid.Column="3" Content="Сбросить по умолчанию" Command="{Binding ResetDefaults}"
+          <Button Grid.Column="3" Content="Экспорт ZIP" Command="{Binding ExportTheme}"
+                  VerticalAlignment="Center" />
+          <Button Grid.Column="4" Content="Сбросить по умолчанию" Command="{Binding ResetDefaults}"
                   VerticalAlignment="Center" />
         </Grid>
       </StackPanel>
 
+      <!-- Мастерская вынесена в отдельное ThemeWorkshopWindow.
       <Expander IsExpanded="False">
         <Expander.Header>
           <Grid ColumnDefinitions="Auto,*,Auto" MinHeight="48">
@@ -122,6 +125,7 @@
           </Border>
         </StackPanel>
       </Expander>
+      -->
 
       <Border Classes="Surface" Padding="20">
         <StackPanel Spacing="9">
@@ -180,9 +184,12 @@
           <Grid ColumnDefinitions="220,*" Height="130">
             <Border Background="{DynamicResource LauncherWorkspaceBrush}" BorderBrush="{DynamicResource LauncherLineBrush}"
                     BorderThickness="1" ClipToBounds="True">
-              <Image Source="{Binding ImportPreviewBackground}" Stretch="UniformToFill">
-                <Image.Effect><BlurEffect Radius="{Binding ImportPreviewBlur}" /></Image.Effect>
-              </Image>
+              <Grid>
+                <Image Source="{Binding ImportPreviewBackground}" Stretch="UniformToFill">
+                  <Image.Effect><BlurEffect Radius="{Binding ImportPreviewBlur}" /></Image.Effect>
+                </Image>
+                <Border Background="#000000" Opacity="{Binding ImportPreviewDimmingOpacity}" IsHitTestVisible="False" />
+              </Grid>
             </Border>
             <StackPanel Grid.Column="1" Margin="14,0,0,0" Spacing="7" VerticalAlignment="Center">
               <TextBlock Text="Цвета" Classes="SectionLabel" />
@@ -204,11 +211,16 @@
             <Button Content="Выбрать изображение" Command="{Binding ChooseBackground}" />
             <Button Content="Убрать фон" Command="{Binding RemoveBackground}" IsEnabled="{Binding BackgroundVisible}" />
           </WrapPanel>
-          <Grid ColumnDefinitions="150,*,48">
+          <Grid ColumnDefinitions="150,*,48" RowDefinitions="Auto,Auto">
             <TextBlock Text="Сила размытия" VerticalAlignment="Center" />
             <Slider Grid.Column="1" Minimum="0" Maximum="40" TickFrequency="1"
                     Value="{Binding Blur, Mode=TwoWay}" Margin="8,0" />
             <TextBlock Grid.Column="2" Text="{Binding Blur}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+            <TextBlock Grid.Row="1" Text="Затемнение фона" VerticalAlignment="Center" Margin="0,8,0,0" />
+            <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="90" TickFrequency="1"
+                    Value="{Binding Dimming, Mode=TwoWay}" Margin="8,8,8,0" />
+            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Dimming, StringFormat={}{0}%}"
+                       VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,8,0,0" />
           </Grid>
           <Border Height="150" Background="{DynamicResource LauncherWorkspaceBrush}"
                   BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" ClipToBounds="True">
@@ -221,6 +233,8 @@
                      IsVisible="{Binding BackgroundIsAnimated}">
                 <Image.Effect><BlurEffect Radius="{Binding Blur}" /></Image.Effect>
               </Image>
+              <Border Background="#000000" Opacity="{Binding BackgroundDimmingOpacity}"
+                      IsVisible="{Binding BackgroundVisible}" IsHitTestVisible="False" />
               <TextBlock Text="ПРЕДПРОСМОТР ФОНА" Classes="SectionLabel" HorizontalAlignment="Center"
                          VerticalAlignment="Center" IsVisible="{Binding !BackgroundVisible}" />
             </Grid>

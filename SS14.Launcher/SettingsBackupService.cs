@@ -18,6 +18,7 @@ public static class SettingsBackupService
             [CVars.CustomThemeSurface.Name] = cfg.GetCVar(CVars.CustomThemeSurface), [CVars.CustomThemeControl.Name] = cfg.GetCVar(CVars.CustomThemeControl),
             [CVars.CustomThemeAccent.Name] = cfg.GetCVar(CVars.CustomThemeAccent), [CVars.CustomThemeText.Name] = cfg.GetCVar(CVars.CustomThemeText),
             [CVars.CustomThemeMuted.Name] = cfg.GetCVar(CVars.CustomThemeMuted), [CVars.CustomThemeBlur.Name] = cfg.GetCVar(CVars.CustomThemeBlur),
+            [CVars.CustomThemeDimming.Name] = cfg.GetCVar(CVars.CustomThemeDimming),
             [CVars.UiSoundsEnabled.Name] = cfg.GetCVar(CVars.UiSoundsEnabled), [CVars.UiSoundVolume.Name] = cfg.GetCVar(CVars.UiSoundVolume),
             [CVars.CloseToTray.Name] = cfg.GetCVar(CVars.CloseToTray), [CVars.NavigationTabOrder.Name] = cfg.GetCVar(CVars.NavigationTabOrder),
             [CVars.HiddenNavigationTabs.Name] = cfg.GetCVar(CVars.HiddenNavigationTabs), [CVars.DiscordRpcEnabled.Name] = cfg.GetCVar(CVars.DiscordRpcEnabled),
@@ -38,7 +39,7 @@ public static class SettingsBackupService
         var root = document.RootElement;
         SetString(CVars.LauncherFont); SetBool(CVars.LightTheme); SetBool(CVars.CustomThemeEnabled);
         SetString(CVars.CustomThemeBackground); SetString(CVars.CustomThemeSurface); SetString(CVars.CustomThemeControl);
-        SetString(CVars.CustomThemeAccent); SetString(CVars.CustomThemeText); SetString(CVars.CustomThemeMuted); SetInt(CVars.CustomThemeBlur);
+        SetString(CVars.CustomThemeAccent); SetString(CVars.CustomThemeText); SetString(CVars.CustomThemeMuted); SetInt(CVars.CustomThemeBlur); SetInt(CVars.CustomThemeDimming);
         SetBool(CVars.UiSoundsEnabled); SetInt(CVars.UiSoundVolume); SetBool(CVars.CloseToTray);
         SetString(CVars.NavigationTabOrder); SetString(CVars.HiddenNavigationTabs); SetBool(CVars.DiscordRpcEnabled); SetBool(CVars.FavoriteNotificationsEnabled);
         var background = archive.Entries.Find(e => e.FullName.StartsWith("background.", StringComparison.OrdinalIgnoreCase));

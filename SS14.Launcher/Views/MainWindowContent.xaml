@@ -15,14 +15,16 @@
 
   <Panel Background="{DynamicResource ThemeStripeBackBrush}" ClipToBounds="True">
     <Image Source="{Binding ActiveThemeBackground}" Stretch="UniformToFill"
-           IsVisible="{Binding CustomThemeTab.BackgroundVisible}" Opacity="0.72" IsHitTestVisible="False">
+           IsVisible="{Binding CustomThemeTab.BackgroundVisible}" IsHitTestVisible="False">
       <Image.Effect><BlurEffect Radius="{Binding CustomThemeTab.Blur}" /></Image.Effect>
     </Image>
     <Image anim:ImageBehavior.AnimatedSource="{Binding ActiveAnimatedThemeBackground}"
            anim:ImageBehavior.RepeatBehavior="Forever" Stretch="UniformToFill"
-           IsVisible="{Binding CustomThemeTab.BackgroundVisible}" Opacity="0.72" IsHitTestVisible="False">
+           IsVisible="{Binding CustomThemeTab.BackgroundVisible}" IsHitTestVisible="False">
       <Image.Effect><BlurEffect Radius="{Binding CustomThemeTab.Blur}" /></Image.Effect>
     </Image>
+    <Border Background="#000000" Opacity="{Binding CustomThemeTab.BackgroundDimmingOpacity}"
+            IsVisible="{Binding CustomThemeTab.BackgroundVisible}" IsHitTestVisible="False" />
     <Border Classes="BackgroundScan" Height="180" VerticalAlignment="Top" IsHitTestVisible="False">
       <Border.Background>
         <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
