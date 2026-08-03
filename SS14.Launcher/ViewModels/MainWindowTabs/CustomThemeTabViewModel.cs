@@ -23,6 +23,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
     private readonly MainWindowViewModel _main;
     private readonly DataManager _cfg;
     private readonly ThemeWorkshopService _workshop = new();
+    private readonly OrbitraSocialService _social = new();
     private Bitmap? _backgroundBitmap;
     private AnimatedImageSource? _backgroundAnimation;
     private readonly Dictionary<string, Bitmap?> _tabBackgrounds = new(StringComparer.OrdinalIgnoreCase);
@@ -585,6 +586,8 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
     public string PublishName { get => _publishName; set => SetProperty(ref _publishName, value); }
     public string PublishDescription { get => _publishDescription; set => SetProperty(ref _publishDescription, value); }
     public string NewComment { get => _newComment; set => SetProperty(ref _newComment, value); }
+    private string _workshopReportReason = "";
+    public string WorkshopReportReason { get => _workshopReportReason; set => SetProperty(ref _workshopReportReason, value); }
     public string WorkshopSearch
     {
         get => _workshopSearch;
@@ -837,6 +840,15 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
             await LoadCommentsAsync(SelectedWorkshopTheme.Theme.Id);
         }
         catch (Exception exception) { _main.ShowToast(exception.Message, true); }
+    }
+
+    public async void ReportSelectedWorkshopTheme()
+    {
+        var account=_main.ActiveAccount;var theme=SelectedWorkshopTheme?.Theme;
+        if(account==null||theme==null)return;
+        if(WorkshopReportReason.Trim().Length<5){_main.ShowToast("Опишите причину жалобы",true);return;}
+        try{await _social.ReportThemeAsync(account.UserId,theme.Id,theme.Name,WorkshopReportReason);WorkshopReportReason="";_main.ShowToast("Жалоба на тему отправлена");}
+        catch(Exception e){_main.ShowToast(e.Message,true);}
     }
 
     private async Task LoadCommentsAsync(Guid themeId)

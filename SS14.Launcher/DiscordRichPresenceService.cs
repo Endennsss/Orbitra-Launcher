@@ -38,6 +38,12 @@ public sealed class DiscordRichPresenceService : IDisposable
     private string? _map;
     private string? _gamePreset;
     private bool _isPlaying;
+    private string _smallImageKey = "player_avatar";
+    private Guid? _avatarUserId;
+    private DateTime _avatarCheckedAt;
+    private int _avatarRefreshRunning;
+    private string _launcherDetails = "В лаунчере";
+    private string _launcherState = "Главное меню";
     public bool IsPlaying => _isPlaying;
     public bool IsConnected => _connected;
     private DataManager Config => Locator.Current.GetRequiredService<DataManager>();
@@ -160,13 +166,13 @@ public sealed class DiscordRichPresenceService : IDisposable
     public void ShowLauncher()
     {
         _isPlaying = false;
-        SetPresence("В лаунчере", "Главное меню");
+        SetLauncherPresence("В лаунчере", "Главное меню");
     }
 
     public void ShowSearching()
     {
         _isPlaying = false;
-        SetPresence("Ищет сервер", "Просматривает список серверов");
+        SetLauncherPresence("Ищет сервер", "Просматривает список серверов");
     }
 
     public void SelectServer(string name, string address, int playerCount, int maxPlayerCount, TimeSpan? ping,
@@ -176,7 +182,7 @@ public sealed class DiscordRichPresenceService : IDisposable
         _selectedServerName = string.IsNullOrWhiteSpace(name) ? address : name;
         _selectedServerAddress = address;
         UpdateStats(playerCount, maxPlayerCount, ping, map, gamePreset);
-        SetPresence("Выбрал сервер", _selectedServerName);
+        SetLauncherPresence("Выбрал сервер", _selectedServerName);
     }
 
     public void UpdateSelectedServerStats(string address, int playerCount, int maxPlayerCount, TimeSpan? ping,
@@ -199,7 +205,7 @@ public sealed class DiscordRichPresenceService : IDisposable
         }
 
         _isPlaying = false;
-        SetPresence("Подключается к серверу", _selectedServerName!);
+        SetLauncherPresence("Подключается к серверу", _selectedServerName!);
     }
 
     public void ShowPlaying()
@@ -220,7 +226,9 @@ public sealed class DiscordRichPresenceService : IDisposable
         if (Config.GetCVar(CVars.DiscordRpcShowNickname)) parts.Add(username);
         if (Config.GetCVar(CVars.DiscordRpcShowOnline)) parts.Add($"Онлайн {online}");
         if (Config.GetCVar(CVars.DiscordRpcShowPing)) parts.Add($"Пинг {ping}");
-        SetPresence(details, parts.Count == 0 ? "В игре" : string.Join(" · ", parts), "in_the_game");
+        var smallImage = Config.GetCVar(CVars.DiscordRpcShowAvatar) ? GetAvatarImageKey() : null;
+        SetPresence(details, parts.Count == 0 ? "В игре" : string.Join(" · ", parts), "in_the_game", smallImage,
+            username);
     }
 
     public void RefreshSettings()
@@ -235,6 +243,13 @@ public sealed class DiscordRichPresenceService : IDisposable
         if (_isPlaying) ShowPlaying(); else ShowLauncher();
     }
 
+    public void RefreshProfileAvatar()
+    {
+        _avatarUserId = null;
+        _avatarCheckedAt = DateTime.MinValue;
+        RefreshSettings();
+    }
+
     private void UpdateStats(int playerCount, int maxPlayerCount, TimeSpan? ping, string? map, string? gamePreset)
     {
         _playerCount = playerCount;
@@ -244,7 +259,49 @@ public sealed class DiscordRichPresenceService : IDisposable
         _gamePreset = gamePreset;
     }
 
-    private void SetPresence(string details, string state, string? largeImageKey = null)
+    private string GetAvatarImageKey()
+    {
+        var account = Locator.Current.GetService<LoginManager>()?.ActiveAccount;
+        if (account == null) return "player_avatar";
+        if (_avatarUserId != account.UserId || DateTime.UtcNow - _avatarCheckedAt > TimeSpan.FromMinutes(2))
+            _ = RefreshAvatarAsync(account.UserId);
+        return _avatarUserId == account.UserId ? _smallImageKey : "player_avatar";
+    }
+
+    private void SetLauncherPresence(string details, string state)
+    {
+        _launcherDetails = details;
+        _launcherState = state;
+        var username = Locator.Current.GetService<LoginManager>()?.ActiveAccount?.Username ?? "Игрок";
+        var smallImage = Config.GetCVar(CVars.DiscordRpcShowAvatar) ? GetAvatarImageKey() : null;
+        SetPresence(details, state, "in_the_launcher", smallImage,
+            username);
+    }
+
+    private async Task RefreshAvatarAsync(Guid userId)
+    {
+        if (Interlocked.Exchange(ref _avatarRefreshRunning, 1) != 0) return;
+        try
+        {
+            using var social = new OrbitraSocialService();
+            var profile = await social.GetProfileAsync(userId);
+            _smallImageKey = social.AvatarUrl(profile?.AvatarPath) ?? "player_avatar";
+            _avatarUserId = userId;
+            _avatarCheckedAt = DateTime.UtcNow;
+            if (_isPlaying) ShowPlaying(); else SetLauncherPresence(_launcherDetails, _launcherState);
+        }
+        catch (Exception e)
+        {
+            _smallImageKey = "player_avatar";
+            _avatarUserId = userId;
+            _avatarCheckedAt = DateTime.UtcNow;
+            Log.Debug(e, "Unable to load Discord RPC profile avatar");
+        }
+        finally { Interlocked.Exchange(ref _avatarRefreshRunning, 0); }
+    }
+
+    private void SetPresence(string details, string state, string? largeImageKey = null,
+        string? smallImageKey = null, string? smallImageText = null)
     {
         if (!Config.GetCVar(CVars.DiscordRpcEnabled))
         {
@@ -266,7 +323,11 @@ public sealed class DiscordRichPresenceService : IDisposable
                     : new Assets
                     {
                         LargeImageKey = largeImageKey,
-                        LargeImageText = "Orbitra Launcher — в игре"
+                        LargeImageText = largeImageKey == "in_the_game"
+                            ? "Orbitra Launcher — в игре"
+                            : "Orbitra Launcher",
+                        SmallImageKey = smallImageKey,
+                        SmallImageText = smallImageText
                     }
             };
 

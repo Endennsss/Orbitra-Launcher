@@ -1,0 +1,5 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="SS14.Launcher.Views.CreatorBadge">
+ <Border Background="#01000000" Padding="2" ToolTip.Tip="Создатель лаунчера" ToolTip.ShowDelay="100">
+  <Viewbox Stretch="Uniform"><Path Data="M2,4 L5,16 L19,16 L22,4 L16,10 L12,4 L8,10 Z M5,20 L19,20" Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Viewbox>
+ </Border>
+</UserControl>

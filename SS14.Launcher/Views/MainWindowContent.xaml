@@ -37,14 +37,17 @@
     <DockPanel LastChildFill="true">
       <Grid>
         <!-- Main tabbed layout when logged in -->
-        <TabControl IsVisible="{Binding LoggedIn}" ItemsSource="{Binding Tabs}" TabStripPlacement="Left"
-                    SelectedIndex="{Binding SelectedIndex,Mode=TwoWay}" Margin="0">
-          <TabControl.ItemsPanel>
+        <Grid IsVisible="{Binding LoggedIn}" ColumnDefinitions="240,2,*">
+          <Border Background="{DynamicResource LauncherChromeBrush}">
+          <ListBox ItemsSource="{Binding Tabs}" SelectedIndex="{Binding SelectedIndex,Mode=TwoWay}"
+                   ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                   Background="Transparent" BorderThickness="0">
+          <ListBox.ItemsPanel>
             <ItemsPanelTemplate>
               <StackPanel Width="210" Spacing="4" Margin="14,18" />
             </ItemsPanelTemplate>
-          </TabControl.ItemsPanel>
-          <TabControl.ItemTemplate>
+          </ListBox.ItemsPanel>
+          <ListBox.ItemTemplate>
             <DataTemplate DataType="mainWindowTabs:MainWindowTabViewModel">
               <Grid ColumnDefinitions="4,26,*,Auto" Height="46" Margin="0">
                 <Border Classes="NavIndicator" Width="3" Height="8" HorizontalAlignment="Left"
@@ -63,8 +66,12 @@
                 </Border>
               </Grid>
             </DataTemplate>
-          </TabControl.ItemTemplate>
-        </TabControl>
+          </ListBox.ItemTemplate>
+          </ListBox>
+          </Border>
+          <Border Grid.Column="1" Background="{DynamicResource ThemeStripebackEdgeBrush}"/>
+          <ContentControl Grid.Column="2" Content="{Binding SelectedTab}" Margin="22" ClipToBounds="True"/>
+        </Grid>
         <!-- Login interface when not logged in -->
         <v:MainWindowLogin
           IsVisible="{Binding !$parent.DataContext.LoggedIn}"

@@ -150,6 +150,7 @@
               <Button Content="Удалить публикацию" Command="{Binding SelectedWorkshopTheme.Delete}"
                       IsVisible="{Binding SelectedWorkshopTheme.IsOwn}" />
             </WrapPanel>
+            <Border Background="{DynamicResource LauncherSurfaceAltBrush}" Padding="12"><Grid ColumnDefinitions="*,Auto"><TextBox Text="{Binding WorkshopReportReason,Mode=TwoWay}" MaxLength="500" Watermark="Причина жалобы на тему"/><Button Grid.Column="1" Content="Пожаловаться" Command="{Binding ReportSelectedWorkshopTheme}" Margin="8,0,0,0"/></Grid></Border>
             <TextBlock Text="КОММЕНТАРИИ" Classes="SectionLabel" Margin="0,8,0,0" />
             <ItemsControl ItemsSource="{Binding WorkshopComments}">
               <ItemsControl.ItemTemplate>

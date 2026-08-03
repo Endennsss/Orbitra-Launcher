@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
@@ -212,6 +213,22 @@ public sealed class ServerEntryViewModel : ObservableRecipient, IRecipient<Favor
         if (clipboard != null)
             await clipboard.SetTextAsync(Address);
         _windowVm.ShowToast("Адрес сервера скопирован");
+    }
+
+    public void CreateDesktopShortcut()
+    {
+        if (!OperatingSystem.IsWindows()) { _windowVm.ShowToast("Ярлыки поддерживаются только в Windows", true); return; }
+        try
+        {
+            var invalid = Path.GetInvalidFileNameChars();
+            var safeName = new string(Name.Select(c => invalid.Contains(c) ? '_' : c).ToArray()).Trim();
+            if (string.IsNullOrWhiteSpace(safeName)) safeName = "Space Station 14 server";
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), safeName + ".url");
+            var icon = Environment.ProcessPath ?? "";
+            File.WriteAllText(path, $"[InternetShortcut]\r\nURL={OrbitraProtocol.CreateInvite(Address)}\r\nIconFile={icon}\r\nIconIndex=0\r\n");
+            _windowVm.ShowToast("Ярлык сервера создан на рабочем столе");
+        }
+        catch (Exception e) { _windowVm.ShowToast($"Не удалось создать ярлык: {e.Message}", true); }
     }
 
     public void OpenWebsitePressed()

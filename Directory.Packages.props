@@ -39,6 +39,7 @@
     <PackageVersion Include="Linguini.Bundle" Version="0.8.1" />
     <PackageVersion Include="DiscordRichPresence" Version="1.6.1.70" />
     <PackageVersion Include="NAudio" Version="2.2.1" />
+    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12" />
     <!-- Test stuff -->
     <PackageVersion Include="nunit" Version="3.13.3"/>
     <PackageVersion Include="NUnit.Analyzers" Version="3.6.1"/>

@@ -1,0 +1,21 @@
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:SS14.Launcher.Views"
+ x:Class="SS14.Launcher.Views.ProfileSettingsWindow" Width="760" Height="720" MinWidth="620" MinHeight="600"
+ Title="Настройка профиля Orbitra" Icon="{DynamicResource WindowIcon}" WindowStartupLocation="CenterOwner" SystemDecorations="BorderOnly" ExtendClientAreaToDecorationsHint="True" ExtendClientAreaChromeHints="NoChrome">
+ <Grid RowDefinitions="44,*" Background="{DynamicResource LauncherWorkspaceBrush}" ClipToBounds="True"><Border Background="{DynamicResource LauncherChromeBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,0,0,1" PointerPressed="TitleBarPressed"><Grid ColumnDefinitions="*,Auto"><TextBlock Text="ORBITRA · НАСТРОЙКА ПРОФИЛЯ" VerticalAlignment="Center" Margin="14,0" FontSize="11" FontWeight="Bold" LetterSpacing="1.1" Foreground="{DynamicResource ThemeSubTextBrush}"/><StackPanel Grid.Column="1" Orientation="Horizontal"><Button Classes="WindowCommand" Width="46" Height="44" Padding="0" Margin="0" Click="MinimizeClicked"><Path Data="M0,0 L10,0" Width="10" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.2"/></Button><Button Classes="WindowCommand" Width="46" Height="44" Padding="0" Margin="0" Click="MaximizeClicked"><Rectangle Width="10" Height="9" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.2"/></Button><Button Classes="WindowCommand Close" Width="46" Height="44" Padding="0" Margin="0" Click="CloseClicked"><Path Data="M0,0 L9,9 M9,0 L0,9" Width="10" Height="10" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.2"/></Button></StackPanel></Grid></Border>
+ <ScrollViewer Grid.Row="1"><StackPanel Margin="24" Spacing="16">
+  <StackPanel><TextBlock Text="ORBITRA ID" Classes="SectionLabel"/><TextBlock Text="Настройка профиля" Classes="NanoHeadingMedium"/></StackPanel>
+  <Border Classes="Surface" ClipToBounds="True"><Grid RowDefinitions="180,Auto">
+   <Border Background="#242424"><Image Source="{Binding Banner}" Stretch="UniformToFill"/></Border>
+   <Button HorizontalAlignment="Right" VerticalAlignment="Top" Margin="12" Content="Выбрать и настроить баннер" Command="{Binding ChooseBanner}"/>
+   <Grid Grid.Row="1" ColumnDefinitions="120,*" Margin="20,0,20,20">
+    <Ellipse Width="100" Height="100" Margin="0,-42,0,0" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="3" ZIndex="2"><Ellipse.Fill><ImageBrush Source="{Binding Avatar}" Stretch="UniformToFill"/></Ellipse.Fill></Ellipse>
+    <StackPanel Grid.Column="1" Margin="16,12,0,0" Spacing="10"><StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="{Binding Username}" FontSize="24" FontWeight="Bold"/><local:CreatorBadge Width="23" Height="23" IsVisible="{Binding IsCreator}"/></StackPanel><Button Content="Выбрать и настроить аватар" Command="{Binding ChooseAvatar}" HorizontalAlignment="Left"/></StackPanel>
+   </Grid>
+  </Grid></Border>
+  <TextBlock Text="О СЕБЕ" Classes="SectionLabel"/><TextBox Text="{Binding Description,Mode=TwoWay}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="100" Watermark="Коротко расскажите о себе"/><TextBlock Text="{Binding DescriptionCounter}" Classes="SubText" HorizontalAlignment="Right"/>
+  <TextBlock Text="ЛЮБИМЫЙ СЕРВЕР" Classes="SectionLabel"/><ComboBox ItemsSource="{Binding FavoriteServers}" SelectedItem="{Binding SelectedFavoriteServer,Mode=TwoWay}"/>
+  <TextBlock Text="СТАТУС" Classes="SectionLabel"/><ComboBox ItemsSource="{Binding ProfileStatuses}" SelectedItem="{Binding SelectedProfileStatus,Mode=TwoWay}"/>
+  <CheckBox Content="Показывать друзьям текущий сервер" IsChecked="{Binding ShareCurrentServer,Mode=TwoWay}"/>
+  <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8"><Button Content="Закрыть" Click="CloseClicked"/><Button Content="Сохранить профиль" Command="{Binding SaveProfileDetails}"/></StackPanel>
+ </StackPanel></ScrollViewer></Grid>
+</Window>

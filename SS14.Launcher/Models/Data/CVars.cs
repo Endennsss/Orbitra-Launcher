@@ -101,6 +101,7 @@ public static class CVars
     /// <summary>Global content download limit in KiB/s. Zero means unlimited.</summary>
     public static readonly CVarDef<int> DownloadSpeedLimitKib = CVarDef.Create("DownloadSpeedLimitKib", 0);
     public static readonly CVarDef<bool> OrbitraShareCurrentServer = CVarDef.Create("OrbitraShareCurrentServer", false);
+    public static readonly CVarDef<string> OrbitraProfileStatus = CVarDef.Create("OrbitraProfileStatus", "online");
 
     /// <summary>
     /// Whether to display override assets (trans rights).
@@ -182,6 +183,7 @@ public static class CVars
     public static readonly CVarDef<bool> DiscordRpcShowPing = CVarDef.Create("DiscordRpcShowPing", true);
     public static readonly CVarDef<bool> DiscordRpcShowMap = CVarDef.Create("DiscordRpcShowMap", true);
     public static readonly CVarDef<bool> DiscordRpcShowGamePreset = CVarDef.Create("DiscordRpcShowGamePreset", true);
+    public static readonly CVarDef<bool> DiscordRpcShowAvatar = CVarDef.Create("DiscordRpcShowAvatar", true);
     public static readonly CVarDef<bool> FirstRunCompleted = CVarDef.Create("FirstRunCompleted", false);
     public static readonly CVarDef<string> LastReadLauncherNews = CVarDef.Create("LastReadLauncherNews", "");
     public static readonly CVarDef<bool> CustomUpdateChecks = CVarDef.Create("CustomUpdateChecks", true);

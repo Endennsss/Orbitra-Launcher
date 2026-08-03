@@ -30,9 +30,7 @@ public sealed partial class Updater
         long versionId,
         CancellationToken cancel)
     {
-        var partialPath = Helpers.GetPartialDownloadPath(buildInfo.DownloadUrl!, "content");
-        await using var tempFile = new FileStream(partialPath, FileMode.OpenOrCreate, FileAccess.ReadWrite,
-            FileShare.Read, 4096, FileOptions.Asynchronous);
+        await using var tempFile = TempFile.CreateTempFile();
 
         var zipHash = await ZipUpdateDownloadContent(tempFile, buildInfo, cancel);
 
@@ -49,10 +47,7 @@ public sealed partial class Updater
 
         ZipIngest(con, versionId, zip, false, cancel);
 
-        var result = GenerateContentManifestHash(con, versionId);
-        tempFile.Close();
-        File.Delete(partialPath);
-        return result;
+        return GenerateContentManifestHash(con, versionId);
     }
 
     /// <summary>

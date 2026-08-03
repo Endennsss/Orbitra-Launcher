@@ -72,6 +72,7 @@
                   IsChecked="{Binding IsTrayMonitored}" IsVisible="{Binding IsFavorite}" />
         <Separator />
         <MenuItem Header="Копировать адрес" Command="{Binding CopyAddressPressed}" />
+        <MenuItem Header="Создать ярлык на рабочем столе" Command="{Binding CreateDesktopShortcut}" />
         <MenuItem Header="Открыть сайт сервера" Command="{Binding OpenWebsitePressed}" />
       </ContextMenu>
     </Panel.ContextMenu>

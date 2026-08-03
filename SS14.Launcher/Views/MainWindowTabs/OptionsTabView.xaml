@@ -73,7 +73,7 @@
           <ComboBox Grid.Column="1" ItemsSource="{Binding DownloadLimits}"
                     SelectedItem="{Binding SelectedDownloadLimit, Mode=TwoWay}" MinWidth="240" />
         </Grid>
-        <TextBlock Text="Ограничение действует на контент серверов, движок и модули. Прерванные загрузки автоматически продолжаются."
+        <TextBlock Text="Ограничение действует на контент серверов, движок и модули."
                    Classes="SubText" TextWrapping="Wrap" Margin="22,0,0,10" />
         <CheckBox IsChecked="{Binding CustomUpdateChecks, Mode=TwoWay}" Content="Проверять обновления лаунчера через GitHub Releases" />
         <Grid ColumnDefinitions="*,Auto" Margin="22,0,0,10">
@@ -156,6 +156,7 @@
             <CheckBox Content="Пинг" IsChecked="{Binding DiscordRpcShowPing, Mode=TwoWay}" />
             <CheckBox Content="Карта" IsChecked="{Binding DiscordRpcShowMap, Mode=TwoWay}" />
             <CheckBox Content="Режим" IsChecked="{Binding DiscordRpcShowGamePreset, Mode=TwoWay}" />
+            <CheckBox Content="Аватар" IsChecked="{Binding DiscordRpcShowAvatar, Mode=TwoWay}" />
           </WrapPanel>
         </StackPanel>
       </Border>

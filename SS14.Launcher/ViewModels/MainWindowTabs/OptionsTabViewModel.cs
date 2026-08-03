@@ -203,6 +203,7 @@ public class OptionsTabViewModel : MainWindowTabViewModel
     public bool DiscordRpcShowPing { get => GetRpc(CVars.DiscordRpcShowPing); set => SetRpc(CVars.DiscordRpcShowPing, value); }
     public bool DiscordRpcShowMap { get => GetRpc(CVars.DiscordRpcShowMap); set => SetRpc(CVars.DiscordRpcShowMap, value); }
     public bool DiscordRpcShowGamePreset { get => GetRpc(CVars.DiscordRpcShowGamePreset); set => SetRpc(CVars.DiscordRpcShowGamePreset, value); }
+    public bool DiscordRpcShowAvatar { get => GetRpc(CVars.DiscordRpcShowAvatar); set => SetRpc(CVars.DiscordRpcShowAvatar, value); }
 
     private bool GetRpc(CVarDef<bool> cvar) => Cfg.GetCVar(cvar);
     private void SetRpc(CVarDef<bool> cvar, bool value)

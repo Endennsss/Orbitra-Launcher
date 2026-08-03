@@ -4,9 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,33 +51,15 @@ public static class Helpers
     public static async Task DownloadToStream(this HttpClient client, string uri, Stream stream,
         DownloadProgressCallback? progress = null, CancellationToken cancel = default)
     {
-        var existing = stream.CanSeek ? stream.Length : 0;
-        using var request = new HttpRequestMessage(HttpMethod.Get, uri);
-        if (existing > 0)
-            request.Headers.Range = new RangeHeaderValue(existing, null);
-
-        using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancel);
-        if (existing > 0 && response.StatusCode == System.Net.HttpStatusCode.RequestedRangeNotSatisfiable)
-        {
-            progress?.Invoke(existing, existing);
-            return;
-        }
+        using var response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancel);
         response.EnsureSuccessStatusCode();
-
-        if (existing > 0 && response.StatusCode != System.Net.HttpStatusCode.PartialContent)
-        {
-            // Server ignored Range: safely restart instead of appending a second archive.
-            stream.SetLength(0);
-            existing = 0;
-        }
-        if (stream.CanSeek) stream.Position = existing;
+        if (stream.CanSeek) { stream.SetLength(0); stream.Position = 0; }
 
         await using var contentStream = await response.Content.ReadAsStreamAsync(cancel);
-        var remaining = response.Content.Headers.ContentLength;
-        var totalLength = remaining.HasValue ? existing + remaining.Value : (long?) null;
-        if (totalLength.HasValue) progress?.Invoke(existing, totalLength.Value);
+        var totalLength = response.Content.Headers.ContentLength;
+        if (totalLength.HasValue) progress?.Invoke(0, totalLength.Value);
 
-        var totalRead = existing;
+        var totalRead = 0L;
         var reads = 0L;
         const int bufferLength = 32 * 1024;
         var buffer = ArrayPool<byte>.Shared.Rent(bufferLength);
@@ -100,14 +79,6 @@ public static class Helpers
             if (totalLength.HasValue) progress?.Invoke(totalRead, totalLength.Value);
         }
         finally { ArrayPool<byte>.Shared.Return(buffer); }
-    }
-
-    public static string GetPartialDownloadPath(string uri, string prefix)
-    {
-        var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(uri)))[..24];
-        var directory = Path.Combine(LauncherPaths.DirUserData, "PartialDownloads");
-        Directory.CreateDirectory(directory);
-        return Path.Combine(directory, $"{prefix}-{hash}.part");
     }
 
     /// <summary>

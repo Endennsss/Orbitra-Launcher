@@ -1,0 +1,9 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:vm="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs" x:Class="SS14.Launcher.Views.MainWindowTabs.ModeratorTabView">
+ <Grid RowDefinitions="Auto,*" Margin="28">
+  <Grid ColumnDefinitions="*,Auto"><StackPanel><TextBlock Text="ORBITRA TRUST" Classes="SectionLabel"/><TextBlock Text="Центр модерации" Classes="NanoHeadingMedium"/></StackPanel><Button Grid.Column="1" Content="Обновить" Command="{Binding Refresh}"/></Grid>
+  <ScrollViewer Grid.Row="1" Margin="0,18,0,0"><StackPanel Spacing="8"><ItemsControl ItemsSource="{Binding Reports}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:ModerationReportItemViewModel">
+   <Border Classes="Surface" Padding="16"><Grid ColumnDefinitions="100,*,Auto"><StackPanel><TextBlock Text="{Binding Type}" FontWeight="Bold"/><TextBlock Text="{Binding Status}" Classes="SubText"/></StackPanel><StackPanel Grid.Column="1"><TextBlock Text="{Binding Target}" FontWeight="Bold"/><TextBlock Text="{Binding Reason}" TextWrapping="Wrap"/><TextBlock Text="{Binding Reporter, StringFormat='Отправитель: {0}'}" Classes="SubText"/><TextBlock Text="{Binding Created}" Classes="SubText"/></StackPanel><StackPanel Grid.Column="2" Spacing="6"><Button Content="Рассмотрено" Command="{Binding Resolve}" IsEnabled="{Binding IsOpen}"/><Button Content="Отклонить" Command="{Binding Reject}" IsEnabled="{Binding IsOpen}"/></StackPanel></Grid></Border>
+  </DataTemplate></ItemsControl.ItemTemplate></ItemsControl><TextBlock Text="{Binding Status}" Classes="SubText"/></StackPanel></ScrollViewer>
+ </Grid>
+</UserControl>

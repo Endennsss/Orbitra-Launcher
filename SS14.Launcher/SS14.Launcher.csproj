@@ -79,6 +79,7 @@
     <PackageReference Include="Linguini.Bundle" />
     <PackageReference Include="DiscordRichPresence" />
     <PackageReference Include="NAudio" />
+    <PackageReference Include="SixLabors.ImageSharp" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Utility\runtime.json" />

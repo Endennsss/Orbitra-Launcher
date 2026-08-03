@@ -14,6 +14,7 @@ public static class OrbitraProtocol
 {
     private static Timer? _presenceTimer;
     private static string? _activeServer;
+    public static string? ActiveServer => _activeServer;
     public static string CreateInvite(string serverAddress) =>
         $"orbitra://connect/?server={Uri.EscapeDataString(serverAddress)}";
 
@@ -65,7 +66,9 @@ public static class OrbitraProtocol
             var account = Locator.Current.GetRequiredService<LoginManager>().ActiveAccount;
             if (account == null) return;
             var address = _activeServer;
-            var share = cfg.GetCVar(CVars.OrbitraShareCurrentServer) && !string.IsNullOrWhiteSpace(address);
+            var share = cfg.GetCVar(CVars.OrbitraShareCurrentServer) &&
+                        cfg.GetCVar(CVars.OrbitraProfileStatus) != "invisible" &&
+                        !string.IsNullOrWhiteSpace(address);
             using var social = new OrbitraSocialService();
             await social.UpdatePresenceAsync(account.UserId, share, share ? address : null, share ? address : null);
         }
