@@ -16,9 +16,6 @@ create table if not exists public.orbitra_moderation_reports (
 );
 alter table public.orbitra_moderation_reports enable row level security;
 drop policy if exists "Moderation reports creatable" on public.orbitra_moderation_reports;
-drop policy if exists "Moderation reports readable" on public.orbitra_moderation_reports;
-drop policy if exists "Moderation reports updateable" on public.orbitra_moderation_reports;
 create policy "Moderation reports creatable" on public.orbitra_moderation_reports for insert with check (true);
-create policy "Moderation reports readable" on public.orbitra_moderation_reports for select using (true);
-create policy "Moderation reports updateable" on public.orbitra_moderation_reports for update using (true);
-grant select, insert, update on public.orbitra_moderation_reports to anon, authenticated;
+revoke select, update on public.orbitra_moderation_reports from anon, authenticated;
+grant insert on public.orbitra_moderation_reports to anon, authenticated;

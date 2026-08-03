@@ -119,13 +119,6 @@ public sealed class OrbitraSocialService : IDisposable
         { Content = JsonContent.Create(new { reporter_id=reporter, target_type=targetType, target_id=targetId, target_name=targetName, reason }, options: Json) };
         await SendAsync(req, ct);
     }
-    public Task<List<OrbitraModerationReportDto>> GetModerationReportsAsync(CancellationToken ct = default) =>
-        GetAsync<List<OrbitraModerationReportDto>>("/rest/v1/orbitra_moderation_reports?select=*&order=created_at.desc&limit=200", ct);
-    public async Task ResolveModerationReportAsync(long id, Guid moderator, string status, CancellationToken ct = default)
-    {
-        using var req = new HttpRequestMessage(HttpMethod.Patch, $"/rest/v1/orbitra_moderation_reports?id=eq.{id}")
-        { Content = JsonContent.Create(new { status, moderator_id=moderator, resolved_at=DateTimeOffset.UtcNow }, options: Json) }; await SendAsync(req, ct);
-    }
     public async Task SendInviteAsync(Guid sender, Guid recipient, string address, string name, CancellationToken ct = default)
     { using var req=new HttpRequestMessage(HttpMethod.Post,"/rest/v1/orbitra_invites") { Content=JsonContent.Create(new {sender_id=sender,recipient_id=recipient,server_address=address,server_name=name},options:Json)}; await SendAsync(req,ct); }
     public Task<List<OrbitraInviteDto>> GetInvitesAsync(Guid recipient, CancellationToken ct = default) => GetAsync<List<OrbitraInviteDto>>($"/rest/v1/orbitra_invites?select=*&recipient_id=eq.{recipient:D}&seen=eq.false&expires_at=gt.{Uri.EscapeDataString(DateTimeOffset.UtcNow.ToString("O"))}",ct);
@@ -172,12 +165,3 @@ public sealed record OrbitraFriendshipDto(
     [property:JsonPropertyName("status")] string Status);
 public sealed record OrbitraFriendDto(OrbitraProfileDto Profile, string Status, bool IsIncoming);
 public sealed record OrbitraInviteDto([property:JsonPropertyName("id")] long Id,[property:JsonPropertyName("sender_id")] Guid SenderId,[property:JsonPropertyName("server_address")] string ServerAddress,[property:JsonPropertyName("server_name")] string? ServerName);
-public sealed record OrbitraModerationReportDto(
-    [property:JsonPropertyName("id")] long Id,
-    [property:JsonPropertyName("reporter_id")] Guid ReporterId,
-    [property:JsonPropertyName("target_type")] string TargetType,
-    [property:JsonPropertyName("target_id")] string TargetId,
-    [property:JsonPropertyName("target_name")] string? TargetName,
-    [property:JsonPropertyName("reason")] string Reason,
-    [property:JsonPropertyName("status")] string Status,
-    [property:JsonPropertyName("created_at")] DateTimeOffset CreatedAt);

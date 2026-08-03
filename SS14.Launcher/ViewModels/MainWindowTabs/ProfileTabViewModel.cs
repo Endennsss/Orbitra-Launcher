@@ -15,6 +15,7 @@ namespace SS14.Launcher.ViewModels.MainWindowTabs;
 
 public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
 {
+    public static readonly Guid CreatorId = Guid.Parse("1d17bc4a-25fa-4ef9-af88-fb1d4dd71701");
     private readonly MainWindowViewModel _main;
     private readonly OrbitraSocialService _social = new();
     private bool _busy;
@@ -42,7 +43,7 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
     public bool Busy { get => _busy; private set => SetProperty(ref _busy, value); }
     public string Status { get => _status; private set => SetProperty(ref _status, value); }
     public string Username => _main.ActiveAccount?.Username ?? "Не выполнен вход";
-    public bool IsCreator => _main.ActiveAccount?.UserId == ModeratorTabViewModel.ModeratorId;
+    public bool IsCreator => _main.ActiveAccount?.UserId == CreatorId;
     public string UserId => _main.ActiveAccount?.UserId.ToString("D") ?? "—";
     public string TotalPlaytime => FormatDuration(TimeSpan.FromSeconds(PlaytimeTracker.GetAll().Sum(x => x.Duration.TotalSeconds)));
     public int ServersPlayed => PlaytimeTracker.GetAll().Count;
@@ -56,7 +57,7 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
     public string Search { get => _search; set => SetProperty(ref _search, value); }
     public string ReportReason { get => _reportReason; set => SetProperty(ref _reportReason, value); }
     public OrbitraProfileDto? FoundProfile { get => _found; private set { SetProperty(ref _found, value); OnPropertyChanged(nameof(HasFoundProfile)); OnPropertyChanged(nameof(FoundServerText)); OnPropertyChanged(nameof(FoundProfileIsCreator)); } }
-    public bool FoundProfileIsCreator => FoundProfile?.UserId == ModeratorTabViewModel.ModeratorId;
+    public bool FoundProfileIsCreator => FoundProfile?.UserId == CreatorId;
     public bool HasFoundProfile => FoundProfile != null && _showFoundProfileInSearch;
     public string FoundServerText => VisibleServer(FoundProfile);
     public IReadOnlyList<ProfileStatusOption> ProfileStatuses { get; } =
@@ -279,7 +280,7 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
 public sealed class OrbitraFriendItemViewModel(ProfileTabViewModel owner, OrbitraFriendDto data)
 {
     public Guid UserId => data.Profile.UserId; public string Username => data.Profile.Username;
-    public bool IsCreator => UserId == ModeratorTabViewModel.ModeratorId;
+    public bool IsCreator => UserId == ProfileTabViewModel.CreatorId;
     public bool IsIncoming => data.IsIncoming; public bool IsAccepted => data.Status == "accepted";
     public string State => IsIncoming ? "Входящая заявка" : IsAccepted ? "В друзьях" : "Заявка отправлена";
     public string ProfileStatus => data.Profile.ProfileStatus switch { "dnd"=>"Не беспокоить","invisible"=>"Не в сети",_ when CanConnect=>"Играет",_=>"В сети" };

@@ -44,7 +44,6 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
 
     public DataManager Cfg => _cfg;
     public LoggedInAccount? ActiveAccount => _loginMgr.ActiveAccount;
-    public bool HasModeratorAccess => _loginMgr.Logins.Items.Any(x => x.UserId == ModeratorTabViewModel.ModeratorId);
     public ICVarEntry<bool> UseTextLogo => Cfg.GetCVarEntry(CVars.UseTextLogo);
     [ObservableProperty] private bool _outOfDate;
     [ObservableProperty] private bool _customUpdateAvailable;
@@ -67,7 +66,6 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
     public ProfileTabViewModel ProfileTab { get; }
     public ActivityTabViewModel ActivityTab { get; }
     public SystemCenterTabViewModel SystemCenterTab { get; }
-    public ModeratorTabViewModel ModeratorTab { get; }
 
     public MainWindowViewModel()
     {
@@ -89,7 +87,6 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         ProfileTab = new ProfileTabViewModel(this);
         ActivityTab = new ActivityTabViewModel();
         SystemCenterTab = new SystemCenterTabViewModel(this);
-        ModeratorTab = new ModeratorTabViewModel(this);
 
         _allTabs.AddRange([
             HomeTab,
@@ -98,7 +95,6 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
             UsefulLinksTab,
             PlaytimeTab,
             ProfileTab,
-            ModeratorTab,
             ActivityTab,
             SystemCenterTab,
             CustomThemeTab,
@@ -136,7 +132,6 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         _cfg.Logins.Connect().Subscribe(_ =>
         {
             OnPropertyChanged(new PropertyChangedEventArgs(nameof(AccountDropDownVisible)));
-            OnPropertyChanged(nameof(HasModeratorAccess));
             RefreshVisibleTabs();
         });
 
@@ -160,15 +155,13 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         if (ReferenceEquals(tab, ProfileTab)) return "profile";
         if (ReferenceEquals(tab, ActivityTab)) return "activity";
         if (ReferenceEquals(tab, SystemCenterTab)) return "system-center";
-        if (ReferenceEquals(tab, ModeratorTab)) return "moderator";
         return "development";
     }
 
-    public bool CanHideNavigationTab(string id) => id is not "home" and not "options" and not "moderator";
+    public bool CanHideNavigationTab(string id) => id is not "home" and not "options";
 
     public bool IsNavigationTabVisible(string id) =>
-        (id != "moderator" || HasModeratorAccess) &&
-        (!ParseCsv(_cfg.GetCVar(CVars.HiddenNavigationTabs)).Contains(id) || !CanHideNavigationTab(id));
+        !ParseCsv(_cfg.GetCVar(CVars.HiddenNavigationTabs)).Contains(id) || !CanHideNavigationTab(id);
 
     public void SetNavigationTabVisible(string id, bool visible)
     {
@@ -207,11 +200,6 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
             var bi = order.IndexOf(GetNavigationId(b));
             return (ai < 0 ? int.MaxValue : ai).CompareTo(bi < 0 ? int.MaxValue : bi);
         });
-        // The moderator tab is entitlement-driven and is not present in older saved orders.
-        // Keep it next to the profile instead of allowing it to fall below the visible sidebar.
-        _allTabs.Remove(ModeratorTab);
-        var profileIndex = _allTabs.IndexOf(ProfileTab);
-        _allTabs.Insert(Math.Max(0, profileIndex + 1), ModeratorTab);
     }
 
     private void RefreshVisibleTabs()
