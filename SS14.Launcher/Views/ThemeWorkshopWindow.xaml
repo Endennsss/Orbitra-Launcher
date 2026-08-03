@@ -42,6 +42,24 @@
           <Button Grid.Column="1" Content="Обновить" Command="{Binding RefreshWorkshop}" VerticalAlignment="Center" />
         </Grid>
 
+        <Border Background="#2A2417" BorderBrush="#6E5B30" BorderThickness="1" Padding="14"
+                IsVisible="{Binding IsWorkshopPreviewActive}">
+          <Grid ColumnDefinitions="*,Auto,Auto">
+            <TextBlock Text="{Binding WorkshopPreviewText}" VerticalAlignment="Center" FontWeight="SemiBold" />
+            <Button Grid.Column="1" Content="Оставить тему" Command="{Binding KeepWorkshopPreview}" />
+            <Button Grid.Column="2" Content="Вернуть предыдущую" Command="{Binding RevertWorkshopPreview}" />
+          </Grid>
+        </Border>
+
+        <Border Background="#2A1818" BorderBrush="#713737" BorderThickness="1" Padding="14"
+                IsVisible="{Binding IsWorkshopDeleteConfirmationVisible}">
+          <Grid ColumnDefinitions="*,Auto,Auto">
+            <TextBlock Text="{Binding WorkshopDeleteConfirmationText}" VerticalAlignment="Center" TextWrapping="Wrap" />
+            <Button Grid.Column="1" Content="Удалить" Command="{Binding ConfirmDeleteWorkshopTheme}" />
+            <Button Grid.Column="2" Content="Отмена" Command="{Binding CancelDeleteWorkshopTheme}" />
+          </Grid>
+        </Border>
+
         <Border Classes="Surface" Padding="18">
           <StackPanel Spacing="9">
             <TextBlock Text="ОПУБЛИКОВАТЬ ТЕКУЩУЮ ТЕМУ" Classes="SectionLabel" />
@@ -62,12 +80,29 @@
         <TextBlock Text="{Binding WorkshopStatus}" Classes="SubText" />
         <ProgressBar IsIndeterminate="True" Height="3" IsVisible="{Binding WorkshopBusy}" />
 
+        <Grid ColumnDefinitions="*,210,Auto" IsVisible="{Binding !HasSelectedWorkshopTheme}">
+          <TextBox Text="{Binding WorkshopSearch, Mode=TwoWay}" Watermark="Поиск по названию или автору" />
+          <ComboBox Grid.Column="1" SelectedIndex="{Binding WorkshopSortIndex, Mode=TwoWay}" Margin="8,0">
+            <ComboBoxItem Content="Сначала новые" />
+            <ComboBoxItem Content="По лайкам" />
+            <ComboBoxItem Content="По загрузкам" />
+            <ComboBoxItem Content="По названию" />
+          </ComboBox>
+          <CheckBox Grid.Column="2" Content="Только избранные" IsChecked="{Binding WorkshopFavoritesOnly, Mode=TwoWay}"
+                    VerticalAlignment="Center" />
+        </Grid>
+
         <ItemsControl ItemsSource="{Binding WorkshopThemes}" IsVisible="{Binding !HasSelectedWorkshopTheme}">
           <ItemsControl.ItemTemplate>
             <DataTemplate x:DataType="vm:WorkshopThemeItemViewModel">
               <Border Classes="Surface" Padding="16" Margin="0,0,0,8">
-                <Grid ColumnDefinitions="8,*,Auto">
-                  <Border Background="{Binding Theme.Accent}" />
+                <Grid ColumnDefinitions="210,*,Auto">
+                  <Border Background="{DynamicResource LauncherSurfaceAltBrush}" Height="118" ClipToBounds="True">
+                    <Grid>
+                      <Image Source="{Binding PreviewBitmap}" Stretch="UniformToFill" />
+                      <Border Width="7" HorizontalAlignment="Left" Background="{Binding Theme.Accent}" />
+                    </Grid>
+                  </Border>
                   <StackPanel Grid.Column="1" Margin="14,0" Spacing="5">
                     <WrapPanel>
                       <TextBlock Text="{Binding Name}" FontSize="19" FontWeight="SemiBold" />
@@ -78,8 +113,10 @@
                     <TextBlock Text="{Binding Stats}" Classes="SubText" />
                   </StackPanel>
                   <StackPanel Grid.Column="2" Spacing="6" Width="145">
-                    <Button Content="Установить" Command="{Binding Install}" />
+                    <Button Content="{Binding InstallText}" Command="{Binding Install}" IsEnabled="{Binding CanInstall}" />
+                    <Button Content="Предпросмотр" Command="{Binding Preview}" />
                     <Button Content="{Binding LikeText}" Command="{Binding ToggleLike}" />
+                    <Button Content="{Binding FavoriteText}" Command="{Binding ToggleFavorite}" />
                     <Button Content="Подробнее" Command="{Binding Open}" />
                   </StackPanel>
                 </Grid>
@@ -97,11 +134,21 @@
               </StackPanel>
               <Button Grid.Column="1" Content="Назад к темам" Command="{Binding CloseWorkshopTheme}" />
             </Grid>
+            <Border Height="260" Background="{DynamicResource LauncherSurfaceAltBrush}" ClipToBounds="True">
+              <Image Source="{Binding SelectedWorkshopTheme.PreviewBitmap}" Stretch="UniformToFill" />
+            </Border>
             <TextBlock Text="{Binding SelectedWorkshopTheme.Description}" TextWrapping="Wrap" />
             <TextBlock Text="{Binding SelectedWorkshopTheme.Palette}" Classes="SubText" FontFamily="Consolas" />
             <WrapPanel>
-              <Button Content="Установить" Command="{Binding SelectedWorkshopTheme.Install}" />
+              <Button Content="{Binding SelectedWorkshopTheme.InstallText}" Command="{Binding SelectedWorkshopTheme.Install}"
+                      IsEnabled="{Binding SelectedWorkshopTheme.CanInstall}" />
+              <Button Content="Предпросмотр" Command="{Binding SelectedWorkshopTheme.Preview}" />
               <Button Content="{Binding SelectedWorkshopTheme.LikeText}" Command="{Binding SelectedWorkshopTheme.ToggleLike}" />
+              <Button Content="{Binding SelectedWorkshopTheme.FavoriteText}" Command="{Binding SelectedWorkshopTheme.ToggleFavorite}" />
+              <Button Content="Обновить текущим оформлением" Command="{Binding SelectedWorkshopTheme.Update}"
+                      IsVisible="{Binding SelectedWorkshopTheme.IsOwn}" />
+              <Button Content="Удалить публикацию" Command="{Binding SelectedWorkshopTheme.Delete}"
+                      IsVisible="{Binding SelectedWorkshopTheme.IsOwn}" />
             </WrapPanel>
             <TextBlock Text="КОММЕНТАРИИ" Classes="SectionLabel" Margin="0,8,0,0" />
             <ItemsControl ItemsSource="{Binding WorkshopComments}">
@@ -109,9 +156,11 @@
                 <DataTemplate x:DataType="vm:WorkshopCommentItemViewModel">
                   <Border Background="{DynamicResource LauncherSurfaceAltBrush}" Padding="11" Margin="0,0,0,6">
                     <StackPanel>
-                      <Grid ColumnDefinitions="*,Auto">
+                      <Grid ColumnDefinitions="*,Auto,Auto">
                         <TextBlock Text="{Binding Author}" FontWeight="SemiBold" />
                         <TextBlock Grid.Column="1" Text="{Binding Date}" Classes="SubText" />
+                        <Button Grid.Column="2" Content="Удалить" Command="{Binding Delete}" IsVisible="{Binding IsOwn}"
+                                Margin="8,0,0,0" Padding="8,2" />
                       </Grid>
                       <TextBlock Text="{Binding Content}" TextWrapping="Wrap" Margin="0,5,0,0" />
                     </StackPanel>

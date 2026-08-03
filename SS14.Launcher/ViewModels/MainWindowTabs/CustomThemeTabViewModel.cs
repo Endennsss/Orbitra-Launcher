@@ -34,12 +34,20 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
     public ObservableCollection<ThemeLibraryItemViewModel> ThemeLibrary { get; } = [];
     public ObservableCollection<WorkshopThemeItemViewModel> WorkshopThemes { get; } = [];
     public ObservableCollection<WorkshopCommentItemViewModel> WorkshopComments { get; } = [];
+    private readonly List<WorkshopThemeDto> _allWorkshopThemes = [];
     private WorkshopThemeItemViewModel? _selectedWorkshopTheme;
     private bool _workshopBusy;
     private string _workshopStatus = "Загрузка мастерской…";
     private string _publishName = "";
     private string _publishDescription = "";
     private string _newComment = "";
+    private string _workshopSearch = "";
+    private int _workshopSortIndex;
+    private bool _workshopFavoritesOnly;
+    private byte[]? _previewRestoreArchive;
+    private string _previewRestoreInstalledId = "";
+    private WorkshopThemeItemViewModel? _previewWorkshopTheme;
+    private WorkshopThemeItemViewModel? _pendingDeleteWorkshopTheme;
     private ThemeWorkshopWindow? _workshopWindow;
 
     public CustomThemeTabViewModel(MainWindowViewModel main)
@@ -62,6 +70,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         get => _cfg.GetCVar(CVars.CustomThemeEnabled);
         set
         {
+            ClearInstalledWorkshopTheme();
             _cfg.SetCVar(CVars.CustomThemeEnabled, value);
             if (value) _cfg.SetCVar(CVars.LightTheme, false);
             SaveAndApplyAnimated();
@@ -91,6 +100,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         {
             var blur = Math.Clamp(value, 0, 40);
             if (blur == Blur) return;
+            ClearInstalledWorkshopTheme();
             _cfg.SetCVar(CVars.CustomThemeBlur, blur);
             _cfg.CommitConfig();
             OnPropertyChanged(nameof(Blur));
@@ -104,6 +114,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         {
             var dimming = Math.Clamp(value, 0, 90);
             if (dimming == Dimming) return;
+            ClearInstalledWorkshopTheme();
             _cfg.SetCVar(CVars.CustomThemeDimming, dimming);
             _cfg.CommitConfig();
             OnPropertyChanged(nameof(Dimming));
@@ -168,6 +179,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
             var destination = Path.Combine(LauncherPaths.DirUserData, $"custom-theme-background{extension}");
             Directory.CreateDirectory(LauncherPaths.DirUserData);
             File.Copy(source, destination, true);
+            ClearInstalledWorkshopTheme();
             _cfg.SetCVar(CVars.CustomThemeImage, destination);
             _cfg.CommitConfig();
             LoadBackground();
@@ -177,6 +189,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
 
     public void RemoveBackground()
     {
+        ClearInstalledWorkshopTheme();
         _cfg.SetCVar(CVars.CustomThemeImage, "");
         _cfg.SetCVar(CVars.CustomThemeImageHome, "");
         _cfg.SetCVar(CVars.CustomThemeImageServers, "");
@@ -195,6 +208,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
 
     public void ResetDefaults()
     {
+        ClearInstalledWorkshopTheme();
         _cfg.SetCVar(CVars.CustomThemeBackground, "#101010");
         _cfg.SetCVar(CVars.CustomThemeSurface, "#181818");
         _cfg.SetCVar(CVars.CustomThemeControl, "#292929");
@@ -317,7 +331,9 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
 
     private static ThemePackage ReadThemeArchive(string path)
     {
-        using var archive = ZipFile.OpenRead(path);
+        var archiveBytes = File.ReadAllBytes(path);
+        ThemeArchiveValidator.Validate(archiveBytes);
+        using var archive = new ZipArchive(new MemoryStream(archiveBytes, writable: false), ZipArchiveMode.Read);
         var manifestEntry = archive.GetEntry("theme.json") ?? throw new InvalidDataException("theme.json missing");
         if (manifestEntry.Length > 64 * 1024) throw new InvalidDataException("Manifest too large");
         ThemeArchive manifest;
@@ -342,6 +358,9 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
             stream.CopyTo(memory);
             images[name] = memory.ToArray();
         }
+        var allowedEntries = new HashSet<string>(names, StringComparer.OrdinalIgnoreCase) { "theme.json" };
+        if (archive.Entries.Any(entry => !allowedEntries.Contains(entry.FullName)))
+            throw new InvalidDataException("Небезопасная тема: архив содержит файлы, не указанные в theme.json.");
         return new ThemePackage(manifest, images);
     }
 
@@ -360,6 +379,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
 
     private void ApplyPackage(ThemePackage package)
     {
+        ClearInstalledWorkshopTheme();
         var manifest = package.Manifest;
         string SaveImage(string? entryName, string targetName)
         {
@@ -402,6 +422,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         if (string.IsNullOrWhiteSpace(value)) return;
         try { Color.Parse(value.Trim()); }
         catch { return; }
+        ClearInstalledWorkshopTheme();
         _cfg.SetCVar(cvar, value.Trim());
         _cfg.CommitConfig();
         OnPropertyChanged(property);
@@ -473,6 +494,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         {
             var destination = Path.Combine(LauncherPaths.DirUserData, $"custom-theme-{key}{Path.GetExtension(source).ToLowerInvariant()}");
             File.Copy(source, destination, true);
+            ClearInstalledWorkshopTheme();
             _cfg.SetCVar(GetTabBackgroundCVar(key), destination);
             _cfg.CommitConfig();
             LoadTabBackgrounds();
@@ -483,6 +505,7 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
 
     internal void RemoveTabBackground(string key)
     {
+        ClearInstalledWorkshopTheme();
         _cfg.SetCVar(GetTabBackgroundCVar(key), "");
         _cfg.CommitConfig();
         LoadTabBackgrounds();
@@ -562,6 +585,26 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
     public string PublishName { get => _publishName; set => SetProperty(ref _publishName, value); }
     public string PublishDescription { get => _publishDescription; set => SetProperty(ref _publishDescription, value); }
     public string NewComment { get => _newComment; set => SetProperty(ref _newComment, value); }
+    public string WorkshopSearch
+    {
+        get => _workshopSearch;
+        set { if (SetProperty(ref _workshopSearch, value)) ApplyWorkshopFilter(); }
+    }
+    public int WorkshopSortIndex
+    {
+        get => _workshopSortIndex;
+        set { if (SetProperty(ref _workshopSortIndex, value)) ApplyWorkshopFilter(); }
+    }
+    public bool WorkshopFavoritesOnly
+    {
+        get => _workshopFavoritesOnly;
+        set { if (SetProperty(ref _workshopFavoritesOnly, value)) ApplyWorkshopFilter(); }
+    }
+    public bool IsWorkshopPreviewActive => _previewWorkshopTheme != null;
+    public string WorkshopPreviewText => _previewWorkshopTheme == null ? "" : $"Предпросмотр: {_previewWorkshopTheme.Name}";
+    public bool IsWorkshopDeleteConfirmationVisible => _pendingDeleteWorkshopTheme != null;
+    public string WorkshopDeleteConfirmationText => _pendingDeleteWorkshopTheme == null ? "" :
+        $"Удалить тему «{_pendingDeleteWorkshopTheme.Name}»? Лайки и комментарии также будут удалены.";
 
     public async void OpenWorkshop()
     {
@@ -588,8 +631,9 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         try
         {
             var themes = await _workshop.GetThemesAsync(_main.ActiveAccount?.UserId);
-            WorkshopThemes.Clear();
-            foreach (var theme in themes) WorkshopThemes.Add(new WorkshopThemeItemViewModel(this, theme));
+            _allWorkshopThemes.Clear();
+            _allWorkshopThemes.AddRange(themes);
+            ApplyWorkshopFilter();
             WorkshopStatus = themes.Count == 0 ? "В мастерской пока нет тем." : $"Тем в мастерской: {themes.Count}";
             OnPropertyChanged(nameof(IsWorkshopEmpty));
         }
@@ -611,8 +655,8 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         try
         {
             var request = new WorkshopPublishRequest(Guid.NewGuid(), account.UserId, account.Username,
-                PublishName, PublishDescription, Background, Surface, Accent, Text, Blur);
-            await _workshop.PublishAsync(request, CreateThemeArchiveBytes());
+                PublishName, PublishDescription, "1.0", Background, Surface, Accent, Text, Blur);
+            await _workshop.PublishAsync(request, CreateThemeArchiveBytes(), CreateWorkshopPreviewBytes());
             PublishName = ""; PublishDescription = "";
             _main.ShowToast("Тема опубликована в мастерской");
         }
@@ -628,10 +672,24 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         try
         {
             ApplyWorkshopArchive(await _workshop.DownloadAsync(item.Theme));
+            _cfg.SetCVar(CVars.InstalledWorkshopThemeId, item.Theme.Id.ToString("D"));
+            _cfg.CommitConfig();
+            foreach (var theme in WorkshopThemes) theme.RefreshInstalled();
             _main.ShowToast($"Тема «{item.Name}» установлена");
         }
         catch (Exception exception) { _main.ShowToast(exception.Message, true); }
         finally { WorkshopBusy = false; }
+        await RefreshWorkshopAsync();
+    }
+
+    internal bool IsWorkshopThemeInstalled(Guid themeId) =>
+        Guid.TryParse(_cfg.GetCVar(CVars.InstalledWorkshopThemeId), out var installed) && installed == themeId;
+
+    private void ClearInstalledWorkshopTheme()
+    {
+        if (string.IsNullOrEmpty(_cfg.GetCVar(CVars.InstalledWorkshopThemeId))) return;
+        _cfg.SetCVar(CVars.InstalledWorkshopThemeId, "");
+        foreach (var theme in WorkshopThemes) theme.RefreshInstalled();
     }
 
     internal async void ToggleWorkshopLike(WorkshopThemeItemViewModel item)
@@ -644,6 +702,113 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
             await RefreshWorkshopAsync();
         }
         catch (Exception exception) { _main.ShowToast(exception.Message, true); }
+    }
+
+    internal async void ToggleWorkshopFavorite(WorkshopThemeItemViewModel item)
+    {
+        var account = _main.ActiveAccount;
+        if (account == null) { _main.ShowToast("Сначала войдите в аккаунт SS14", true); return; }
+        try
+        {
+            await _workshop.SetFavoriteAsync(item.Theme.Id, account.UserId, !item.IsFavorite);
+            await RefreshWorkshopAsync();
+        }
+        catch (Exception exception) { _main.ShowToast(exception.Message, true); }
+    }
+
+    internal async void UpdateWorkshopTheme(WorkshopThemeItemViewModel item)
+    {
+        var account = _main.ActiveAccount;
+        if (account == null || item.Theme.AuthorUserId != account.UserId) return;
+        WorkshopBusy = true;
+        try
+        {
+            var request = new WorkshopPublishRequest(item.Theme.Id, account.UserId, account.Username,
+                item.Theme.Name, item.Theme.Description, NextThemeVersion(item.Theme.Version),
+                Background, Surface, Accent, Text, Blur);
+            await _workshop.UpdateAsync(item.Theme, request, CreateThemeArchiveBytes(), CreateWorkshopPreviewBytes());
+            _main.ShowToast($"Тема «{item.Name}» обновлена");
+        }
+        catch (Exception exception) { _main.ShowToast(exception.Message, true); }
+        finally { WorkshopBusy = false; }
+        await RefreshWorkshopAsync();
+    }
+
+    internal void RequestDeleteWorkshopTheme(WorkshopThemeItemViewModel item)
+    {
+        if (!item.IsOwn) return;
+        _pendingDeleteWorkshopTheme = item;
+        OnPropertyChanged(nameof(IsWorkshopDeleteConfirmationVisible));
+        OnPropertyChanged(nameof(WorkshopDeleteConfirmationText));
+    }
+
+    public void CancelDeleteWorkshopTheme()
+    {
+        _pendingDeleteWorkshopTheme = null;
+        OnPropertyChanged(nameof(IsWorkshopDeleteConfirmationVisible));
+        OnPropertyChanged(nameof(WorkshopDeleteConfirmationText));
+    }
+
+    public async void ConfirmDeleteWorkshopTheme()
+    {
+        var item = _pendingDeleteWorkshopTheme;
+        CancelDeleteWorkshopTheme();
+        if (item == null) return;
+        var account = _main.ActiveAccount;
+        if (account == null || item.Theme.AuthorUserId != account.UserId) return;
+        try
+        {
+            await _workshop.DeleteThemeAsync(item.Theme, account.UserId);
+            if (IsWorkshopThemeInstalled(item.Theme.Id)) ClearInstalledWorkshopTheme();
+            CloseWorkshopTheme();
+            _main.ShowToast($"Тема «{item.Name}» удалена");
+            await RefreshWorkshopAsync();
+        }
+        catch (Exception exception) { _main.ShowToast(exception.Message, true); }
+    }
+
+    internal async void PreviewWorkshopTheme(WorkshopThemeItemViewModel item)
+    {
+        if (WorkshopBusy) return;
+        if (_previewWorkshopTheme != null) RevertWorkshopPreview();
+        WorkshopBusy = true;
+        try
+        {
+            _previewRestoreArchive = CreateThemeArchiveBytes();
+            _previewRestoreInstalledId = _cfg.GetCVar(CVars.InstalledWorkshopThemeId);
+            ApplyWorkshopArchive(await _workshop.DownloadAsync(item.Theme));
+            _previewWorkshopTheme = item;
+            OnPropertyChanged(nameof(IsWorkshopPreviewActive));
+            OnPropertyChanged(nameof(WorkshopPreviewText));
+        }
+        catch (Exception exception) { _main.ShowToast(exception.Message, true); }
+        finally { WorkshopBusy = false; }
+    }
+
+    public void KeepWorkshopPreview()
+    {
+        if (_previewWorkshopTheme == null) return;
+        _cfg.SetCVar(CVars.InstalledWorkshopThemeId, _previewWorkshopTheme.Theme.Id.ToString("D"));
+        _cfg.CommitConfig();
+        _previewRestoreArchive = null;
+        _previewWorkshopTheme = null;
+        OnPropertyChanged(nameof(IsWorkshopPreviewActive));
+        OnPropertyChanged(nameof(WorkshopPreviewText));
+        foreach (var theme in WorkshopThemes) theme.RefreshInstalled();
+        _main.ShowToast("Тема оставлена и отмечена установленной");
+    }
+
+    public void RevertWorkshopPreview()
+    {
+        if (_previewRestoreArchive != null) ApplyWorkshopArchive(_previewRestoreArchive);
+        _cfg.SetCVar(CVars.InstalledWorkshopThemeId, _previewRestoreInstalledId);
+        _cfg.CommitConfig();
+        _previewRestoreArchive = null;
+        _previewWorkshopTheme = null;
+        OnPropertyChanged(nameof(IsWorkshopPreviewActive));
+        OnPropertyChanged(nameof(WorkshopPreviewText));
+        foreach (var theme in WorkshopThemes) theme.RefreshInstalled();
+        _main.ShowToast("Предыдущая тема восстановлена");
     }
 
     internal async void OpenWorkshopTheme(WorkshopThemeItemViewModel item)
@@ -680,9 +845,56 @@ public sealed class CustomThemeTabViewModel : MainWindowTabViewModel
         {
             var comments = await _workshop.GetCommentsAsync(themeId);
             WorkshopComments.Clear();
-            foreach (var comment in comments) WorkshopComments.Add(new WorkshopCommentItemViewModel(comment));
+            foreach (var comment in comments) WorkshopComments.Add(new WorkshopCommentItemViewModel(this, comment, _main.ActiveAccount?.UserId));
         }
         catch (Exception exception) { _main.ShowToast(exception.Message, true); }
+    }
+
+    internal async void DeleteWorkshopComment(WorkshopCommentItemViewModel item)
+    {
+        var account = _main.ActiveAccount;
+        if (account == null || !item.IsOwn || SelectedWorkshopTheme == null) return;
+        try
+        {
+            await _workshop.DeleteCommentAsync(item.Comment.Id, account.UserId);
+            await LoadCommentsAsync(SelectedWorkshopTheme.Theme.Id);
+        }
+        catch (Exception exception) { _main.ShowToast(exception.Message, true); }
+    }
+
+    internal bool IsOwnWorkshopTheme(WorkshopThemeDto theme) => _main.ActiveAccount?.UserId == theme.AuthorUserId;
+    internal Task<byte[]?> LoadWorkshopPreviewAsync(WorkshopThemeDto theme) => _workshop.DownloadPreviewAsync(theme);
+
+    private byte[] CreateWorkshopPreviewBytes() => ThemePreviewRenderer.Render(Background, Surface, Control,
+        Accent, Text, Muted, Blur, Dimming, _cfg.GetCVar(CVars.CustomThemeImage));
+
+    private static string NextThemeVersion(string current)
+    {
+        if (!Version.TryParse(current, out var version)) return "1.1";
+        return $"{Math.Max(1, version.Major)}.{version.Minor + 1}";
+    }
+
+    private void ApplyWorkshopFilter()
+    {
+        IEnumerable<WorkshopThemeDto> themes = _allWorkshopThemes;
+        if (!string.IsNullOrWhiteSpace(WorkshopSearch))
+        {
+            var search = WorkshopSearch.Trim();
+            themes = themes.Where(x => x.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                                       x.AuthorName.Contains(search, StringComparison.OrdinalIgnoreCase));
+        }
+        if (WorkshopFavoritesOnly) themes = themes.Where(x => x.IsFavorite);
+        themes = WorkshopSortIndex switch
+        {
+            1 => themes.OrderByDescending(x => x.LikeCount),
+            2 => themes.OrderByDescending(x => x.Downloads),
+            3 => themes.OrderBy(x => x.Name, StringComparer.CurrentCultureIgnoreCase),
+            _ => themes.OrderByDescending(x => x.UpdatedAt)
+        };
+        foreach (var old in WorkshopThemes) old.Dispose();
+        WorkshopThemes.Clear();
+        foreach (var theme in themes) WorkshopThemes.Add(new WorkshopThemeItemViewModel(this, theme));
+        OnPropertyChanged(nameof(IsWorkshopEmpty));
     }
 
     private byte[] CreateThemeArchiveBytes()
@@ -765,7 +977,7 @@ public sealed class ThemeLibraryItemViewModel
     public void Delete() => _owner.DeleteLibraryTheme(_path);
 }
 
-public sealed class WorkshopThemeItemViewModel
+public sealed class WorkshopThemeItemViewModel : ObservableObject, IDisposable
 {
     private readonly CustomThemeTabViewModel _owner;
     public WorkshopThemeDto Theme { get; }
@@ -777,19 +989,51 @@ public sealed class WorkshopThemeItemViewModel
     public string Stats => $"♥ {Theme.LikeCount}   ↓ {Theme.Downloads}   Комментарии: {Theme.CommentCount}";
     public string LikeText => Theme.IsLiked ? "Убрать лайк" : "Нравится";
     public bool IsLiked => Theme.IsLiked;
+    public bool IsFavorite => Theme.IsFavorite;
+    public string FavoriteText => IsFavorite ? "В избранном" : "В избранное";
+    public bool IsOwn => _owner.IsOwnWorkshopTheme(Theme);
+    public bool IsInstalled => _owner.IsWorkshopThemeInstalled(Theme.Id);
+    public bool CanInstall => !IsInstalled;
+    public string InstallText => IsInstalled ? "Установлено" : "Установить";
     public string Palette => $"{Theme.Background}  {Theme.Surface}  {Theme.Accent}  {Theme.TextColor}";
+    private Bitmap? _previewBitmap;
+    public Bitmap? PreviewBitmap { get => _previewBitmap; private set => SetProperty(ref _previewBitmap, value); }
     public WorkshopThemeItemViewModel(CustomThemeTabViewModel owner, WorkshopThemeDto theme)
-    { _owner = owner; Theme = theme; }
+    { _owner = owner; Theme = theme; _ = LoadPreviewAsync(); }
     public void Install() => _owner.InstallWorkshopTheme(this);
+    public void Preview() => _owner.PreviewWorkshopTheme(this);
     public void ToggleLike() => _owner.ToggleWorkshopLike(this);
+    public void ToggleFavorite() => _owner.ToggleWorkshopFavorite(this);
+    public void Update() => _owner.UpdateWorkshopTheme(this);
+    public void Delete() => _owner.RequestDeleteWorkshopTheme(this);
     public void Open() => _owner.OpenWorkshopTheme(this);
+    private async Task LoadPreviewAsync()
+    {
+        try
+        {
+            var bytes = await _owner.LoadWorkshopPreviewAsync(Theme);
+            if (bytes != null) PreviewBitmap = new Bitmap(new MemoryStream(bytes));
+        }
+        catch { }
+    }
+    internal void RefreshInstalled()
+    {
+        OnPropertyChanged(nameof(IsInstalled));
+        OnPropertyChanged(nameof(CanInstall));
+        OnPropertyChanged(nameof(InstallText));
+    }
+    public void Dispose() { PreviewBitmap?.Dispose(); PreviewBitmap = null; }
 }
 
 public sealed class WorkshopCommentItemViewModel
 {
-    private readonly WorkshopCommentDto _comment;
-    public string Author => _comment.UserName;
-    public string Content => _comment.Content;
-    public string Date => _comment.CreatedAt.LocalDateTime.ToString("dd.MM.yyyy · HH:mm");
-    public WorkshopCommentItemViewModel(WorkshopCommentDto comment) => _comment = comment;
+    private readonly CustomThemeTabViewModel _owner;
+    internal WorkshopCommentDto Comment { get; }
+    public string Author => Comment.UserName;
+    public string Content => Comment.Content;
+    public string Date => Comment.CreatedAt.LocalDateTime.ToString("dd.MM.yyyy · HH:mm");
+    public bool IsOwn { get; }
+    public WorkshopCommentItemViewModel(CustomThemeTabViewModel owner, WorkshopCommentDto comment, Guid? activeUser)
+    { _owner = owner; Comment = comment; IsOwn = activeUser == comment.UserId; }
+    public void Delete() => _owner.DeleteWorkshopComment(this);
 }

@@ -55,6 +55,8 @@ internal static class Program
             // Check if this is a valid Uri, since that indicates re-invocation.
             if (Uri.TryCreate(args[0], UriKind.Absolute, out var result))
             {
+                if (OrbitraProtocol.TryParseInvite(result, out var invitedServer))
+                    result = invitedServer;
                 commands = new string[]
                     { LauncherCommands.BlankReasonCommand, LauncherCommands.ConstructConnectCommand(result) };
                 // This ensures we queue up the connection even if we're starting the launcher now.
@@ -90,6 +92,7 @@ internal static class Program
 
         VcRedistCheck.Check();
         LauncherPaths.CreateDirs();
+        OrbitraProtocol.RegisterForCurrentUser();
         var recovery = new LauncherRecoveryService();
         recovery.Begin();
         SafeModeActive = recovery.PreviousRunFailed || args.Contains("--safe-mode", StringComparer.OrdinalIgnoreCase);

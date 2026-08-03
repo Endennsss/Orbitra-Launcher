@@ -4,12 +4,17 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Mono.Unix;
 using Serilog;
 using TerraFX.Interop.Windows;
+using Splat;
+using SS14.Launcher.Models.Data;
 using Win = TerraFX.Interop.Windows.Windows;
 
 namespace SS14.Launcher;
@@ -49,45 +54,60 @@ public static class Helpers
     public static async Task DownloadToStream(this HttpClient client, string uri, Stream stream,
         DownloadProgressCallback? progress = null, CancellationToken cancel = default)
     {
-        await Task.Run(async () =>
+        var existing = stream.CanSeek ? stream.Length : 0;
+        using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+        if (existing > 0)
+            request.Headers.Range = new RangeHeaderValue(existing, null);
+
+        using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancel);
+        if (existing > 0 && response.StatusCode == System.Net.HttpStatusCode.RequestedRangeNotSatisfiable)
         {
-            using var response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancel);
-            response.EnsureSuccessStatusCode();
+            progress?.Invoke(existing, existing);
+            return;
+        }
+        response.EnsureSuccessStatusCode();
 
-            await using var contentStream = await response.Content.ReadAsStreamAsync(cancel);
-            // await using var fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite, 4096, useAsync: true);
-            var totalLength = response.Content.Headers.ContentLength;
-            if (totalLength.HasValue)
-            {
-                progress?.Invoke(0, totalLength.Value);
-            }
+        if (existing > 0 && response.StatusCode != System.Net.HttpStatusCode.PartialContent)
+        {
+            // Server ignored Range: safely restart instead of appending a second archive.
+            stream.SetLength(0);
+            existing = 0;
+        }
+        if (stream.CanSeek) stream.Position = existing;
 
-            var totalRead = 0L;
-            var reads = 0L;
-            const int bufferLength = 4096;
-            var buffer = ArrayPool<byte>.Shared.Rent(bufferLength);
-            var isMoreToRead = true;
+        await using var contentStream = await response.Content.ReadAsStreamAsync(cancel);
+        var remaining = response.Content.Headers.ContentLength;
+        var totalLength = remaining.HasValue ? existing + remaining.Value : (long?) null;
+        if (totalLength.HasValue) progress?.Invoke(existing, totalLength.Value);
 
-            do
+        var totalRead = existing;
+        var reads = 0L;
+        const int bufferLength = 32 * 1024;
+        var buffer = ArrayPool<byte>.Shared.Rent(bufferLength);
+        try
+        {
+            while (true)
             {
                 var read = await contentStream.ReadAsync(buffer.AsMemory(0, bufferLength), cancel);
-                if (read == 0)
-                {
-                    isMoreToRead = false;
-                }
-                else
-                {
-                    await stream.WriteAsync(buffer.AsMemory(0, read), cancel);
+                if (read == 0) break;
+                await DownloadBandwidthLimiter.ThrottleAsync(read, cancel);
+                await stream.WriteAsync(buffer.AsMemory(0, read), cancel);
 
-                    reads += 1;
-                    totalRead += read;
-                    if (totalLength.HasValue && reads % 20 == 0)
-                    {
-                        progress?.Invoke(totalRead, totalLength.Value);
-                    }
-                }
-            } while (isMoreToRead);
-        }, cancel);
+                reads++;
+                totalRead += read;
+                if (totalLength.HasValue && reads % 8 == 0) progress?.Invoke(totalRead, totalLength.Value);
+            }
+            if (totalLength.HasValue) progress?.Invoke(totalRead, totalLength.Value);
+        }
+        finally { ArrayPool<byte>.Shared.Return(buffer); }
+    }
+
+    public static string GetPartialDownloadPath(string uri, string prefix)
+    {
+        var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(uri)))[..24];
+        var directory = Path.Combine(LauncherPaths.DirUserData, "PartialDownloads");
+        Directory.CreateDirectory(directory);
+        return Path.Combine(directory, $"{prefix}-{hash}.part");
     }
 
     /// <summary>

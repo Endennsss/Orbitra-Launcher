@@ -63,6 +63,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
     public OptionsTabViewModel OptionsTab { get; }
     public CustomThemeTabViewModel CustomThemeTab { get; }
     public PlaytimeTabViewModel PlaytimeTab { get; }
+    public ProfileTabViewModel ProfileTab { get; }
     public ActivityTabViewModel ActivityTab { get; }
     public SystemCenterTabViewModel SystemCenterTab { get; }
 
@@ -83,6 +84,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         OptionsTab = new OptionsTabViewModel(this);
         CustomThemeTab = new CustomThemeTabViewModel(this);
         PlaytimeTab = new PlaytimeTabViewModel();
+        ProfileTab = new ProfileTabViewModel(this);
         ActivityTab = new ActivityTabViewModel();
         SystemCenterTab = new SystemCenterTabViewModel(this);
 
@@ -92,6 +94,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
             NewsTab,
             UsefulLinksTab,
             PlaytimeTab,
+            ProfileTab,
             ActivityTab,
             SystemCenterTab,
             CustomThemeTab,
@@ -118,7 +121,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         _loginMgr.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName is nameof(_loginMgr.ActiveAccount))
+            {
                 OnPropertyChanged(new PropertyChangedEventArgs(nameof(LoggedIn)));
+                OrbitraProtocol.PublishPresence(null);
+            }
         };
 
         _cfg.Logins.Connect()
@@ -141,6 +147,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         if (ReferenceEquals(tab, OptionsTab)) return "options";
         if (ReferenceEquals(tab, CustomThemeTab)) return "custom-theme";
         if (ReferenceEquals(tab, PlaytimeTab)) return "playtime";
+        if (ReferenceEquals(tab, ProfileTab)) return "profile";
         if (ReferenceEquals(tab, ActivityTab)) return "activity";
         if (ReferenceEquals(tab, SystemCenterTab)) return "system-center";
         return "development";
@@ -174,11 +181,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
 
     private void ApplySavedNavigationOrder()
     {
-        if (_cfg.GetCVar(CVars.NavigationOrderVersion) < 2)
+        if (_cfg.GetCVar(CVars.NavigationOrderVersion) < 3)
         {
             _cfg.SetCVar(CVars.NavigationTabOrder,
-                "home,servers,news,links,playtime,activity,system-center,custom-theme,options,development");
-            _cfg.SetCVar(CVars.NavigationOrderVersion, 2);
+                "home,servers,news,links,playtime,profile,activity,system-center,custom-theme,options,development");
+            _cfg.SetCVar(CVars.NavigationOrderVersion, 3);
             _cfg.CommitConfig();
         }
         var order = ParseCsv(_cfg.GetCVar(CVars.NavigationTabOrder)).ToList();
@@ -566,6 +573,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         Add("Перейти: Главная", SelectTabHome);
         Add("Перейти: Серверы", SelectTabServers);
         Add("Перейти: Новости", () => SelectTab(NewsTab));
+        Add("Перейти: Профиль", () => SelectTab(ProfileTab));
         Add("Перейти: Настройки", () => SelectTab(OptionsTab));
         Add("Обновить текущую вкладку", RefreshCurrentTab);
         Add("Открыть папку логов", OptionsTab.OpenLogDirectory);

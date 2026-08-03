@@ -98,6 +98,10 @@ public static class CVars
     /// </summary>
     public static readonly CVarDef<int> InterruptibleDownloadKeepHours = CVarDef.Create("InterruptibleDownloadKeepHours", 7 * 24);
 
+    /// <summary>Global content download limit in KiB/s. Zero means unlimited.</summary>
+    public static readonly CVarDef<int> DownloadSpeedLimitKib = CVarDef.Create("DownloadSpeedLimitKib", 0);
+    public static readonly CVarDef<bool> OrbitraShareCurrentServer = CVarDef.Create("OrbitraShareCurrentServer", false);
+
     /// <summary>
     /// Whether to display override assets (trans rights).
     /// </summary>
@@ -146,11 +150,12 @@ public static class CVars
     public static readonly CVarDef<string> CustomThemeImageOptions = CVarDef.Create("CustomThemeImageOptions", "");
     public static readonly CVarDef<int> CustomThemeBlur = CVarDef.Create("CustomThemeBlur", 8);
     public static readonly CVarDef<int> CustomThemeDimming = CVarDef.Create("CustomThemeDimming", 28);
+    public static readonly CVarDef<string> InstalledWorkshopThemeId = CVarDef.Create("InstalledWorkshopThemeId", "");
     public static readonly CVarDef<bool> UiSoundsEnabled = CVarDef.Create("UiSoundsEnabled", true);
     public static readonly CVarDef<int> UiSoundVolume = CVarDef.Create("UiSoundVolume", 65);
     public static readonly CVarDef<bool> CloseToTray = CVarDef.Create("CloseToTray", true);
     public static readonly CVarDef<string> NavigationTabOrder =
-        CVarDef.Create("NavigationTabOrder", "home,servers,news,links,playtime,activity,system-center,custom-theme,options,development");
+        CVarDef.Create("NavigationTabOrder", "home,servers,news,links,playtime,profile,activity,system-center,custom-theme,options,development");
     public static readonly CVarDef<string> HiddenNavigationTabs =
         CVarDef.Create("HiddenNavigationTabs", "");
     public static readonly CVarDef<int> NavigationOrderVersion = CVarDef.Create("NavigationOrderVersion", 0);

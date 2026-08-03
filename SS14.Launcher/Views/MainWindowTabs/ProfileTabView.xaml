@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:vm="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs" x:Class="SS14.Launcher.Views.MainWindowTabs.ProfileTabView">
+ <ScrollViewer HorizontalScrollBarVisibility="Disabled"><StackPanel Spacing="16">
+  <StackPanel><TextBlock Text="ORBITRA ID" Classes="SectionLabel"/><TextBlock Text="Профиль пользователя" Classes="NanoHeadingMedium"/></StackPanel>
+  <Border Classes="Surface" Padding="20"><Grid ColumnDefinitions="130,*,Auto">
+   <Border Width="108" Height="108" CornerRadius="54" ClipToBounds="True" Background="#292929">
+    <Image Source="{Binding Avatar}" Stretch="UniformToFill"/>
+   </Border>
+   <StackPanel Grid.Column="1" Margin="20,4" Spacing="5"><TextBlock Text="{Binding Username}" FontSize="26" FontWeight="Bold"/><TextBlock Text="{Binding UserId}" Classes="SubText"/>
+    <TextBlock Text="{Binding TotalPlaytime, StringFormat='Игровое время: {0}'}"/><TextBlock Text="{Binding ServersPlayed, StringFormat='Серверов посещено: {0}'}"/>
+    <CheckBox Content="Показывать друзьям текущий сервер" IsChecked="{Binding ShareCurrentServer,Mode=TwoWay}"/>
+   </StackPanel><Button Grid.Column="2" Content="Сменить аватар" Command="{Binding ChooseAvatar}" VerticalAlignment="Top"/>
+  </Grid></Border>
+  <Border Classes="Surface" Padding="20"><StackPanel Spacing="10"><TextBlock Text="ПОИСК ЛЮДЕЙ" Classes="SectionLabel"/>
+   <Grid ColumnDefinitions="*,Auto"><TextBox Watermark="Точный ник аккаунта SS14" Text="{Binding Search,Mode=TwoWay}"/><Button Grid.Column="1" Content="Найти" Command="{Binding FindUser}" Margin="8,0,0,0"/></Grid>
+   <Border IsVisible="{Binding HasFoundProfile}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="14">
+    <StackPanel Spacing="8"><TextBlock Text="{Binding FoundProfile.Username}" FontSize="20" FontWeight="Bold"/><TextBlock Text="{Binding FoundServerText}" Classes="SubText"/>
+     <WrapPanel><Button Content="Добавить в друзья" Command="{Binding AddFoundFriend}"/><TextBox Width="300" Watermark="Причина жалобы" Text="{Binding ReportReason,Mode=TwoWay}" Margin="8,0"/><Button Content="Отправить жалобу" Command="{Binding ReportFoundUser}"/></WrapPanel>
+    </StackPanel></Border>
+  </StackPanel></Border>
+  <Border Classes="Surface" Padding="20"><StackPanel Spacing="10"><Grid ColumnDefinitions="*,Auto"><TextBlock Text="ДРУЗЬЯ И ЗАЯВКИ" Classes="SectionLabel"/><Button Grid.Column="1" Content="Обновить" Command="{Binding Refresh}"/></Grid>
+   <ItemsControl ItemsSource="{Binding Friends}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:OrbitraFriendItemViewModel">
+    <Grid ColumnDefinitions="180,*,Auto,Auto,Auto,Auto" Margin="0,4"><StackPanel><TextBlock Text="{Binding Username}" FontWeight="Bold"/><TextBlock Text="{Binding State}" Classes="SubText"/></StackPanel>
+     <TextBlock Grid.Column="1" Text="{Binding ServerText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+     <Button Grid.Column="2" Content="Принять" Command="{Binding Accept}" IsVisible="{Binding IsIncoming}"/>
+     <Button Grid.Column="3" Content="Подключиться" Command="{Binding Connect}" IsEnabled="{Binding CanConnect}"/>
+     <Button Grid.Column="4" Content="Приглашение" Command="{Binding CopyInvite}" IsEnabled="{Binding CanConnect}"/>
+     <Button Grid.Column="5" Content="Удалить" Command="{Binding Remove}"/>
+    </Grid>
+   </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+  </StackPanel></Border>
+  <TextBlock Text="{Binding Status}" Classes="SubText" TextWrapping="Wrap"/>
+ </StackPanel></ScrollViewer>
+</UserControl>

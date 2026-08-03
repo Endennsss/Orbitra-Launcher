@@ -68,6 +68,13 @@
                   Content="Сворачивать в трей при закрытии" />
         <TextBlock Text="Крестик и Alt+F4 скрывают окно. Полностью завершить лаунчер можно через пункт «Выйти» в трее."
                    Classes="SubText" TextWrapping="Wrap" Margin="22,0,0,10" />
+        <Grid ColumnDefinitions="150,260" Margin="0,2,0,2">
+          <TextBlock Text="Скорость загрузки" VerticalAlignment="Center" />
+          <ComboBox Grid.Column="1" ItemsSource="{Binding DownloadLimits}"
+                    SelectedItem="{Binding SelectedDownloadLimit, Mode=TwoWay}" MinWidth="240" />
+        </Grid>
+        <TextBlock Text="Ограничение действует на контент серверов, движок и модули. Прерванные загрузки автоматически продолжаются."
+                   Classes="SubText" TextWrapping="Wrap" Margin="22,0,0,10" />
         <CheckBox IsChecked="{Binding CustomUpdateChecks, Mode=TwoWay}" Content="Проверять обновления лаунчера через GitHub Releases" />
         <Grid ColumnDefinitions="*,Auto" Margin="22,0,0,10">
           <TextBlock Text="Новая стабильная версия будет предложена при запуске."

@@ -124,6 +124,24 @@ public class OptionsTabViewModel : MainWindowTabViewModel
         set { Cfg.SetCVar(CVars.CloseToTray, value); Cfg.CommitConfig(); }
     }
 
+    public IReadOnlyList<DownloadLimitOption> DownloadLimits { get; } =
+    [
+        new(0, "Без ограничения"), new(512, "512 КБ/с"), new(1024, "1 МБ/с"),
+        new(2048, "2 МБ/с"), new(5120, "5 МБ/с"), new(10240, "10 МБ/с"),
+        new(20480, "20 МБ/с"), new(51200, "50 МБ/с")
+    ];
+    public DownloadLimitOption SelectedDownloadLimit
+    {
+        get => DownloadLimits.FirstOrDefault(x => x.KibPerSecond == Cfg.GetCVar(CVars.DownloadSpeedLimitKib)) ?? DownloadLimits[0];
+        set
+        {
+            if (value == null) return;
+            Cfg.SetCVar(CVars.DownloadSpeedLimitKib, value.KibPerSecond);
+            Cfg.CommitConfig();
+            OnPropertyChanged(nameof(SelectedDownloadLimit));
+        }
+    }
+
     public bool CustomUpdateChecks
     {
         get => Cfg.GetCVar(CVars.CustomUpdateChecks);
@@ -265,6 +283,11 @@ public class OptionsTabViewModel : MainWindowTabViewModel
         try { SettingsBackupService.Import(path, Cfg); App.ApplyConfiguredTheme(Cfg); _mainWindow.ShowToast("Настройки восстановлены. Перезапустите лаунчер"); }
         catch { _mainWindow.ShowToast("Архив настроек повреждён", true); }
     }
+}
+
+public sealed record DownloadLimitOption(int KibPerSecond, string Name)
+{
+    public override string ToString() => Name;
 }
 
 public sealed class NavigationTabOptionViewModel : ObservableObject

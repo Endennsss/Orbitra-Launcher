@@ -226,7 +226,7 @@ public sealed partial class Updater
         var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancel);
         response.EnsureSuccessStatusCode();
 
-        var stream = await response.Content.ReadAsStreamAsync(cancel);
+        Stream stream = new ThrottledReadStream(await response.Content.ReadAsStreamAsync(cancel));
         var bandwidthStream = new BandwidthStream(stream);
         stream = bandwidthStream;
         if (response.Content.Headers.ContentEncoding.Contains("zstd"))

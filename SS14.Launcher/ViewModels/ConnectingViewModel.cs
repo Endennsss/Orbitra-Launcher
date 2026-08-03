@@ -102,12 +102,14 @@ public class ConnectingViewModel : ViewModelBase
                     if (_connector.Status == ClientExited)
                     {
                         PlaytimeTracker.Stop();
+                        OrbitraProtocol.PublishPresence(null);
                         DiscordRichPresenceService.Instance.ShowLauncher();
                     }
 
                     if (_connector.Status == ClientRunning)
                     {
                         PlaytimeTracker.Start(TargetAddress);
+                        OrbitraProtocol.PublishPresence(TargetAddress);
                         ActivityLog.Record("Подключение", "Клиент запущен", TargetAddress ?? "Неизвестный сервер");
                         DiscordRichPresenceService.Instance.ShowPlaying();
                         CloseAfterConnected();

@@ -120,20 +120,14 @@ public sealed partial class EngineManagerDynamic : IEngineManager
         Helpers.EnsureDirectoryExists(LauncherPaths.DirEngineInstallations);
 
         var downloadTarget = Path.Combine(LauncherPaths.DirEngineInstallations, $"{foundVersion.Version}.zip");
-        await using var file = File.Create(downloadTarget, 4096, FileOptions.Asynchronous);
+        await using var file = new FileStream(downloadTarget, FileMode.OpenOrCreate, FileAccess.ReadWrite,
+            FileShare.Read, 4096, FileOptions.Asynchronous);
 
         try
         {
             await _http.DownloadToStream(buildInfo.Url, file, progress, cancel: cancel);
         }
-        catch (OperationCanceledException)
-        {
-            // Don't leave behind garbage.
-            await file.DisposeAsync();
-            File.Delete(downloadTarget);
-
-            throw;
-        }
+        catch (OperationCanceledException) { throw; } // Keep the partial ZIP for HTTP Range resume.
 
         _cfg.AddEngineInstallation(new InstalledEngineVersion(foundVersion.Version, buildInfo.Signature));
         _cfg.CommitConfig();
@@ -197,8 +191,10 @@ public sealed partial class EngineManagerDynamic : IEngineManager
 
         await ClearModuleDir(moduleDiskPath, moduleVersionDiskPath);
 
+        var partialPath = Helpers.GetPartialDownloadPath(platformData.Url, $"module-{moduleName}-{moduleVersion}");
         {
-            await using var tempFile = TempFile.CreateTempFile();
+            await using var tempFile = new FileStream(partialPath, FileMode.OpenOrCreate, FileAccess.ReadWrite,
+                FileShare.Read, 4096, FileOptions.Asynchronous);
             Log.Debug("Downloading into temp file: {TempFilePath}", tempFile.Name);
 
             await _http.DownloadToStream(platformData.Url, tempFile, progress, cancel);
@@ -216,6 +212,7 @@ public sealed partial class EngineManagerDynamic : IEngineManager
                 else
 #endif
                 {
+                    tempFile.SetLength(0);
                     throw new UpdateException("Failed to verify module signature!");
                 }
             }
@@ -230,6 +227,7 @@ public sealed partial class EngineManagerDynamic : IEngineManager
 
             ExtractModule(moduleName, moduleVersionDiskPath, tempFile);
         }
+        File.Delete(partialPath);
 
         _cfg.AddEngineModule(new InstalledEngineModule(moduleName, moduleVersion));
         _cfg.CommitConfig();
