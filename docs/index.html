@@ -4,13 +4,13 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101010">
   <title>Orbitra Launcher</title>
   <meta name="description" content="Orbitra Launcher — неофициальный лаунчер Space Station 14 с новым интерфейсом и расширенным мониторингом серверов.">
-  <link rel="stylesheet" href="style.css?v=20260809-1"><script src="news.js?v=20260802-3" defer></script><script src="workshop.js?v=20260809-1" defer></script>
+  <link rel="stylesheet" href="style.css?v=20260802-3"><script src="news.js?v=20260802-3" defer></script>
 </head>
 <body>
   <div class="grid"></div>
   <header>
     <a class="brand" href="#top"><img src="assets/brand-mark.png" alt=""><span>ORBITRA / LAUNCHER</span></a>
-    <nav><a href="#features">Возможности</a><a href="#workshop">Мастерская</a><a href="#news">Новости</a><button id="account-open" class="nav-account" type="button">Войти через SS14</button></nav>
+    <nav><a href="#features">Возможности</a><a href="#news">Новости</a><a href="https://github.com/Endennsss/Orbitra-Launcher">GitHub</a></nav>
   </header>
   <main id="top">
     <section class="hero">
@@ -18,11 +18,6 @@
       <p>Быстрый серверный браузер, живой пинг, Discord RPC, уведомления, статистика и полностью настраиваемый интерфейс.</p>
       <div class="actions"><a class="primary" href="https://github.com/Endennsss/Orbitra-Launcher/releases/latest">Скачать последнюю версию</a><a class="secondary" href="https://github.com/Endennsss/Orbitra-Launcher">Исходный код</a></div>
       <div class="status"><i></i><span>Windows 10/11 · .NET 10 · Avalonia UI</span></div>
-    </section>
-    <section id="workshop" class="workshop-section">
-      <div class="section-head"><div><div class="eyebrow">ORBITRA COMMUNITY</div><h2>Мастерская тем</h2></div><button id="publish-open" class="secondary web-button" type="button" disabled>Опубликовать тему</button></div>
-      <div class="workshop-toolbar"><input id="theme-search" type="search" placeholder="Найти тему или автора"><button id="themes-refresh" class="secondary web-button" type="button">Обновить</button></div>
-      <div id="theme-list" class="theme-list" aria-live="polite"><div class="news-loading">Загружаем темы…</div></div>
     </section>
     <section id="features" class="features">
       <article><b>01</b><h2>Серверы в реальном времени</h2><p>Пинг, онлайн, карта, режим, избранное и фоновые уведомления.</p></article>
@@ -36,7 +31,5 @@
     </section>
   </main>
   <footer><span>Orbitra Launcher · неофициальный проект сообщества</span><span>MIT · 2026</span></footer>
-  <dialog id="account-dialog" class="orbitra-dialog"><form method="dialog" class="dialog-card"><button class="dialog-close" value="cancel" aria-label="Закрыть">×</button><div class="eyebrow">SS14 ACCOUNT</div><h2>Аккаунт мастерской</h2><p class="dialog-copy">Вход выполняется через официальный сервер авторизации Space Station 14. Orbitra не сохраняет пароль.</p><div class="auth-tabs"><button id="login-tab" class="active" type="button">Вход</button><button id="register-tab" type="button">Регистрация</button></div><label>Имя пользователя<input id="auth-username" autocomplete="username" required></label><label id="email-row" hidden>Email<input id="auth-email" type="email" autocomplete="email"></label><label>Пароль<input id="auth-password" type="password" autocomplete="current-password" required></label><label id="tfa-row" hidden>Код 2FA<input id="auth-tfa" inputmode="numeric" autocomplete="one-time-code"></label><div id="auth-message" class="form-message"></div><button id="auth-submit" class="primary web-button" type="button">Войти</button><button id="logout-button" class="secondary web-button" type="button" hidden>Выйти</button></form></dialog>
-  <dialog id="publish-dialog" class="orbitra-dialog"><form method="dialog" class="dialog-card publish-card"><button class="dialog-close" value="cancel" aria-label="Закрыть">×</button><div class="eyebrow">PUBLISH THEME</div><h2>Новая тема</h2><div class="publish-grid"><label>Название<input id="publish-name" maxlength="60" required></label><label>Версия<input id="publish-version" maxlength="20" value="1.0" required></label><label class="wide">Описание<textarea id="publish-description" maxlength="2000" rows="4"></textarea></label><label>Архив Orbitra ZIP<input id="publish-archive" type="file" accept=".zip,application/zip" required></label><label>Превью PNG<input id="publish-preview" type="file" accept="image/png" required></label><label>Фон<input id="publish-background" type="color" value="#0d0d0d"></label><label>Панели<input id="publish-surface" type="color" value="#1a1a1a"></label><label>Акцент<input id="publish-accent" type="color" value="#eeeeee"></label><label>Текст<input id="publish-text" type="color" value="#f2f2f2"></label><label class="wide">Размытие: <output id="blur-value">0</output> px<input id="publish-blur" type="range" min="0" max="40" value="0"></label></div><div id="publish-message" class="form-message"></div><button id="publish-submit" class="primary web-button" type="button">Опубликовать</button></form></dialog>
 </body>
 </html>
