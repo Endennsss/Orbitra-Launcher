@@ -1,5 +1,13 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="SS14.Launcher.Views.CreatorBadge">
- <Border Background="#01000000" Padding="2" ToolTip.Tip="Создатель лаунчера" ToolTip.ShowDelay="100">
-  <Viewbox Stretch="Uniform"><Path Data="M2,4 L5,16 L19,16 L22,4 L16,10 L12,4 L8,10 Z M5,20 L19,20" Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Viewbox>
+ <Border Background="#01000000" Padding="1" ClipToBounds="False"
+         ToolTip.Tip="Создатель лаунчера" ToolTip.ShowDelay="100">
+  <Viewbox Stretch="Uniform" ClipToBounds="False">
+   <Canvas Width="24" Height="24" ClipToBounds="False">
+    <!-- Official Lucide hammer geometry. The fixed canvas preserves its outer stroke. -->
+    <Path Data="M15,12 L5.627,21.373 A1,1 0 0 1 2.626,18.373 L12,9 M18,15 L22,11 M21.5,11.5 L19.586,9.586 A2,2 0 0 1 19,8.172 L19,7.828 A2,2 0 0 0 18.414,6.414 L16.757,4.757 A6,6 0 0 0 12.516,3 L9,3 L10.243,4.243 A6,6 0 0 1 12,8.485 L12,10 L14,12 L15.172,12 A2,2 0 0 1 16.586,12.586 L18.5,14.5"
+          Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.8"
+          StrokeLineCap="Round"/>
+   </Canvas>
+  </Viewbox>
  </Border>
 </UserControl>

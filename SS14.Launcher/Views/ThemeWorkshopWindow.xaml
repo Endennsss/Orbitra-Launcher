@@ -21,10 +21,10 @@
         </StackPanel>
         <StackPanel Grid.Column="1" Orientation="Horizontal">
           <Button Classes="WindowCommand" Width="46" Height="44" Padding="0" Margin="0" Click="MinimizeClicked">
-            <Path Data="M0,0 L10,0" Width="10" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.2" />
+            <Rectangle Width="11" Height="1.5" Fill="{DynamicResource ThemeForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Button>
           <Button Classes="WindowCommand Close" Width="46" Height="44" Padding="0" Margin="0" Click="CloseClicked">
-            <Path Data="M0,0 L9,9 M9,0 L0,9" Width="10" Height="10" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.2" />
+            <Grid Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center"><Rectangle Width="11" Height="1.5" Fill="{DynamicResource ThemeForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="50%,50%" RenderTransform="rotate(45deg)"/><Rectangle Width="11" Height="1.5" Fill="{DynamicResource ThemeForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="50%,50%" RenderTransform="rotate(-45deg)"/></Grid>
           </Button>
         </StackPanel>
       </Grid>
@@ -39,7 +39,7 @@
             <TextBlock Text="Публикуйте оформление, устанавливайте темы, ставьте лайки и оставляйте комментарии."
                        Classes="SubText" TextWrapping="Wrap" />
           </StackPanel>
-          <Button Grid.Column="1" Content="Обновить" Command="{Binding RefreshWorkshop}" VerticalAlignment="Center" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"><Button Content="Опубликовать тему" Command="{Binding OpenPublishWindow}"/><Button Content="Обновить" Command="{Binding RefreshWorkshop}" /></StackPanel>
         </Grid>
 
         <Border Background="#2A2417" BorderBrush="#6E5B30" BorderThickness="1" Padding="14"
@@ -58,23 +58,6 @@
             <Button Grid.Column="1" Content="Удалить" Command="{Binding ConfirmDeleteWorkshopTheme}" />
             <Button Grid.Column="2" Content="Отмена" Command="{Binding CancelDeleteWorkshopTheme}" />
           </Grid>
-        </Border>
-
-        <Border Classes="Surface" Padding="18">
-          <StackPanel Spacing="9">
-            <TextBlock Text="ОПУБЛИКОВАТЬ ТЕКУЩУЮ ТЕМУ" Classes="SectionLabel" />
-            <Grid ColumnDefinitions="240,*">
-              <TextBox Text="{Binding PublishName, Mode=TwoWay}" Watermark="Название темы" MaxLength="60" />
-              <TextBox Grid.Column="1" Text="{Binding PublishDescription, Mode=TwoWay}" Watermark="Описание темы"
-                       MaxLength="2000" Margin="8,0,0,0" />
-            </Grid>
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Text="Автором будет указан активный аккаунт Space Station 14."
-                         Classes="SubText" VerticalAlignment="Center" />
-              <Button Grid.Column="1" Content="Опубликовать" Command="{Binding PublishToWorkshop}"
-                      IsEnabled="{Binding !WorkshopBusy}" />
-            </Grid>
-          </StackPanel>
         </Border>
 
         <TextBlock Text="{Binding WorkshopStatus}" Classes="SubText" />
@@ -145,12 +128,11 @@
               <Button Content="Предпросмотр" Command="{Binding SelectedWorkshopTheme.Preview}" />
               <Button Content="{Binding SelectedWorkshopTheme.LikeText}" Command="{Binding SelectedWorkshopTheme.ToggleLike}" />
               <Button Content="{Binding SelectedWorkshopTheme.FavoriteText}" Command="{Binding SelectedWorkshopTheme.ToggleFavorite}" />
-              <Button Content="Обновить текущим оформлением" Command="{Binding SelectedWorkshopTheme.Update}"
+              <Button Content="Редактировать публикацию" Command="{Binding SelectedWorkshopTheme.Update}"
                       IsVisible="{Binding SelectedWorkshopTheme.IsOwn}" />
               <Button Content="Удалить публикацию" Command="{Binding SelectedWorkshopTheme.Delete}"
                       IsVisible="{Binding SelectedWorkshopTheme.IsOwn}" />
             </WrapPanel>
-            <Border Background="{DynamicResource LauncherSurfaceAltBrush}" Padding="12"><Grid ColumnDefinitions="*,Auto"><TextBox Text="{Binding WorkshopReportReason,Mode=TwoWay}" MaxLength="500" Watermark="Причина жалобы на тему"/><Button Grid.Column="1" Content="Пожаловаться" Command="{Binding ReportSelectedWorkshopTheme}" Margin="8,0,0,0"/></Grid></Border>
             <TextBlock Text="КОММЕНТАРИИ" Classes="SectionLabel" Margin="0,8,0,0" />
             <ItemsControl ItemsSource="{Binding WorkshopComments}">
               <ItemsControl.ItemTemplate>

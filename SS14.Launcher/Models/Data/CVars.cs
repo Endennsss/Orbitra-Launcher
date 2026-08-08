@@ -160,6 +160,7 @@ public static class CVars
     public static readonly CVarDef<string> HiddenNavigationTabs =
         CVarDef.Create("HiddenNavigationTabs", "");
     public static readonly CVarDef<int> NavigationOrderVersion = CVarDef.Create("NavigationOrderVersion", 0);
+    public static readonly CVarDef<bool> NavigationCompact = CVarDef.Create("NavigationCompact", false);
 
     /// <summary>
     /// Automatically refresh favorite server status and ping every three seconds.

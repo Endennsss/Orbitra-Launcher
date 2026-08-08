@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
+using Avalonia;
 using Avalonia.Platform.Storage;
 using Avalonia.Media.Imaging;
 using AnimatedImage.Avalonia;
@@ -40,11 +41,32 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
     private readonly LocalizationManager _loc;
 
     private int _selectedIndex;
+    private bool _isNavigationCompact;
     private readonly List<MainWindowTabViewModel> _allTabs = [];
 
     public DataManager Cfg => _cfg;
     public LoggedInAccount? ActiveAccount => _loginMgr.ActiveAccount;
     public ICVarEntry<bool> UseTextLogo => Cfg.GetCVarEntry(CVars.UseTextLogo);
+    public bool IsNavigationCompact
+    {
+        get => _isNavigationCompact;
+        private set
+        {
+            if (!SetProperty(ref _isNavigationCompact, value)) return;
+            OnPropertyChanged(nameof(NavigationPanelWidth));
+            OnPropertyChanged(nameof(NavigationItemsWidth));
+            OnPropertyChanged(nameof(NavigationIconMargin));
+            OnPropertyChanged(nameof(NavigationToggleIcon));
+            OnPropertyChanged(nameof(NavigationToggleText));
+        }
+    }
+    public double NavigationPanelWidth => IsNavigationCompact ? 74 : 240;
+    public double NavigationItemsWidth => IsNavigationCompact ? 46 : 210;
+    public Thickness NavigationIconMargin => IsNavigationCompact ? new Thickness(6, 0, 0, 0) : default;
+    public string NavigationToggleText => IsNavigationCompact ? "Развернуть панель" : "Свернуть панель";
+    public string NavigationToggleIcon => IsNavigationCompact
+        ? "M5,3 L19,3 A2,2 0 0 1 21,5 L21,19 A2,2 0 0 1 19,21 L5,21 A2,2 0 0 1 3,19 L3,5 A2,2 0 0 1 5,3 Z M9,3 L9,21 M14,9 L17,12 L14,15"
+        : "M5,3 L19,3 A2,2 0 0 1 21,5 L21,19 A2,2 0 0 1 19,21 L5,21 A2,2 0 0 1 3,19 L3,5 A2,2 0 0 1 5,3 Z M9,3 L9,21 M16,15 L13,12 L16,9";
     [ObservableProperty] private bool _outOfDate;
     [ObservableProperty] private bool _customUpdateAvailable;
     [ObservableProperty] private string _customUpdateVersion = string.Empty;
@@ -66,10 +88,12 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
     public ProfileTabViewModel ProfileTab { get; }
     public ActivityTabViewModel ActivityTab { get; }
     public SystemCenterTabViewModel SystemCenterTab { get; }
+    public DevelopmentTabViewModel? DevelopmentTab { get; }
 
     public MainWindowViewModel()
     {
         _cfg = Locator.Current.GetRequiredService<DataManager>();
+        _isNavigationCompact = _cfg.GetCVar(CVars.NavigationCompact);
         _loginMgr = Locator.Current.GetRequiredService<LoginManager>();
         _infoManager = Locator.Current.GetRequiredService<LauncherInfoManager>();
         _loc = LocalizationManager.Instance;
@@ -81,12 +105,15 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         NewsTab = new NewsTabViewModel(this);
         UsefulLinksTab = new UsefulLinksTabViewModel();
         HomeTab = new HomePageViewModel(this);
-        OptionsTab = new OptionsTabViewModel(this);
         CustomThemeTab = new CustomThemeTabViewModel(this);
         PlaytimeTab = new PlaytimeTabViewModel();
         ProfileTab = new ProfileTabViewModel(this);
         ActivityTab = new ActivityTabViewModel();
         SystemCenterTab = new SystemCenterTabViewModel(this);
+#if DEVELOPMENT
+        DevelopmentTab = new DevelopmentTabViewModel(this);
+#endif
+        OptionsTab = new OptionsTabViewModel(this);
 
         _allTabs.AddRange([
             HomeTab,
@@ -95,13 +122,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
             UsefulLinksTab,
             PlaytimeTab,
             ProfileTab,
-            ActivityTab,
-            SystemCenterTab,
-            CustomThemeTab,
             OptionsTab,
-#if DEVELOPMENT
-            new DevelopmentTabViewModel(this),
-#endif
         ]);
         ApplySavedNavigationOrder();
         RefreshVisibleTabs();
@@ -136,6 +157,13 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         });
 
         BuildCommandPalette();
+    }
+
+    public void ToggleNavigationCompact()
+    {
+        IsNavigationCompact = !IsNavigationCompact;
+        _cfg.SetCVar(CVars.NavigationCompact, IsNavigationCompact);
+        _cfg.CommitConfig();
     }
 
     public MainWindow? Control { get; set; }
@@ -259,6 +287,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
 
             RunSelectedOnTab();
             OnPropertyChanged(nameof(SelectedTab));
+            OnPropertyChanged(nameof(SelectedTabName));
+            OnPropertyChanged(nameof(SelectedTabContext));
             OnPropertyChanged(nameof(ActiveThemeBackground));
             OnPropertyChanged(nameof(ActiveAnimatedThemeBackground));
         }
@@ -316,6 +346,18 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         Helpers.OpenUri(new Uri(ConfigConstants.WebsiteUrl));
     }
     public MainWindowTabViewModel? SelectedTab => _selectedIndex >= 0 && _selectedIndex < Tabs.Count ? Tabs[_selectedIndex] : null;
+    public string SelectedTabName => SelectedTab?.Name ?? "Orbitra";
+    public string SelectedTabContext => SelectedTab == null ? "ЛАУНЧЕР" : GetNavigationId(SelectedTab) switch
+    {
+        "home" => "ОБЗОР",
+        "servers" => "СЕТЬ SS14",
+        "news" => "ТРАНСЛЯЦИИ",
+        "links" => "РЕСУРСЫ",
+        "playtime" => "СТАТИСТИКА",
+        "profile" => "ORBITRA ID",
+        "options" => "УПРАВЛЕНИЕ",
+        _ => "ORBITRA"
+    };
 
     public Bitmap? ActiveThemeBackground
     {

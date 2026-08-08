@@ -29,7 +29,7 @@ public sealed class DevelopmentTabViewModel : MainWindowTabViewModel
         ? _loc.GetString("tab-development-title-override")
         : _loc.GetString("tab-development-title");
 
-    public override string IconData => "M8,9 L3,12 L8,15 M16,9 L21,12 L16,15 M14,5 L10,19";
+    public override string IconData => "M18,16 L22,12 L18,8 M6,8 L2,12 L6,16 M14.5,4 L9.5,20";
 
     public double TestProgress
     {

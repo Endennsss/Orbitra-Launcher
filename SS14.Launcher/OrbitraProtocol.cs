@@ -53,9 +53,23 @@ public static class OrbitraProtocol
     {
         _activeServer = address;
         _presenceTimer?.Dispose();
-        _presenceTimer = string.IsNullOrWhiteSpace(address) ? null :
-            new Timer(_ => SendPresence(), null, TimeSpan.FromSeconds(45), TimeSpan.FromSeconds(45));
+        // Presence is a launcher heartbeat, not merely an in-game marker.
+        _presenceTimer = new Timer(_ => SendPresence(), null, TimeSpan.FromSeconds(45), TimeSpan.FromSeconds(45));
         SendPresence();
+    }
+
+    public static async void StopPresence()
+    {
+        _presenceTimer?.Dispose();
+        _presenceTimer = null;
+        try
+        {
+            var account = Locator.Current.GetRequiredService<LoginManager>().ActiveAccount;
+            if (account == null) return;
+            using var social = new OrbitraSocialService();
+            await social.SetPresenceStateAsync(account.UserId, "offline");
+        }
+        catch (Exception e) { Log.Debug(e, "Unable to clear Orbitra presence"); }
     }
 
     private static async void SendPresence()
@@ -66,10 +80,13 @@ public static class OrbitraProtocol
             var account = Locator.Current.GetRequiredService<LoginManager>().ActiveAccount;
             if (account == null) return;
             var address = _activeServer;
+            var incognito = cfg.GetCVar(CVars.OrbitraProfileStatus) == "invisible";
             var share = cfg.GetCVar(CVars.OrbitraShareCurrentServer) &&
-                        cfg.GetCVar(CVars.OrbitraProfileStatus) != "invisible" &&
+                        !incognito &&
                         !string.IsNullOrWhiteSpace(address);
             using var social = new OrbitraSocialService();
+            await social.UpsertProfileAsync(account.UserId, account.Username,
+                cfg.GetCVar(CVars.OrbitraShareCurrentServer), incognito ? "invisible" : "online");
             await social.UpdatePresenceAsync(account.UserId, share, share ? address : null, share ? address : null);
         }
         catch (Exception e) { Log.Debug(e, "Unable to update Orbitra presence"); }

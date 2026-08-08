@@ -2,6 +2,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
+  <!-- All regular launcher copy follows the active theme text color. More specific
+       SubText/SectionLabel styles below switch to the configured muted color. -->
+  <Style Selector="TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}" />
+    <Setter Property="Transitions">
+      <Transitions><BrushTransition Property="Foreground" Duration="0:0:0.2" /></Transitions>
+    </Setter>
+  </Style>
+
   <Style Selector="TextBlock.NanoHeading">
     <Setter Property="Foreground" Value="{DynamicResource ThemeNanoGoldBrush}" />
     <Setter Property="FontWeight" Value="Bold" />
@@ -145,8 +154,33 @@
     <Setter Property="FontSize" Value="20" />
   </Style>
 
+  <!-- Orbitra scrollbar: quiet at rest, clear while navigating long lists. -->
   <Style Selector="ScrollBar">
-    <Setter Property="Margin" Value="4 0 0 0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Margin" Value="4,0,0,0" />
+    <Setter Property="Opacity" Value="0.72" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.18" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="ScrollBar:pointerover, ScrollBar:pressed">
+    <Setter Property="Opacity" Value="1" />
+  </Style>
+  <Style Selector="ScrollBar /template/ Thumb">
+    <Setter Property="Background" Value="{DynamicResource ThemeForegroundMutedBrush}" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.18" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="ScrollBar:pointerover /template/ Thumb">
+    <Setter Property="Background" Value="{DynamicResource ThemeAccentBrush}" />
+  </Style>
+  <Style Selector="ScrollBar /template/ Thumb:pressed">
+    <Setter Property="Background" Value="{DynamicResource ThemeForegroundBrush}" />
   </Style>
 
   <Style Selector="Button, ToggleButton">
@@ -355,6 +389,46 @@
   <Style Selector="Button.WindowCommand">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Button.WindowCommand Path">
+    <Setter Property="MinWidth" Value="10" />
+    <Setter Property="MinHeight" Value="10" />
+    <Setter Property="Stretch" Value="Uniform" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="StrokeThickness" Value="1.4" />
+  </Style>
+
+  <!-- A horizontal Path has zero intrinsic height in Avalonia and can disappear.
+       Give every non-close window command a real 10x10 Lucide minus geometry. -->
+  <Style Selector="Button.WindowCommand:not(.Close) Path">
+    <Setter Property="Data" Value="M2,7 L12,7" />
+    <Setter Property="Width" Value="14" />
+    <Setter Property="Height" Value="14" />
+    <Setter Property="Stretch" Value="None" />
+    <Setter Property="StrokeLineCap" Value="Round" />
+    <Setter Property="Margin" Value="0,14,0,0" />
+  </Style>
+
+  <Style Selector="Button.WindowCommand.Close Path">
+    <Setter Property="Data" Value="M3,3 L11,11 M11,3 L3,11" />
+    <Setter Property="Width" Value="14" />
+    <Setter Property="Height" Value="14" />
+    <Setter Property="Stretch" Value="None" />
+    <Setter Property="StrokeLineCap" Value="Round" />
+  </Style>
+
+  <Style Selector="Button.WindowCommand Rectangle">
+    <Setter Property="Width" Value="11" />
+    <Setter Property="Height" Value="10" />
+    <Setter Property="Stroke" Value="{DynamicResource ThemeForegroundBrush}" />
+    <Setter Property="StrokeThickness" Value="1.4" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
   </Style>
 
   <Style Selector="Button.WindowCommand:pointerover">

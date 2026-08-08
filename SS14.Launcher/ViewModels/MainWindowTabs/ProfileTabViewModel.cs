@@ -18,10 +18,10 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
     public static readonly Guid CreatorId = Guid.Parse("1d17bc4a-25fa-4ef9-af88-fb1d4dd71701");
     private readonly MainWindowViewModel _main;
     private readonly OrbitraSocialService _social = new();
+    private readonly ThemeWorkshopService _workshop = new();
     private bool _busy;
     private string _status = "";
     private string _search = "";
-    private string _reportReason = "";
     private OrbitraProfileDto? _found;
     private bool _showFoundProfileInSearch;
     private Bitmap? _avatar;
@@ -37,9 +37,11 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
     private OrbitraProfileWindow? _profileWindow;
     public ObservableCollection<OrbitraFriendItemViewModel> Friends { get; } = [];
     public ObservableCollection<FavoriteServerOption> FavoriteServers { get; } = [];
+    public ObservableCollection<ProfileThemeItemViewModel> MyThemes { get; } = [];
+    public ObservableCollection<ProfileThemeItemViewModel> FoundThemes { get; } = [];
     public override string Name => "Профиль";
     // Lucide user-round.
-    public override string IconData => "M18,20 A6,6 0 0 0 6,20 M12,12 A4,4 0 1 0 12,4 A4,4 0 1 0 12,12";
+    public override string IconData => "M20,21 A8,8 0 0 0 4,21 M12,13 A5,5 0 1 0 12,3 A5,5 0 1 0 12,13";
     public bool Busy { get => _busy; private set => SetProperty(ref _busy, value); }
     public string Status { get => _status; private set => SetProperty(ref _status, value); }
     public string Username => _main.ActiveAccount?.Username ?? "Не выполнен вход";
@@ -51,21 +53,33 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
     public Bitmap? Banner { get => _banner; private set => SetProperty(ref _banner, value); }
     public Bitmap? FoundAvatar { get => _foundAvatar; private set => SetProperty(ref _foundAvatar, value); }
     public Bitmap? FoundBanner { get => _foundBanner; private set => SetProperty(ref _foundBanner, value); }
-    public string Description { get => _description; set { if (value.Length <= 240) { SetProperty(ref _description, value); OnPropertyChanged(nameof(DescriptionCounter)); } } }
+    public string Description { get => _description; set { if (value.Length <= 240) { SetProperty(ref _description, value); OnPropertyChanged(nameof(DescriptionCounter)); OnPropertyChanged(nameof(DescriptionDisplay)); } } }
     public string DescriptionCounter => $"{Description.Length}/240";
+    public string DescriptionDisplay => string.IsNullOrWhiteSpace(Description) ? "Описание пока не заполнено." : Description;
     public FavoriteServerOption? SelectedFavoriteServer { get => _favoriteServer; set => SetProperty(ref _favoriteServer, value); }
     public string Search { get => _search; set => SetProperty(ref _search, value); }
-    public string ReportReason { get => _reportReason; set => SetProperty(ref _reportReason, value); }
-    public OrbitraProfileDto? FoundProfile { get => _found; private set { SetProperty(ref _found, value); OnPropertyChanged(nameof(HasFoundProfile)); OnPropertyChanged(nameof(FoundServerText)); OnPropertyChanged(nameof(FoundProfileIsCreator)); } }
+    public OrbitraProfileDto? FoundProfile { get => _found; private set { SetProperty(ref _found, value); OnPropertyChanged(nameof(HasFoundProfile)); OnPropertyChanged(nameof(FoundServerText)); OnPropertyChanged(nameof(FoundPresenceText)); OnPropertyChanged(nameof(FoundIsOnline)); OnPropertyChanged(nameof(FoundDescriptionDisplay)); OnPropertyChanged(nameof(FoundProfileIsCreator)); } }
     public bool FoundProfileIsCreator => FoundProfile?.UserId == CreatorId;
     public bool HasFoundProfile => FoundProfile != null && _showFoundProfileInSearch;
     public string FoundServerText => VisibleServer(FoundProfile);
-    public IReadOnlyList<ProfileStatusOption> ProfileStatuses { get; } =
-        [new("online","В сети"),new("dnd","Не беспокоить"),new("invisible","Невидимый")];
-    public ProfileStatusOption SelectedProfileStatus
+    public string FoundPresenceText => "Онлайн";
+    public bool FoundIsOnline => IsProfileOnline(FoundProfile);
+    public string FoundDescriptionDisplay => string.IsNullOrWhiteSpace(FoundProfile?.Description) ? "Пользователь пока ничего о себе не рассказал." : FoundProfile.Description;
+    public string OwnPresenceText => "Онлайн";
+    public bool OwnIsOnline => !IsIncognito;
+    public bool IsIncognito
     {
-        get => ProfileStatuses.FirstOrDefault(x=>x.Id==_main.Cfg.GetCVar(CVars.OrbitraProfileStatus)) ?? ProfileStatuses[0];
-        set { if(value==null)return; _main.Cfg.SetCVar(CVars.OrbitraProfileStatus,value.Id);_main.Cfg.CommitConfig();OnPropertyChanged();if(value.Id=="invisible")OrbitraProtocol.PublishPresence(null);_ = SaveSharingAsync(ShareCurrentServer); }
+        get => _main.Cfg.GetCVar(CVars.OrbitraProfileStatus) == "invisible";
+        set
+        {
+            _main.Cfg.SetCVar(CVars.OrbitraProfileStatus, value ? "invisible" : "online");
+            _main.Cfg.CommitConfig();
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(OwnPresenceText));
+            OnPropertyChanged(nameof(OwnIsOnline));
+            OrbitraProtocol.PublishPresence(OrbitraProtocol.ActiveServer);
+            _ = SaveSharingAsync(ShareCurrentServer);
+        }
     }
     public bool ShareCurrentServer
     {
@@ -98,14 +112,16 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
         Busy = true;
         try
         {
-            await _social.UpsertProfileAsync(account.UserId, account.Username, ShareCurrentServer, SelectedProfileStatus.Id);
+            await _social.UpsertProfileAsync(account.UserId, account.Username, ShareCurrentServer, IsIncognito ? "invisible" : "online");
             var profile = await _social.GetProfileAsync(account.UserId);
             await LoadAvatarAsync(_social.AvatarUrl(profile?.AvatarPath));
             await LoadBannerAsync(_social.ProfileMediaUrl(profile?.BannerPath));
             Description = profile?.Description ?? "";
+            OnPropertyChanged(nameof(DescriptionDisplay));
             RefreshFavoriteServers(profile?.FavoriteServer, profile?.FavoriteServerName);
             var friends = await _social.GetFriendsAsync(account.UserId);
             Friends.Clear(); foreach (var friend in friends) Friends.Add(new(this, friend));
+            await LoadThemesAsync(account.UserId, MyThemes);
             Status = $"Друзей: {Friends.Count(x => x.IsAccepted)} · входящих заявок: {Friends.Count(x => x.IsIncoming)}";
         }
         catch (Exception e) { Status = e.Message; }
@@ -167,6 +183,7 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
             FoundProfile = await _social.FindProfileAsync(Search);
             OnPropertyChanged(nameof(HasFoundProfile));
             await LoadFoundImagesAsync(FoundProfile);
+            await LoadThemesAsync(FoundProfile?.UserId, FoundThemes);
             Status = FoundProfile == null ? "Пользователь не найден." : "Профиль найден.";
         }
         catch (Exception e) { Status = e.Message; }
@@ -183,20 +200,13 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
     internal async void ViewProfile(OrbitraFriendItemViewModel item)
     {
         Busy=true;
-        try{_showFoundProfileInSearch=false;FoundProfile=await _social.GetProfileAsync(item.UserId);OnPropertyChanged(nameof(HasFoundProfile));await LoadFoundImagesAsync(FoundProfile);OpenFoundProfile();}
+        try{_showFoundProfileInSearch=false;FoundProfile=await _social.GetProfileAsync(item.UserId);OnPropertyChanged(nameof(HasFoundProfile));await LoadFoundImagesAsync(FoundProfile);await LoadThemesAsync(FoundProfile?.UserId,FoundThemes);OpenFoundProfile();}
         catch(Exception e){_main.ShowToast(e.Message,true);}finally{Busy=false;}
     }
     public async void AddFoundFriend()
     {
         var me = _main.ActiveAccount; if (me == null || FoundProfile == null) return;
         try { await _social.SendFriendRequestAsync(me.UserId, FoundProfile.UserId); _main.ShowToast("Заявка в друзья отправлена"); await RefreshAsync(); }
-        catch (Exception e) { _main.ShowToast(e.Message, true); }
-    }
-    public async void ReportFoundUser()
-    {
-        var me = _main.ActiveAccount; if (me == null || FoundProfile == null) return;
-        if (ReportReason.Trim().Length < 5) { _main.ShowToast("Опишите причину жалобы", true); return; }
-        try { await _social.ReportAsync(me.UserId, FoundProfile.UserId, ReportReason); ReportReason=""; _main.ShowToast("Жалоба отправлена"); }
         catch (Exception e) { _main.ShowToast(e.Message, true); }
     }
     internal async void Accept(OrbitraFriendItemViewModel item)
@@ -214,7 +224,7 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
     private async Task SaveSharingAsync(bool enabled)
     {
         var account=_main.ActiveAccount; if(account==null)return;
-        try { await _social.UpsertProfileAsync(account.UserId,account.Username,enabled,SelectedProfileStatus.Id); if(!enabled||SelectedProfileStatus.Id=="invisible") await _social.UpdatePresenceAsync(account.UserId,false,null,null); }
+        try { await _social.UpsertProfileAsync(account.UserId,account.Username,enabled,IsIncognito ? "invisible" : "online"); if(!enabled||IsIncognito) await _social.UpdatePresenceAsync(account.UserId,false,null,null); }
         catch(Exception e){_main.ShowToast(e.Message,true);}
     }
     private async Task LoadAvatarAsync(string? url)
@@ -248,11 +258,30 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
         try{var url=_social.AvatarUrl(profile.AvatarPath);if(url!=null)FoundAvatar=new Bitmap(new MemoryStream(await http.GetByteArrayAsync(url)));}catch{}
         try{var url=_social.ProfileMediaUrl(profile.BannerPath);if(url!=null)FoundBanner=new Bitmap(new MemoryStream(await http.GetByteArrayAsync(url)));}catch{}
     }
+    private async Task LoadThemesAsync(Guid? userId, ObservableCollection<ProfileThemeItemViewModel> target)
+    {
+        target.Clear();
+        if (userId == null) return;
+        try
+        {
+            var themes = await _workshop.GetThemesAsync(_main.ActiveAccount?.UserId);
+            foreach (var theme in themes.Where(x => x.AuthorUserId == userId.Value))
+                target.Add(new ProfileThemeItemViewModel(this, theme));
+        }
+        catch { }
+    }
+    internal void OpenThemeWorkshop() => _main.CustomThemeTab.OpenWorkshop();
+    internal void OpenThemeWorkshop(Guid themeId) => _main.CustomThemeTab.OpenWorkshopThemeById(themeId);
+    internal void EditThemeWorkshop(Guid themeId) => _main.CustomThemeTab.EditWorkshopThemeById(themeId);
+    internal bool IsOwnTheme(Guid authorId) => _main.ActiveAccount?.UserId == authorId;
     private void OnPlaytimeChanged(string _) { OnPropertyChanged(nameof(TotalPlaytime)); OnPropertyChanged(nameof(ServersPlayed)); }
     private static string VisibleServer(OrbitraProfileDto? p) =>
-        p is { ShareCurrentServer:true, CurrentServer.Length:>0 } && p.PresenceUpdatedAt > DateTimeOffset.UtcNow.AddMinutes(-2)
+        IsProfileOnline(p) && p is { ShareCurrentServer:true, CurrentServer.Length:>0 }
             ? p.CurrentServerName ?? p.CurrentServer
-            : "Сервер скрыт или пользователь не играет";
+            : IsProfileOnline(p) ? "В лаунчере" : "";
+    private static bool IsProfileOnline(OrbitraProfileDto? profile) =>
+        profile is { ProfileStatus: "online", PresenceUpdatedAt: { } updated } &&
+        updated > DateTimeOffset.UtcNow.AddMinutes(-2);
     private static string FormatDuration(TimeSpan value) => value.TotalHours >= 1 ? $"{(int)value.TotalHours} ч {value.Minutes} мин" : $"{Math.Max(0,value.Minutes)} мин";
     private async void PollSocialAsync()
     {
@@ -261,20 +290,20 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
         {
             var friends=await _social.GetFriendsAsync(me.UserId);
             var incoming=friends.Where(x=>x.IsIncoming).Select(x=>x.Profile).ToArray();
-            if(_pollInitialized && SelectedProfileStatus.Id!="dnd") foreach(var profile in incoming.Where(x=>!_knownIncoming.Contains(x.UserId)))
+            if(_pollInitialized) foreach(var profile in incoming.Where(x=>!_knownIncoming.Contains(x.UserId)))
                 SystemNotificationService.Show("Новая заявка в друзья",profile.Username,open:()=>_main.SelectProfileTab());
             _knownIncoming.Clear();foreach(var profile in incoming)_knownIncoming.Add(profile.UserId);
             var invites=await _social.GetInvitesAsync(me.UserId);
             foreach(var invite in invites)
             {
                 var sender=await _social.GetProfileAsync(invite.SenderId);await _social.MarkInviteSeenAsync(invite.Id);
-                if(SelectedProfileStatus.Id!="dnd")SystemNotificationService.Show("Приглашение на сервер",$"{sender?.Username??"Пользователь"} приглашает на {invite.ServerName??invite.ServerAddress}",connect:()=>ConnectingViewModel.StartConnect(_main,invite.ServerAddress),open:()=>_main.SelectProfileTab());
+                SystemNotificationService.Show("Приглашение на сервер",$"{sender?.Username??"Пользователь"} приглашает на {invite.ServerName??invite.ServerAddress}",connect:()=>ConnectingViewModel.StartConnect(_main,invite.ServerAddress),open:()=>_main.SelectProfileTab());
             }
             _pollInitialized=true;
         }
         catch { }
     }
-    public void Dispose() { _socialPollTimer.Dispose(); PlaytimeTracker.Changed -= OnPlaytimeChanged; Avatar?.Dispose(); Banner?.Dispose(); FoundAvatar?.Dispose(); FoundBanner?.Dispose(); _social.Dispose(); }
+    public void Dispose() { _socialPollTimer.Dispose(); PlaytimeTracker.Changed -= OnPlaytimeChanged; Avatar?.Dispose(); Banner?.Dispose(); FoundAvatar?.Dispose(); FoundBanner?.Dispose(); _social.Dispose(); _workshop.Dispose(); }
 }
 
 public sealed class OrbitraFriendItemViewModel(ProfileTabViewModel owner, OrbitraFriendDto data)
@@ -283,7 +312,8 @@ public sealed class OrbitraFriendItemViewModel(ProfileTabViewModel owner, Orbitr
     public bool IsCreator => UserId == ProfileTabViewModel.CreatorId;
     public bool IsIncoming => data.IsIncoming; public bool IsAccepted => data.Status == "accepted";
     public string State => IsIncoming ? "Входящая заявка" : IsAccepted ? "В друзьях" : "Заявка отправлена";
-    public string ProfileStatus => data.Profile.ProfileStatus switch { "dnd"=>"Не беспокоить","invisible"=>"Не в сети",_ when CanConnect=>"Играет",_=>"В сети" };
+    public bool IsOnline => data.Profile.ProfileStatus == "online" && data.Profile.PresenceUpdatedAt > DateTimeOffset.UtcNow.AddMinutes(-2);
+    public string ProfileStatus => "Онлайн";
     public string? ServerAddress => data.Profile.ShareCurrentServer &&
         data.Profile.PresenceUpdatedAt > DateTimeOffset.UtcNow.AddMinutes(-2) ? data.Profile.CurrentServer : null;
     public bool CanConnect => IsAccepted && !string.IsNullOrWhiteSpace(ServerAddress);
@@ -292,5 +322,13 @@ public sealed class OrbitraFriendItemViewModel(ProfileTabViewModel owner, Orbitr
     public void Accept() => owner.Accept(this); public void Remove() => owner.Remove(this);
     public void ViewProfile()=>owner.ViewProfile(this); public void Connect() => owner.Connect(this); public void Invite() => owner.Invite(this); public void CopyInvite() => owner.CopyInvite(this);
 }
-public sealed record ProfileStatusOption(string Id,string Name){public override string ToString()=>Name;}
 public sealed record FavoriteServerOption(string? Address,string Name){public override string ToString()=>Name;}
+public sealed class ProfileThemeItemViewModel(ProfileTabViewModel owner, WorkshopThemeDto theme)
+{
+    public string Name => theme.Name;
+    public string Description => string.IsNullOrWhiteSpace(theme.Description) ? "Без описания" : theme.Description;
+    public string Meta => $"v{theme.Version} · {theme.LikeCount} ♥ · {theme.Downloads} загрузок";
+    public bool IsOwn => owner.IsOwnTheme(theme.AuthorUserId);
+    public void Open() => owner.OpenThemeWorkshop(theme.Id);
+    public void Edit() => owner.EditThemeWorkshop(theme.Id);
+}

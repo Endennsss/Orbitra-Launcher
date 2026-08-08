@@ -134,6 +134,12 @@ login-forgot-error = Error
 ## Strings for the "login" view on login
 
 login-login-title = Log in
+login-orbitra-secure-access = SECURE ACCESS
+login-orbitra-subtitle = Sign in to your Space Station 14 account to continue.
+login-orbitra-identity = USERNAME OR EMAIL
+login-orbitra-password = PASSWORD
+login-orbitra-no-account = NEW TO SS14?
+login-orbitra-brand-subtitle = One account. Every server. Launch faster.
 login-login-auth-server-changed = Auth server has changed
 login-login-username-watermark = Username or email
 login-login-password-watermark = Password

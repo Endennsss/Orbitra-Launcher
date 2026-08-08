@@ -5,6 +5,7 @@
              xmlns:mainWindowTabs="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs"
              xmlns:loc="clr-namespace:SS14.Launcher.Localization"
              xmlns:views="clr-namespace:SS14.Launcher.Views"
+             xmlns:tabs="clr-namespace:SS14.Launcher.Views.MainWindowTabs"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SS14.Launcher.Views.MainWindowTabs.OptionsTabView"
              Name="NewsTab">
@@ -12,6 +13,52 @@
     <mainWindowTabs:OptionsTabViewModel />
   </Design.DataContext>
 
+  <UserControl.Styles>
+    <Style Selector="TabControl.SettingsHub /template/ Panel#PART_TabPanel">
+      <Setter Property="Margin" Value="0,0,0,16" />
+      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceBrush}" />
+    </Style>
+    <Style Selector="TabItem.SettingsSection /template/ ContentPresenter">
+      <Setter Property="Padding" Value="15,10" />
+      <Setter Property="Margin" Value="3" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Opacity" Value="0.72" />
+    </Style>
+    <Style Selector="TabItem.SettingsSection:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource ThemeTabItemHoveredBrush}" />
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="TabItem.SettingsSection:selected /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource ThemeTabItemSelectedBrush}" />
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="TabItem.SettingsSection Border.SettingsIndicator">
+      <Setter Property="Opacity" Value="0" />
+      <Setter Property="Width" Value="8" />
+      <Setter Property="Transitions"><Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.2"/><DoubleTransition Property="Width" Duration="0:0:0.26" Easing="CubicEaseOut"/></Transitions></Setter>
+    </Style>
+    <Style Selector="TabItem.SettingsSection:selected Border.SettingsIndicator">
+      <Setter Property="Opacity" Value="1" />
+      <Setter Property="Width" Value="32" />
+    </Style>
+    <Style Selector="TabItem.SettingsSection Path.SettingsIcon">
+      <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+      <Setter Property="Transitions"><Transitions><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.22" Easing="CubicEaseOut"/><DoubleTransition Property="Opacity" Duration="0:0:0.18"/></Transitions></Setter>
+    </Style>
+    <Style Selector="TabItem.SettingsSection:pointerover Path.SettingsIcon">
+      <Setter Property="RenderTransform" Value="scale(1.08)" />
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="TabItem.SettingsSection:selected Path.SettingsIcon">
+      <Setter Property="Stroke" Value="{DynamicResource ThemeForegroundBrush}" />
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+  </UserControl.Styles>
+
+  <TabControl Classes="SettingsHub" SelectedIndex="{Binding SelectedSettingsSection, Mode=TwoWay}"
+              HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+   <TabItem Classes="SettingsSection">
+    <TabItem.Header><Grid RowDefinitions="*,3"><StackPanel Orientation="Horizontal" Spacing="8"><Viewbox Width="18" Height="18"><Canvas Width="24" Height="24"><Path Classes="SettingsIcon" Data="M10,5 L3,5 M12,19 L3,19 M14,3 L14,7 M16,17 L16,21 M21,12 L12,12 M21,19 L16,19 M21,5 L14,5 M8,10 L8,14 M8,12 L3,12" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox><TextBlock Text="Общие" VerticalAlignment="Center" FontWeight="SemiBold"/></StackPanel><Border Grid.Row="1" Classes="SettingsIndicator" Height="2" HorizontalAlignment="Center" Background="{DynamicResource ThemeForegroundBrush}"/></Grid></TabItem.Header>
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
     <StackPanel Spacing="16">
       <StackPanel Margin="0,0,0,4">
@@ -177,4 +224,22 @@
       </Border>
     </StackPanel>
   </ScrollViewer>
+   </TabItem>
+   <TabItem Classes="SettingsSection">
+    <TabItem.Header><Grid RowDefinitions="*,3"><StackPanel Orientation="Horizontal" Spacing="8"><Viewbox Width="18" Height="18"><Canvas Width="24" Height="24"><Path Classes="SettingsIcon" Data="M12,22 A1,1 0 0 1 12,2 A10,9 0 0 1 22,11 A5,5 0 0 1 17,16 L14.75,16 A1.75,1.75 0 0 0 13.35,18.8 L13.65,19.2 A1.75,1.75 0 0 1 12.25,22 Z M13.5,6.5 L13.51,6.5 M17.5,10.5 L17.51,10.5 M6.5,12.5 L6.51,12.5 M8.5,7.5 L8.51,7.5" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox><TextBlock Text="Кастом тема" VerticalAlignment="Center" FontWeight="SemiBold"/></StackPanel><Border Grid.Row="1" Classes="SettingsIndicator" Height="2" HorizontalAlignment="Center" Background="{DynamicResource ThemeForegroundBrush}"/></Grid></TabItem.Header>
+    <tabs:CustomThemeTabView DataContext="{Binding CustomThemeTab}" />
+   </TabItem>
+   <TabItem Classes="SettingsSection">
+    <TabItem.Header><Grid RowDefinitions="*,3"><StackPanel Orientation="Horizontal" Spacing="8"><Viewbox Width="18" Height="18"><Canvas Width="24" Height="24"><Path Classes="SettingsIcon" Data="M22,12 L19.52,12 A2,2 0 0 0 17.59,13.46 L15.24,21.82 A0.25,0.25 0 0 1 14.76,21.82 L9.24,2.18 A0.25,0.25 0 0 0 8.76,2.18 L6.41,10.54 A2,2 0 0 1 4.49,12 L2,12" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox><TextBlock Text="Активность" VerticalAlignment="Center" FontWeight="SemiBold"/></StackPanel><Border Grid.Row="1" Classes="SettingsIndicator" Height="2" HorizontalAlignment="Center" Background="{DynamicResource ThemeForegroundBrush}"/></Grid></TabItem.Header>
+    <tabs:ActivityTabView DataContext="{Binding ActivityTab}" />
+   </TabItem>
+   <TabItem Classes="SettingsSection">
+    <TabItem.Header><Grid RowDefinitions="*,3"><StackPanel Orientation="Horizontal" Spacing="8"><Viewbox Width="18" Height="18"><Canvas Width="24" Height="24"><Path Classes="SettingsIcon" Data="M4,3 L20,3 A2,2 0 0 1 22,5 L22,15 A2,2 0 0 1 20,17 L4,17 A2,2 0 0 1 2,15 L2,5 A2,2 0 0 1 4,3 Z M8,21 L16,21 M12,17 L12,21" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox><TextBlock Text="Система" VerticalAlignment="Center" FontWeight="SemiBold"/></StackPanel><Border Grid.Row="1" Classes="SettingsIndicator" Height="2" HorizontalAlignment="Center" Background="{DynamicResource ThemeForegroundBrush}"/></Grid></TabItem.Header>
+    <tabs:SystemCenterTabView DataContext="{Binding SystemCenterTab}" />
+   </TabItem>
+   <TabItem Classes="SettingsSection" IsVisible="{Binding DevelopmentAvailable}">
+    <TabItem.Header><Grid RowDefinitions="*,3"><StackPanel Orientation="Horizontal" Spacing="8"><Viewbox Width="18" Height="18"><Canvas Width="24" Height="24"><Path Classes="SettingsIcon" Data="M18,16 L22,12 L18,8 M6,8 L2,12 L6,16 M14.5,4 L9.5,20" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox><TextBlock Text="[DEV]" VerticalAlignment="Center" FontWeight="SemiBold"/></StackPanel><Border Grid.Row="1" Classes="SettingsIndicator" Height="2" HorizontalAlignment="Center" Background="{DynamicResource ThemeForegroundBrush}"/></Grid></TabItem.Header>
+    <tabs:DevelopmentTabView DataContext="{Binding DevelopmentTab}" />
+   </TabItem>
+  </TabControl>
 </UserControl>

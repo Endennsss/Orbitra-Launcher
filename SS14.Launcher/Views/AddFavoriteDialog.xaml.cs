@@ -1,6 +1,7 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Input;
 
 namespace SS14.Launcher.Views;
 
@@ -31,4 +32,7 @@ public partial class AddFavoriteDialog : Window
         SubmitButton.IsEnabled = valid;
         TxtInvalid.IsVisible = !validAddr;
     }
+    private void TitleBarPressed(object? sender, PointerPressedEventArgs e) { if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) BeginMoveDrag(e); }
+    private void MinimizeClicked(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+    private void CloseWindowClicked(object? sender, RoutedEventArgs e) => Close();
 }

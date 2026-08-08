@@ -23,10 +23,27 @@ public class OptionsTabViewModel : MainWindowTabViewModel
     private readonly IEngineManager _engineManager;
     private readonly ContentManager _contentManager;
     private readonly MainWindowViewModel? _mainWindow;
+    private int _selectedSettingsSection;
     public ObservableCollection<NavigationTabOptionViewModel> NavigationTabs { get; } = [];
 
     public LanguageSelectorViewModel Language { get; } = new();
     public AccountDropDownViewModel? AccountDropDown { get; }
+    public CustomThemeTabViewModel? CustomThemeTab => _mainWindow?.CustomThemeTab;
+    public ActivityTabViewModel? ActivityTab => _mainWindow?.ActivityTab;
+    public SystemCenterTabViewModel? SystemCenterTab => _mainWindow?.SystemCenterTab;
+    public DevelopmentTabViewModel? DevelopmentTab => _mainWindow?.DevelopmentTab;
+    public bool DevelopmentAvailable => DevelopmentTab != null;
+    public int SelectedSettingsSection
+    {
+        get => _selectedSettingsSection;
+        set
+        {
+            if (!SetProperty(ref _selectedSettingsSection, value)) return;
+            if (value == 2) ActivityTab?.Selected();
+            if (value == 3) SystemCenterTab?.Selected();
+            if (value == 4) DevelopmentTab?.Selected();
+        }
+    }
 
     public OptionsTabViewModel() : this(null)
     {
@@ -214,7 +231,7 @@ public class OptionsTabViewModel : MainWindowTabViewModel
     }
 
     public override string Name => LocalizationManager.Instance.GetString("tab-options-title");
-    public override string IconData => "M12,8 A4,4 0 1 0 12,16 A4,4 0 1 0 12,8 M19.4,15 A1.7,1.7 0 0 0 19.7,16.9 L19.8,17 A2,2 0 1 1 17,19.8 L16.9,19.7 A1.7,1.7 0 0 0 15,19.4 A1.7,1.7 0 0 0 14,21 L14,21.1 A2,2 0 1 1 10,21.1 L10,21 A1.7,1.7 0 0 0 9,19.4 A1.7,1.7 0 0 0 7.1,19.7 L7,19.8 A2,2 0 1 1 4.2,17 L4.3,16.9 A1.7,1.7 0 0 0 4.6,15 A1.7,1.7 0 0 0 3,14 L2.9,14 A2,2 0 1 1 2.9,10 L3,10 A1.7,1.7 0 0 0 4.6,9 A1.7,1.7 0 0 0 4.3,7.1 L4.2,7 A2,2 0 1 1 7,4.2 L7.1,4.3 A1.7,1.7 0 0 0 9,4.6 A1.7,1.7 0 0 0 10,3 L10,2.9 A2,2 0 1 1 14,2.9 L14,3 A1.7,1.7 0 0 0 15,4.6 A1.7,1.7 0 0 0 16.9,4.3 L17,4.2 A2,2 0 1 1 19.8,7 L19.7,7.1 A1.7,1.7 0 0 0 19.4,9 A1.7,1.7 0 0 0 21,10 L21.1,10 A2,2 0 1 1 21.1,14 L21,14 A1.7,1.7 0 0 0 19.4,15";
+    public override string IconData => "M10,5 L3,5 M12,19 L3,19 M14,3 L14,7 M16,17 L16,21 M21,12 L12,12 M21,19 L16,19 M21,5 L14,5 M8,10 L8,14 M8,12 L3,12";
 
     public bool CompatMode
     {

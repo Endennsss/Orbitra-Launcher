@@ -19,11 +19,11 @@ public partial class NewsTabViewModel : MainWindowTabViewModel
     public ObservableList<NewsEntryViewModel> NewsEntries { get; } = [];
     public ObservableList<NewsEntryViewModel> LauncherNewsEntries { get; } =
     [
-        new("Срочное обновление Orbitra Launcher 0.44.1", summary: "Удалена небезопасная клиентская вкладка модерации и закрыт публичный доступ к чтению и изменению жалоб. Отправка жалоб пользователями сохранена, а обработка будет перенесена в защищённый серверный инструмент.", date: "3 августа 2026"),
+        new("Срочное обновление Orbitra Launcher 0.44.1", summary: "Удалены устаревшие административные элементы и усилена безопасность социальных функций лаунчера.", date: "3 августа 2026"),
         new("Вышел Orbitra Launcher 0.44.0", summary: "Профили получили баннер, описание, любимый сервер и отдельные окна просмотра. Улучшены редактор аватара, друзья и приглашения, статусы присутствия, Discord RPC, навигация и фирменный стиль дополнительных окон.", date: "3 августа 2026"),
         new("Большое обновление профилей Orbitra", summary: "Теперь можно настроить баннер, аватар, описание и любимый сервер, открыть профиль друга или найденного пользователя в отдельном окне и увидеть подтверждённый значок создателя. Редактор изображений поддерживает приближение, перемещение, обрезку и удаление прозрачных полей.", date: "3 августа 2026"),
         new("Вышел Orbitra Launcher 0.43.0", summary: "Добавлены профили с аватарами, друзья, добровольный показ сервера и приглашения orbitra://. Мастерская получила обновление и предпросмотр тем, загрузчик — восстановление и ограничение скорости, а архивы теперь проходят усиленную проверку безопасности.", date: "3 августа 2026"),
-        new("В Orbitra появились профили и друзья", summary: "Добавлена отдельная вкладка профиля с аватаром и статистикой игрового времени, заявки в друзья, добровольный показ текущего сервера, жалобы и приглашения orbitra:// для быстрого подключения.", date: "3 августа 2026"),
+        new("В Orbitra появились профили и друзья", summary: "Добавлена отдельная вкладка профиля с аватаром и статистикой игрового времени, заявки в друзья, добровольный показ текущего сервера и приглашения orbitra:// для быстрого подключения.", date: "3 августа 2026"),
         new("Мастерская тем стала полноценнее", summary: "Добавлены обновления публикаций, управление своими темами и комментариями, избранное, поиск, сортировка, безопасный предпросмотр с возвратом и автоматические изображения карточек со скрытой тестовой страницы.", date: "3 августа 2026"),
         new("Мастерская переехала в отдельное окно", summary: "Каталог тем сообщества теперь открывается отдельным окном Orbitra, а в редактор кастомной темы добавлена плавная настройка затемнения обычного или GIF-фона.", date: "3 августа 2026"),
         new("Вышел Orbitra Launcher 0.42.0", summary: "Открыта мастерская тем сообщества с публикацией, установкой, лайками и комментариями от активного аккаунта SS14. Добавлен собственный C#-установщик, а ZIP-сборки теперь автоматически проверяются на целостность.", date: "2 августа 2026"),
@@ -46,7 +46,7 @@ public partial class NewsTabViewModel : MainWindowTabViewModel
         RefreshUnreadCount();
     }
     public override string Name => LocalizationManager.Instance.GetString("tab-news-title");
-    public override string IconData => "M4,3 L18,3 L18,21 L4,21 Z M8,7 L14,7 M8,11 L14,11 M8,15 L12,15 M18,7 L21,7 L21,19 Q21,21 19,21 L18,21";
+    public override string IconData => "M15,18 L10,18 M18,14 L10,14 M4,22 L20,22 A2,2 0 0 0 22,20 L22,4 A2,2 0 0 0 20,2 L8,2 A2,2 0 0 0 6,4 L6,20 A2,2 0 0 1 2,20 L2,11 A2,2 0 0 1 4,9 L6,9 M11,6 L17,6 A1,1 0 0 1 18,7 L18,9 A1,1 0 0 1 17,10 L11,10 A1,1 0 0 1 10,9 L10,7 A1,1 0 0 1 11,6 Z";
 
     private bool _startedPullingNews;
     private bool _startedPullingLauncherNews;
@@ -146,7 +146,13 @@ public partial class NewsTabViewModel : MainWindowTabViewModel
 
             LauncherNewsEntries.Clear();
             LauncherNewsEntries.AddRange(parsed);
-            RefreshUnreadCount();
+            // The remote feed replaces the built-in fallback and uses its own stable IDs.
+            // If the user is already reading launcher news, remember the remote head now;
+            // otherwise the just-loaded feed appears unread again immediately.
+            if (LauncherNewsSelected)
+                MarkLauncherNewsRead();
+            else
+                RefreshUnreadCount();
             if (UnreadCount > 0 && parsed.FirstOrDefault(entry => entry.Important) is { } important)
                 _main?.ShowToast($"Важная новость: {important.Headline}");
         }
@@ -161,13 +167,18 @@ public partial class NewsTabViewModel : MainWindowTabViewModel
         var lastRead = _cfg.GetCVar(CVars.LastReadLauncherNews);
         UnreadCount = string.IsNullOrWhiteSpace(lastRead)
             ? LauncherNewsEntries.Count
-            : LauncherNewsEntries.TakeWhile(entry => !string.Equals(entry.Id, lastRead, StringComparison.Ordinal)).Count();
+            : LauncherNewsEntries.TakeWhile(entry =>
+                !string.Equals(entry.Id, lastRead, StringComparison.Ordinal) &&
+                !string.Equals(entry.Headline, lastRead, StringComparison.Ordinal)).Count();
     }
 
     private void MarkLauncherNewsRead()
     {
         if (LauncherNewsEntries.FirstOrDefault() is not { } latest) return;
-        _cfg.SetCVar(CVars.LastReadLauncherNews, latest.Id);
+        // Titles are shared by the built-in fallback and the remote feed, while their
+        // generated IDs may differ. Persisting the title prevents a false unread badge
+        // when the launcher switches between those two sources.
+        _cfg.SetCVar(CVars.LastReadLauncherNews, latest.Headline);
         _cfg.CommitConfig();
         UnreadCount = 0;
     }

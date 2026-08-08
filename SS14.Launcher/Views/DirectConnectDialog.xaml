@@ -1,25 +1,3 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:loc="clr-namespace:SS14.Launcher.Localization"
-        mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="100"
-        MinWidth="350" MinHeight="100"
-        Width="350" Height="100"
-        x:Class="SS14.Launcher.Views.DirectConnectDialog"
-        Icon="{DynamicResource WindowIcon}"
-        Title="{loc:Loc direct-connect-title}"
-        WindowStartupLocation="CenterOwner">
-
-  <DockPanel Margin="4">
-    <TextBlock Classes="NanoHeadingMedium" DockPanel.Dock="Top"
-               Text="{loc:Loc direct-connect-text}" />
-
-    <DockPanel DockPanel.Dock="Bottom" Margin="0 4 0 0">
-      <Button DockPanel.Dock="Right" Name="SubmitButton" Content="{loc:Loc direct-connect-connect}" IsDefault="True" Click="TrySubmit" />
-      <TextBlock Name="InvalidLabel" Text="{loc:Loc direct-connect-address-invalid}" VerticalAlignment="Center" />
-    </DockPanel>
-
-    <TextBox Name="AddressBox" Watermark="ss14://example.com:1212" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" />
-  </DockPanel>
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:loc="clr-namespace:SS14.Launcher.Localization" x:Class="SS14.Launcher.Views.DirectConnectDialog" Width="520" Height="220" MinWidth="440" MinHeight="200" Icon="{DynamicResource WindowIcon}" Title="{loc:Loc direct-connect-title}" WindowStartupLocation="CenterOwner" SystemDecorations="BorderOnly" ExtendClientAreaToDecorationsHint="True" ExtendClientAreaChromeHints="NoChrome">
+ <Grid RowDefinitions="44,*" Background="{DynamicResource LauncherWorkspaceBrush}" ClipToBounds="True"><Border Background="{DynamicResource LauncherChromeBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,0,0,1" PointerPressed="TitleBarPressed"><Grid ColumnDefinitions="*,Auto"><TextBlock Text="ORBITRA · ПРЯМОЕ ПОДКЛЮЧЕНИЕ" VerticalAlignment="Center" Margin="14,0" Classes="SectionLabel"/><StackPanel Grid.Column="1" Orientation="Horizontal"><Button Classes="WindowCommand" Width="46" Height="44" Padding="0" Click="MinimizeClicked"><Rectangle Width="11" Height="1.5" Fill="{DynamicResource ThemeForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Button><Button Classes="WindowCommand Close" Width="46" Height="44" Padding="0" Click="CloseWindowClicked"><Grid Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center"><Rectangle Width="11" Height="1.5" Fill="{DynamicResource ThemeForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="50%,50%" RenderTransform="rotate(45deg)"/><Rectangle Width="11" Height="1.5" Fill="{DynamicResource ThemeForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="50%,50%" RenderTransform="rotate(-45deg)"/></Grid></Button></StackPanel></Grid></Border><StackPanel Grid.Row="1" Margin="20" Spacing="12"><TextBlock Text="{loc:Loc direct-connect-text}" Classes="NanoHeadingSmall"/><TextBox Name="AddressBox" Watermark="ss14://example.com:1212"/><Grid ColumnDefinitions="*,Auto"><TextBlock Name="InvalidLabel" Text="{loc:Loc direct-connect-address-invalid}" VerticalAlignment="Center"/><Button Grid.Column="1" Name="SubmitButton" Content="{loc:Loc direct-connect-connect}" IsDefault="True" Click="TrySubmit"/></Grid></StackPanel></Grid>
 </Window>

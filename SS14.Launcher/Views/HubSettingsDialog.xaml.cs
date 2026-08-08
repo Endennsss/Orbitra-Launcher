@@ -3,6 +3,7 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Input;
 using Avalonia.LogicalTree;
 using SS14.Launcher.Localization;
 using SS14.Launcher.ViewModels;
@@ -38,6 +39,9 @@ public partial class HubSettingsDialog : Window
     }
 
     private void Cancel(object? sender, RoutedEventArgs args) => Close();
+    private void TitleBarPressed(object? sender, PointerPressedEventArgs e) { if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) BeginMoveDrag(e); }
+    private void MinimizeClicked(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+    private void CloseWindowClicked(object? sender, RoutedEventArgs e) => Close();
 
     private void HubTextChanged(object? sender, AvaloniaPropertyChangedEventArgs e) => Verify();
 

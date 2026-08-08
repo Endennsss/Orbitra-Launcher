@@ -2,10 +2,19 @@
              xmlns:vm="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs"
              x:Class="SS14.Launcher.Views.MainWindowTabs.PlaytimeTabView">
   <StackPanel Spacing="16">
-    <Grid ColumnDefinitions="*,Auto">
+    <Grid ColumnDefinitions="*,Auto,Auto">
       <StackPanel><TextBlock Text="STATISTICS" Classes="SectionLabel" /><TextBlock Text="Журнал игрового времени" Classes="NanoHeadingMedium" /></StackPanel>
-      <StackPanel Grid.Column="1" HorizontalAlignment="Right"><TextBlock Text="ВСЕГО" Classes="SectionLabel" HorizontalAlignment="Right" /><TextBlock Text="{Binding TotalText}" FontSize="20" FontWeight="SemiBold" /></StackPanel>
+      <StackPanel Grid.Column="1" HorizontalAlignment="Right" Margin="0,0,16,0"><TextBlock Text="ВСЕГО" Classes="SectionLabel" HorizontalAlignment="Right" /><TextBlock Text="{Binding TotalText}" FontSize="20" FontWeight="SemiBold" /></StackPanel>
+      <Button Grid.Column="2" Content="Очистить" Command="{Binding RequestClear}" VerticalAlignment="Center" />
     </Grid>
+    <Border Classes="Surface" Padding="14" IsVisible="{Binding ClearConfirmationVisible}"
+            BorderBrush="#B55345" BorderThickness="1">
+      <Grid ColumnDefinitions="*,Auto,Auto">
+        <StackPanel><TextBlock Text="Очистить всю статистику?" FontWeight="SemiBold"/><TextBlock Text="Время по всем серверам и даты последних запусков будут удалены." Classes="SubText"/></StackPanel>
+        <Button Grid.Column="1" Content="Отмена" Command="{Binding CancelClear}" Margin="12,0,0,0"/>
+        <Button Grid.Column="2" Content="Да, очистить" Command="{Binding ConfirmClear}" Margin="8,0,0,0"/>
+      </Grid>
+    </Border>
     <Border Classes="Surface" Padding="14">
       <ScrollViewer>
         <ItemsControl ItemsSource="{Binding Servers}" IsVisible="{Binding !IsEmpty}">

@@ -207,6 +207,12 @@ login-forgot-success-message = Ссылка для сброса была отп�
 login-forgot-error = Ошибка
 # Strings for the "login" view on login
 login-login-title = Войти
+login-orbitra-secure-access = БЕЗОПАСНЫЙ ВХОД
+login-orbitra-subtitle = Войдите в аккаунт Space Station 14, чтобы продолжить.
+login-orbitra-identity = ЛОГИН ИЛИ EMAIL
+login-orbitra-password = ПАРОЛЬ
+login-orbitra-no-account = НЕТ АККАУНТА?
+login-orbitra-brand-subtitle = Один аккаунт. Все серверы. Быстрый запуск.
 # Strings for the "login" view on login
 login-login-show-password = Показать пароль
 # Strings for the "login" view on login

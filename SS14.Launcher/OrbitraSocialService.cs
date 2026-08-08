@@ -106,19 +106,6 @@ public sealed class OrbitraSocialService : IDisposable
         using var req = new HttpRequestMessage(HttpMethod.Delete, $"/rest/v1/orbitra_friendships?or=(and(requester_id.eq.{me:D},addressee_id.eq.{other:D}),and(requester_id.eq.{other:D},addressee_id.eq.{me:D}))");
         await SendAsync(req, ct);
     }
-    public async Task ReportAsync(Guid reporter, Guid target, string reason, CancellationToken ct = default)
-    {
-        await CreateModerationReportAsync(reporter, "player", target.ToString("D"), null, reason, ct);
-    }
-    public async Task ReportThemeAsync(Guid reporter, Guid themeId, string? themeName, string reason, CancellationToken ct = default) =>
-        await CreateModerationReportAsync(reporter, "theme", themeId.ToString("D"), themeName, reason, ct);
-    private async Task CreateModerationReportAsync(Guid reporter, string targetType, string targetId, string? targetName, string reason, CancellationToken ct)
-    {
-        reason = reason.Trim(); if (reason.Length is < 5 or > 500) throw new InvalidOperationException("Причина должна содержать от 5 до 500 символов.");
-        using var req = new HttpRequestMessage(HttpMethod.Post, "/rest/v1/orbitra_moderation_reports")
-        { Content = JsonContent.Create(new { reporter_id=reporter, target_type=targetType, target_id=targetId, target_name=targetName, reason }, options: Json) };
-        await SendAsync(req, ct);
-    }
     public async Task SendInviteAsync(Guid sender, Guid recipient, string address, string name, CancellationToken ct = default)
     { using var req=new HttpRequestMessage(HttpMethod.Post,"/rest/v1/orbitra_invites") { Content=JsonContent.Create(new {sender_id=sender,recipient_id=recipient,server_address=address,server_name=name},options:Json)}; await SendAsync(req,ct); }
     public Task<List<OrbitraInviteDto>> GetInvitesAsync(Guid recipient, CancellationToken ct = default) => GetAsync<List<OrbitraInviteDto>>($"/rest/v1/orbitra_invites?select=*&recipient_id=eq.{recipient:D}&seen=eq.false&expires_at=gt.{Uri.EscapeDataString(DateTimeOffset.UtcNow.ToString("O"))}",ct);
@@ -128,6 +115,12 @@ public sealed class OrbitraSocialService : IDisposable
     {
         using var req = new HttpRequestMessage(HttpMethod.Patch, $"/rest/v1/orbitra_profiles?user_id=eq.{id:D}")
         { Content = JsonContent.Create(new { share_current_server=share, current_server=share?address:null, current_server_name=share?name:null, presence_updated_at=DateTimeOffset.UtcNow, updated_at=DateTimeOffset.UtcNow }, options: Json) };
+        await SendAsync(req, ct);
+    }
+    public async Task SetPresenceStateAsync(Guid id, string state, CancellationToken ct = default)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Patch, $"/rest/v1/orbitra_profiles?user_id=eq.{id:D}")
+        { Content = JsonContent.Create(new { profile_status=state, share_current_server=false, current_server=(string?)null, current_server_name=(string?)null, updated_at=DateTimeOffset.UtcNow }, options:Json) };
         await SendAsync(req, ct);
     }
     public string? AvatarUrl(string? path) => string.IsNullOrWhiteSpace(path) ? null : $"{BaseUrl}/storage/v1/object/public/orbitra-avatars/{path}";

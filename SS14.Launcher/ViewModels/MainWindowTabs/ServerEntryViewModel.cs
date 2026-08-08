@@ -86,7 +86,11 @@ public sealed class ServerEntryViewModel : ObservableRecipient, IRecipient<Favor
         get => _isExpanded;
         set
         {
+            if (_isExpanded == value)
+                return;
+
             _isExpanded = value;
+            OnPropertyChanged(nameof(IsExpanded));
             if (value)
                 UpdateDiscordSelection();
             CheckUpdateInfo();

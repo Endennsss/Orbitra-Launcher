@@ -46,6 +46,9 @@ public partial class DirectConnectDialog : Window
 
         Close(AddressBox.Text.Trim());
     }
+    private void TitleBarPressed(object? sender, PointerPressedEventArgs e) { if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) BeginMoveDrag(e); }
+    private void MinimizeClicked(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+    private void CloseWindowClicked(object? sender, RoutedEventArgs e) => Close();
 
     internal static bool IsAddressValid([NotNullWhen(true)] string? address)
     {

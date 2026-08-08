@@ -27,7 +27,7 @@ public partial class ServerListTabViewModel : MainWindowTabViewModel
     private readonly DispatcherTimer _quietPingTimer = new() { Interval = TimeSpan.FromSeconds(5) };
 
     public override string Name => _loc.GetString("tab-servers-title");
-    public override string IconData => "M4,4 L20,4 L20,10 L4,10 Z M4,14 L20,14 L20,20 L4,20 Z M8,7 L8.01,7 M8,17 L8.01,17";
+    public override string IconData => "M4,2 L20,2 A2,2 0 0 1 22,4 L22,8 A2,2 0 0 1 20,10 L4,10 A2,2 0 0 1 2,8 L2,4 A2,2 0 0 1 4,2 Z M4,14 L20,14 A2,2 0 0 1 22,16 L22,20 A2,2 0 0 1 20,22 L4,22 A2,2 0 0 1 2,20 L2,16 A2,2 0 0 1 4,14 Z M6,6 L6.01,6 M6,18 L6.01,18";
     public override string BadgeText => _serverListCache.AllServers.Count == 0
         ? string.Empty
         : _serverListCache.AllServers.Count(x => x.Status == ServerStatusCode.Online).ToString();

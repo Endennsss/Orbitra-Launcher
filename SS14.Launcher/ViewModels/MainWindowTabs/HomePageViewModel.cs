@@ -127,7 +127,7 @@ public partial class HomePageViewModel : MainWindowTabViewModel
     [ObservableProperty] private bool _favoritesEmpty = true;
 
     public override string Name => LocalizationManager.Instance.GetString("tab-home-title");
-    public override string IconData => "M3,10.5 L12,3 L21,10.5 M5,9.5 L5,21 L19,21 L19,9.5 M9,21 L9,14 L15,14 L15,21";
+    public override string IconData => "M15,21 L15,13 A1,1 0 0 0 14,12 L10,12 A1,1 0 0 0 9,13 L9,21 M3,10 A2,2 0 0 1 3.709,8.472 L10.709,2.472 A2,2 0 0 1 13.291,2.472 L20.291,8.472 A2,2 0 0 1 21,10 L21,19 A2,2 0 0 1 19,21 L5,21 A2,2 0 0 1 3,19 Z";
     public override string BadgeText => Favorites.Count(x => x.IsOnline) is var count && count > 0
         ? count.ToString()
         : string.Empty;

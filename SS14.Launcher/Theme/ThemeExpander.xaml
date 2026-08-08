@@ -12,12 +12,28 @@ Taken & modified from Avalonia's git repo.
         <Border BorderThickness="1">
           <utility:AlwaysHitTest>
             <Grid ColumnDefinitions="Auto,*">
-              <Border Grid.Column="0" Width="20" Height="20" HorizontalAlignment="Center"
-                      VerticalAlignment="Center">
-                <Path Fill="{DynamicResource ThemeForegroundBrush}"
-                      HorizontalAlignment="Center"
-                      VerticalAlignment="Center"
-                      Data="M 0 0 L 6 6 L 0 12 Z" />
+              <Border Grid.Column="0" Width="28" Height="28" HorizontalAlignment="Center"
+                      VerticalAlignment="Center" Background="Transparent">
+                <!-- Lucide chevron-right. The toggle state rotates it instead of swapping geometry. -->
+                <Viewbox Name="PART_ChevronHost" Width="17" Height="17" HorizontalAlignment="Center" VerticalAlignment="Center"
+                         RenderTransformOrigin="50%,50%">
+                  <Viewbox.Transitions>
+                    <Transitions>
+                      <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.28" Easing="CubicEaseOut" />
+                    </Transitions>
+                  </Viewbox.Transitions>
+                  <Canvas Width="24" Height="24">
+                    <Path Name="PART_Chevron" Data="M9,18 L15,12 L9,6"
+                          Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}"
+                          StrokeThickness="2" StrokeLineCap="Round" StrokeJoin="Round">
+                      <Path.Transitions>
+                        <Transitions>
+                          <BrushTransition Property="Stroke" Duration="0:0:0.18" />
+                        </Transitions>
+                      </Path.Transitions>
+                    </Path>
+                  </Canvas>
+                </Viewbox>
               </Border>
               <ContentPresenter Name="PART_ContentPresenter"
                                 Grid.Column="1"
@@ -41,6 +57,26 @@ Taken & modified from Avalonia's git repo.
   <Style Selector="Expander /template/ ToggleButton#PART_toggle:checked">
     <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}" />
     <Setter Property="Background" Value="Transparent" />
+  </Style>
+
+  <Style Selector="Expander /template/ ToggleButton#PART_toggle:checked Viewbox#PART_ChevronHost">
+    <Setter Property="RenderTransform" Value="rotate(90deg)" />
+  </Style>
+
+  <Style Selector="Expander /template/ ToggleButton#PART_toggle:pointerover Viewbox#PART_ChevronHost">
+    <Setter Property="RenderTransform" Value="rotate(8deg) scale(1.06)" />
+  </Style>
+
+  <Style Selector="Expander /template/ ToggleButton#PART_toggle:checked:pointerover Viewbox#PART_ChevronHost">
+    <Setter Property="RenderTransform" Value="rotate(98deg) scale(1.06)" />
+  </Style>
+
+  <Style Selector="Expander /template/ ToggleButton#PART_toggle:checked Path#PART_Chevron">
+    <Setter Property="Stroke" Value="{DynamicResource ThemeForegroundBrush}" />
+  </Style>
+
+  <Style Selector="Expander /template/ ToggleButton#PART_toggle:pointerover Path#PART_Chevron">
+    <Setter Property="Stroke" Value="{DynamicResource ThemeForegroundBrush}" />
   </Style>
 
   <Style Selector="Expander /template/ ToggleButton#PART_toggle:pointerover">

@@ -183,14 +183,18 @@ public class App : Application
         {
             ["ThemeBackgroundBrush"] = background, ["ThemePopupBackgroundBrush"] = surface,
             ["ThemeForegroundBrush"] = text, ["ThemeForegroundMutedBrush"] = muted,
-            ["ThemeSubTextBrush"] = muted, ["LauncherWorkspaceBrush"] = background,
+            ["ThemeNanoGoldBrush"] = text, ["ThemeSubTextBrush"] = muted,
+            ["ThemeControlMidBrush"] = control, ["ThemeControlHighBrush"] = accent,
+            ["ThemeStripebackEdgeBrush"] = muted,
+            ["LauncherWorkspaceBrush"] = background,
             ["LauncherChromeBrush"] = surface, ["LauncherSurfaceBrush"] = surface,
             ["LauncherSurfaceAltBrush"] = control, ["LauncherControlBrush"] = control,
             ["LauncherHoverBrush"] = accent, ["LauncherLineBrush"] = muted,
             ["LauncherTextBrush"] = text, ["LauncherMutedBrush"] = muted,
             ["HighlightBrush"] = accent, ["ThemeAccentBrush"] = accent,
             ["ThemeButtonHoveredBrush"] = accent, ["ThemeTabItemSelectedBrush"] = control,
-            ["ThemeTabItemHoveredBrush"] = surface,
+            ["ThemeTabItemHoveredBrush"] = surface, ["ThemeBorderMidBrush"] = muted,
+            ["ThemeBorderHighBrush"] = accent,
         };
         foreach (var (key, color) in palette)
             Current.Resources[key] = new SolidColorBrush(Color.Parse(color));
@@ -448,6 +452,7 @@ public class App : Application
 
     private void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {
+        OrbitraProtocol.StopPresence();
         PlaytimeTracker.Stop();
         _trayIcon?.Dispose();
         _trayIcon = null;

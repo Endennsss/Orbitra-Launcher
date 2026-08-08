@@ -37,40 +37,66 @@
     <DockPanel LastChildFill="true">
       <Grid>
         <!-- Main tabbed layout when logged in -->
-        <Grid IsVisible="{Binding LoggedIn}" ColumnDefinitions="240,2,*">
-          <Border Background="{DynamicResource LauncherChromeBrush}">
+        <Grid IsVisible="{Binding LoggedIn}" ColumnDefinitions="Auto,1,*">
+          <Border Width="{Binding NavigationPanelWidth}" Background="{DynamicResource LauncherChromeBrush}" ClipToBounds="True">
+          <Border.Transitions>
+            <Transitions><DoubleTransition Property="Width" Duration="0:0:0.32" Easing="CubicEaseOut" /></Transitions>
+          </Border.Transitions>
+          <Grid RowDefinitions="62,*">
+          <Panel Grid.Row="0">
+            <Button Classes="NavCollapse" Width="210" Height="42" Margin="14,10,14,10" Padding="0" HorizontalAlignment="Left" HorizontalContentAlignment="Stretch" Command="{Binding ToggleNavigationCompact}" ToolTip.Tip="{Binding NavigationToggleText}" IsVisible="{Binding !IsNavigationCompact}">
+              <Grid ColumnDefinitions="4,30,*"><Viewbox Grid.Column="1" Width="19" Height="19"><Canvas Width="24" Height="24"><Path Classes="NavToggleIcon" Data="{Binding NavigationToggleIcon}" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox><TextBlock Grid.Column="2" Text="Свернуть панель" Margin="10,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource ThemeSubTextBrush}"/></Grid>
+            </Button>
+            <Button Classes="NavCollapse" Width="46" Height="42" Margin="14,10,14,10" Padding="0" HorizontalAlignment="Left" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding ToggleNavigationCompact}" ToolTip.Tip="{Binding NavigationToggleText}" IsVisible="{Binding IsNavigationCompact}">
+              <Viewbox Width="19" Height="19" HorizontalAlignment="Center" VerticalAlignment="Center"><Canvas Width="24" Height="24"><Path Classes="NavToggleIcon" Data="{Binding NavigationToggleIcon}" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox>
+            </Button>
+          </Panel>
           <ListBox ItemsSource="{Binding Tabs}" SelectedIndex="{Binding SelectedIndex,Mode=TwoWay}"
+                   Grid.Row="1"
                    ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                    Background="Transparent" BorderThickness="0">
           <ListBox.ItemsPanel>
             <ItemsPanelTemplate>
-              <StackPanel Width="210" Spacing="4" Margin="14,18" />
+              <StackPanel Width="{Binding $parent[UserControl].DataContext.NavigationItemsWidth}" Spacing="6" Margin="14,8,14,18">
+                <StackPanel.Transitions>
+                  <Transitions><DoubleTransition Property="Width" Duration="0:0:0.32" Easing="CubicEaseOut" /></Transitions>
+                </StackPanel.Transitions>
+              </StackPanel>
             </ItemsPanelTemplate>
           </ListBox.ItemsPanel>
           <ListBox.ItemTemplate>
             <DataTemplate DataType="mainWindowTabs:MainWindowTabViewModel">
-              <Grid ColumnDefinitions="4,26,*,Auto" Height="46" Margin="0">
-                <Border Classes="NavIndicator" Width="3" Height="8" HorizontalAlignment="Left"
-                        VerticalAlignment="Center" Background="{DynamicResource ThemeForegroundBrush}" Opacity="0" />
-                <Viewbox Grid.Column="1" Width="18" Height="18" VerticalAlignment="Center">
-                  <Path Classes="NavIcon" Data="{Binding IconData}" Fill="Transparent"
-                        Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.7" StrokeLineCap="Round" />
+              <Grid ColumnDefinitions="4,30,*,Auto" Height="48" Margin="0" ToolTip.Tip="{Binding Name}">
+                <Border Classes="NavIndicator" Width="3" Height="8" HorizontalAlignment="Left" VerticalAlignment="Center" Background="{DynamicResource ThemeAccentBrush}" Opacity="0" />
+                <Viewbox Grid.Column="1" Width="20" Height="20" VerticalAlignment="Center"
+                         Stretch="Uniform" ClipToBounds="False"
+                         Margin="{Binding $parent[UserControl].DataContext.NavigationIconMargin}">
+                  <Canvas Width="24" Height="24" ClipToBounds="False">
+                    <Path Classes="NavIcon" Data="{Binding IconData}" Fill="Transparent"
+                          Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.8"
+                          StrokeLineCap="Round" />
+                  </Canvas>
                 </Viewbox>
-                <TextBlock Grid.Column="2" Text="{Binding Name}" FontSize="14" FontWeight="SemiBold"
-                           HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,4,0" />
-                <Border Grid.Column="3" IsVisible="{Binding HasBadge}" Background="{DynamicResource LauncherControlBrush}"
-                        BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" MinWidth="24" Height="22"
-                        Padding="6,0" Margin="4,0" VerticalAlignment="Center">
-                  <TextBlock Text="{Binding BadgeText}" FontSize="10" HorizontalAlignment="Center"
-                             VerticalAlignment="Center" Foreground="{DynamicResource ThemeForegroundBrush}" />
-                </Border>
+                <TextBlock Grid.Column="2" Classes="NavText" Text="{Binding Name}" FontSize="14" FontWeight="SemiBold"
+                           HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,4,0"
+                           Foreground="{DynamicResource ThemeSubTextBrush}"
+                           IsVisible="{Binding !$parent[UserControl].DataContext.IsNavigationCompact}" />
+                <Panel Grid.Column="3" IsVisible="{Binding !$parent[UserControl].DataContext.IsNavigationCompact}">
+                  <Border IsVisible="{Binding HasBadge}" Background="{DynamicResource LauncherControlBrush}"
+                          BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" MinWidth="24" Height="22"
+                          Padding="6,0" Margin="4,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding BadgeText}" FontSize="10" HorizontalAlignment="Center"
+                               VerticalAlignment="Center" Foreground="{DynamicResource ThemeForegroundBrush}" />
+                  </Border>
+                </Panel>
               </Grid>
             </DataTemplate>
           </ListBox.ItemTemplate>
           </ListBox>
+          </Grid>
           </Border>
           <Border Grid.Column="1" Background="{DynamicResource ThemeStripebackEdgeBrush}"/>
-          <ContentControl Grid.Column="2" Content="{Binding SelectedTab}" Margin="22" ClipToBounds="True"/>
+          <ContentControl Grid.Column="2" Content="{Binding SelectedTab}" Margin="22" ClipToBounds="True"><ContentControl.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.22"/></Transitions></ContentControl.Transitions></ContentControl>
         </Grid>
         <!-- Login interface when not logged in -->
         <v:MainWindowLogin
@@ -258,12 +284,13 @@
     <v:ConnectingOverlay DataContext="{Binding ConnectingVM}"
                          IsVisible="{Binding $parent.DataContext.ConnectingVM, Converter={x:Static ObjectConverters.IsNotNull}}" />
 
-    <ItemsControl ItemsSource="{Binding Toasts}" HorizontalAlignment="Right" VerticalAlignment="Top"
-                  Margin="0,18,18,0" IsHitTestVisible="False">
+    <!-- Toasts live below the workspace actions: top-right is reserved for Refresh/Add buttons. -->
+    <ItemsControl ItemsSource="{Binding Toasts}" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                  Margin="0,0,18,32" IsHitTestVisible="False">
       <ItemsControl.ItemTemplate>
         <DataTemplate>
           <Border Classes="LauncherToast" Classes.Error="{Binding IsError}" Margin="0,0,0,8"
-                  Padding="14,10" MinWidth="240" MaxWidth="360">
+                  Padding="13,9" MinWidth="220" MaxWidth="320">
             <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
           </Border>
         </DataTemplate>

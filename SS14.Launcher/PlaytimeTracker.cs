@@ -76,6 +76,21 @@ public static class PlaytimeTracker
         }
     }
 
+    public static void Clear()
+    {
+        string? activeAddress;
+        lock (Sync)
+        {
+            activeAddress = _activeAddress;
+            Seconds.Clear();
+            Meta.Clear();
+            if (activeAddress != null)
+                _startedAt = DateTime.UtcNow;
+            SaveCore();
+        }
+        Changed?.Invoke(activeAddress ?? string.Empty);
+    }
+
     private static void StopCore()
     {
         if (_activeAddress == null) return;

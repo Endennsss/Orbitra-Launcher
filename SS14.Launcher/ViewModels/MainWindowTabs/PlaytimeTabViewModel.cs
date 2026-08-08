@@ -9,12 +9,28 @@ public sealed class PlaytimeTabViewModel : MainWindowTabViewModel
     public ObservableCollection<PlaytimeEntryViewModel> Servers { get; } = [];
     public string TotalText { get; private set; } = "0 мин";
     public bool IsEmpty => Servers.Count == 0;
+    private bool _clearConfirmationVisible;
+    public bool ClearConfirmationVisible
+    {
+        get => _clearConfirmationVisible;
+        private set => SetProperty(ref _clearConfirmationVisible, value);
+    }
     public override string Name => "Игровое время";
     // Official Lucide "chart-no-axes-column-increasing".
-    public override string IconData => "M5,21 L5,15 M12,21 L12,9 M19,21 L19,3";
+    public override string IconData => "M5,21 L5,15 M12,21 L12,3 M19,21 L19,9";
 
     public PlaytimeTabViewModel() => Refresh();
     public override void Selected() => Refresh();
+
+    public void RequestClear() => ClearConfirmationVisible = true;
+    public void CancelClear() => ClearConfirmationVisible = false;
+    public void ConfirmClear()
+    {
+        PlaytimeTracker.Clear();
+        ClearConfirmationVisible = false;
+        Refresh();
+        ActivityLog.Record("playtime", "Статистика очищена", "История игрового времени удалена пользователем.");
+    }
 
     private void Refresh()
     {

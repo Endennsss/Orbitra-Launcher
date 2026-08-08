@@ -1,41 +1,31 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
- xmlns:vm="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs" xmlns:v="clr-namespace:SS14.Launcher.Views" x:Class="SS14.Launcher.Views.MainWindowTabs.ProfileTabView">
- <ScrollViewer HorizontalScrollBarVisibility="Disabled"><StackPanel Spacing="16">
-  <StackPanel><TextBlock Text="ORBITRA ID" Classes="SectionLabel"/><TextBlock Text="Профиль пользователя" Classes="NanoHeadingMedium"/></StackPanel>
-  <Border Classes="Surface" ClipToBounds="True">
-   <Grid RowDefinitions="170,Auto">
-    <Border Background="#242424"><Image Source="{Binding Banner}" Stretch="UniformToFill"/></Border>
-    <Grid Grid.Row="1" ColumnDefinitions="130,*,Auto" Margin="20,0,20,20">
-     <Ellipse Width="108" Height="108" Margin="0,-48,0,0" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="3" ZIndex="2"><Ellipse.Fill><ImageBrush Source="{Binding Avatar}" Stretch="UniformToFill"/></Ellipse.Fill></Ellipse>
-     <StackPanel Grid.Column="1" Margin="20,12,20,0" Spacing="7"><StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="{Binding Username}" FontSize="26" FontWeight="Bold"/><v:CreatorBadge Width="24" Height="24" IsVisible="{Binding IsCreator}"/></StackPanel><TextBlock Text="{Binding UserId}" Classes="SubText"/>
-      <TextBlock Text="{Binding TotalPlaytime, StringFormat='Игровое время: {0}'}"/><TextBlock Text="{Binding ServersPlayed, StringFormat='Серверов посещено: {0}'}"/>
-      <TextBlock Text="{Binding Description}" TextWrapping="Wrap" MaxWidth="650" HorizontalAlignment="Left"/>
-      <TextBlock Text="{Binding SelectedFavoriteServer.Name, StringFormat='Любимый сервер: {0}'}" Classes="SubText"/>
-      <ComboBox ItemsSource="{Binding ProfileStatuses}" SelectedItem="{Binding SelectedProfileStatus,Mode=TwoWay}" Width="210" HorizontalAlignment="Left"/>
-      <CheckBox Content="Показывать друзьям текущий сервер" IsChecked="{Binding ShareCurrentServer,Mode=TwoWay}"/>
-     </StackPanel><Button Grid.Column="2" Content="Настроить профиль" Command="{Binding OpenProfileSettings}" Margin="0,12,0,0" VerticalAlignment="Top"/>
-    </Grid>
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs" xmlns:v="clr-namespace:SS14.Launcher.Views" x:Class="SS14.Launcher.Views.MainWindowTabs.ProfileTabView">
+ <ScrollViewer HorizontalScrollBarVisibility="Disabled"><StackPanel Spacing="18">
+  <Grid ColumnDefinitions="*,Auto"><StackPanel Spacing="3"><TextBlock Text="ORBITRA ID" Classes="SectionLabel"/><TextBlock Text="Профиль" Classes="NanoHeadingMedium"/><TextBlock Text="Ваше присутствие, друзья и публикации мастерской" Classes="SubText"/></StackPanel><Button Grid.Column="1" Content="Настроить профиль" Command="{Binding OpenProfileSettings}" VerticalAlignment="Bottom"/></Grid>
+
+  <Border Classes="Surface" ClipToBounds="True"><Grid RowDefinitions="156,Auto">
+   <Border Background="{DynamicResource LauncherChromeBrush}"><Image Source="{Binding Banner}" Stretch="UniformToFill"/></Border>
+   <Grid Grid.Row="1" ColumnDefinitions="126,*,Auto" Margin="22,0,22,22">
+    <Ellipse Width="104" Height="104" Margin="0,-43,0,0" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="3" ZIndex="2"><Ellipse.Fill><ImageBrush Source="{Binding Avatar}" Stretch="UniformToFill"/></Ellipse.Fill></Ellipse>
+    <StackPanel Grid.Column="1" Margin="18,13,20,0" Spacing="10">
+     <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="{Binding Username}" FontSize="25" FontWeight="Bold"/><v:CreatorBadge Width="23" Height="23" IsVisible="{Binding IsCreator}"/><Border Width="64" Height="24" Background="{DynamicResource LauncherSurfaceAltBrush}" BorderBrush="{DynamicResource ThemeAccentBrush}" BorderThickness="1" Padding="0" IsVisible="{Binding OwnIsOnline}"><TextBlock Text="ОНЛАЙН" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ThemeAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"/></Border></StackPanel>
+     <TextBlock Text="{Binding UserId}" Classes="SubText"/>
+     <Border Background="{DynamicResource LauncherSurfaceAltBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="14"><StackPanel Spacing="5"><TextBlock Text="ОПИСАНИЕ" Classes="SectionLabel"/><TextBlock Text="{Binding DescriptionDisplay}" TextWrapping="Wrap" MaxWidth="720" HorizontalAlignment="Left"/></StackPanel></Border>
+     <TextBlock Text="{Binding SelectedFavoriteServer.Name, StringFormat='Любимый сервер · {0}'}" Classes="SubText"/>
+    </StackPanel>
+    <StackPanel Grid.Column="2" Margin="0,16,0,0" Spacing="7"><TextBlock Text="СТАТИСТИКА" Classes="SectionLabel"/><TextBlock Text="{Binding TotalPlaytime, StringFormat='Игровое время · {0}'}"/><TextBlock Text="{Binding ServersPlayed, StringFormat='Серверов · {0}'}"/></StackPanel>
    </Grid>
-  </Border>
-  <Border Classes="Surface" Padding="20"><StackPanel Spacing="10"><TextBlock Text="ПОИСК ЛЮДЕЙ" Classes="SectionLabel"/>
-   <Grid ColumnDefinitions="*,Auto"><TextBox Watermark="Точный ник аккаунта SS14" Text="{Binding Search,Mode=TwoWay}"/><Button Grid.Column="1" Content="Найти" Command="{Binding FindUser}" Margin="8,0,0,0"/></Grid>
-   <Border IsVisible="{Binding HasFoundProfile}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" ClipToBounds="True">
-    <StackPanel><Border Height="150" Background="#242424"><Image Source="{Binding FoundBanner}" Stretch="UniformToFill"/></Border><Grid ColumnDefinitions="90,*" Margin="14,0,14,14"><Ellipse Width="76" Height="76" Margin="0,-28,0,0" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="2" ZIndex="2"><Ellipse.Fill><ImageBrush Source="{Binding FoundAvatar}" Stretch="UniformToFill"/></Ellipse.Fill></Ellipse><StackPanel Grid.Column="1" Margin="12,10,0,0" Spacing="8"><StackPanel Orientation="Horizontal" Spacing="7"><TextBlock Text="{Binding FoundProfile.Username}" FontSize="20" FontWeight="Bold"/><v:CreatorBadge Width="21" Height="21" IsVisible="{Binding FoundProfileIsCreator}"/></StackPanel><TextBlock Text="{Binding FoundProfile.Description}" TextWrapping="Wrap"/><TextBlock Text="{Binding FoundProfile.FavoriteServerName, StringFormat='Любимый сервер: {0}'}" Classes="SubText"/><TextBlock Text="{Binding FoundServerText}" Classes="SubText"/>
-     <WrapPanel><Button Content="Посмотреть профиль" Command="{Binding OpenFoundProfile}"/><Button Content="Добавить в друзья" Command="{Binding AddFoundFriend}" Margin="8,0,0,0"/><TextBox Width="300" Watermark="Причина жалобы" Text="{Binding ReportReason,Mode=TwoWay}" Margin="8,0"/><Button Content="Отправить жалобу" Command="{Binding ReportFoundUser}"/></WrapPanel>
-    </StackPanel></Grid></StackPanel></Border>
+  </Grid></Border>
+
+  <Border Classes="Surface" Padding="20"><StackPanel Spacing="12"><Grid ColumnDefinitions="*,Auto"><StackPanel Spacing="3"><TextBlock Text="МОИ ТЕМЫ" Classes="SectionLabel"/><TextBlock Text="Опубликованные оформления мастерской" Classes="SubText"/></StackPanel><Button Grid.Column="1" Content="Открыть мастерскую" Command="{Binding OpenThemeWorkshop}"/></Grid>
+   <ItemsControl ItemsSource="{Binding MyThemes}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:ProfileThemeItemViewModel"><Border Background="{DynamicResource LauncherSurfaceAltBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="14" Margin="0,3"><Grid ColumnDefinitions="*,Auto"><StackPanel Spacing="4"><TextBlock Text="{Binding Name}" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="{Binding Description}" Classes="SubText" TextWrapping="Wrap" MaxLines="2"/><TextBlock Text="{Binding Meta}" Classes="SubText"/></StackPanel><StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center"><Button Content="Открыть" Command="{Binding Open}"/><Button Content="Редактировать" Command="{Binding Edit}" IsVisible="{Binding IsOwn}"/></StackPanel></Grid></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
   </StackPanel></Border>
-  <Border Classes="Surface" Padding="20"><StackPanel Spacing="10"><Grid ColumnDefinitions="*,Auto"><TextBlock Text="ДРУЗЬЯ И ЗАЯВКИ" Classes="SectionLabel"/><Button Grid.Column="1" Content="Обновить" Command="{Binding Refresh}"/></Grid>
-   <ItemsControl ItemsSource="{Binding Friends}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:OrbitraFriendItemViewModel">
-    <Grid ColumnDefinitions="180,*,Auto,Auto,Auto,Auto,Auto,Auto" Margin="0,4"><StackPanel><StackPanel Orientation="Horizontal" Spacing="5"><TextBlock Text="{Binding Username}" FontWeight="Bold"/><v:CreatorBadge Width="18" Height="18" IsVisible="{Binding IsCreator}"/></StackPanel><TextBlock Text="{Binding State}" Classes="SubText"/><TextBlock Text="{Binding ProfileStatus}" Classes="SubText"/></StackPanel>
-     <TextBlock Grid.Column="1" Text="{Binding ServerText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-     <Button Grid.Column="2" Content="Профиль" Command="{Binding ViewProfile}"/>
-     <Button Grid.Column="3" Content="Принять" Command="{Binding Accept}" IsVisible="{Binding IsIncoming}"/>
-     <Button Grid.Column="4" Content="Подключиться" Command="{Binding Connect}" IsEnabled="{Binding CanConnect}"/>
-     <Button Grid.Column="5" Content="Пригласить" Command="{Binding Invite}" IsEnabled="{Binding CanInvite}"/>
-     <Button Grid.Column="6" Content="Ссылка" Command="{Binding CopyInvite}" IsEnabled="{Binding CanConnect}"/>
-     <Button Grid.Column="7" Content="Удалить" Command="{Binding Remove}"/>
-    </Grid>
-   </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+
+  <Border Classes="Surface" Padding="20"><StackPanel Spacing="12"><StackPanel Spacing="3"><TextBlock Text="ПОИСК ЛЮДЕЙ" Classes="SectionLabel"/><TextBlock Text="Найдите профиль по точному нику аккаунта SS14" Classes="SubText"/></StackPanel><Grid ColumnDefinitions="*,Auto"><TextBox Watermark="Ник пользователя" Text="{Binding Search,Mode=TwoWay}"/><Button Grid.Column="1" Content="Найти" Command="{Binding FindUser}" Margin="8,0,0,0"/></Grid>
+   <Border IsVisible="{Binding HasFoundProfile}" Background="{DynamicResource LauncherSurfaceAltBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="14"><Grid ColumnDefinitions="74,*,Auto"><Ellipse Width="62" Height="62" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="2"><Ellipse.Fill><ImageBrush Source="{Binding FoundAvatar}" Stretch="UniformToFill"/></Ellipse.Fill></Ellipse><StackPanel Grid.Column="1" Spacing="6"><StackPanel Orientation="Horizontal" Spacing="7"><TextBlock Text="{Binding FoundProfile.Username}" FontSize="19" FontWeight="Bold"/><v:CreatorBadge Width="20" Height="20" IsVisible="{Binding FoundProfileIsCreator}"/><TextBlock Text="ОНЛАЙН" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ThemeAccentBrush}" VerticalAlignment="Center" IsVisible="{Binding FoundIsOnline}"/></StackPanel><TextBlock Text="{Binding FoundDescriptionDisplay}" TextWrapping="Wrap" Classes="SubText" MaxLines="2"/><TextBlock Text="{Binding FoundServerText}" Classes="SubText"/></StackPanel><StackPanel Grid.Column="2" Spacing="6" VerticalAlignment="Center"><Button Content="Посмотреть профиль" Command="{Binding OpenFoundProfile}"/><Button Content="Добавить в друзья" Command="{Binding AddFoundFriend}"/></StackPanel></Grid></Border>
+  </StackPanel></Border>
+
+  <Border Classes="Surface" Padding="20"><StackPanel Spacing="10"><Grid ColumnDefinitions="*,Auto"><StackPanel Spacing="3"><TextBlock Text="ДРУЗЬЯ И ЗАЯВКИ" Classes="SectionLabel"/><TextBlock Text="Присутствие и быстрые действия" Classes="SubText"/></StackPanel><Button Grid.Column="1" Content="Обновить" Command="{Binding Refresh}"/></Grid>
+   <ItemsControl ItemsSource="{Binding Friends}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:OrbitraFriendItemViewModel"><Border Background="{DynamicResource LauncherSurfaceAltBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="12" Margin="0,3"><Grid ColumnDefinitions="175,*,Auto"><StackPanel Spacing="3"><StackPanel Orientation="Horizontal" Spacing="5"><TextBlock Text="{Binding Username}" FontWeight="Bold"/><v:CreatorBadge Width="18" Height="18" IsVisible="{Binding IsCreator}"/><TextBlock Text="ОНЛАЙН" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource ThemeAccentBrush}" VerticalAlignment="Center" IsVisible="{Binding IsOnline}"/></StackPanel><TextBlock Text="{Binding State}" Classes="SubText"/></StackPanel><TextBlock Grid.Column="1" Text="{Binding ServerText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Classes="SubText"/><WrapPanel Grid.Column="2" VerticalAlignment="Center"><Button Content="Профиль" Command="{Binding ViewProfile}"/><Button Content="Принять" Command="{Binding Accept}" IsVisible="{Binding IsIncoming}"/><Button Content="Подключиться" Command="{Binding Connect}" IsEnabled="{Binding CanConnect}"/><Button Content="Пригласить" Command="{Binding Invite}" IsEnabled="{Binding CanInvite}"/><Button Content="Ссылка" Command="{Binding CopyInvite}" IsEnabled="{Binding CanConnect}"/><Button Content="Удалить" Command="{Binding Remove}"/></WrapPanel></Grid></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
   </StackPanel></Border>
   <TextBlock Text="{Binding Status}" Classes="SubText" TextWrapping="Wrap"/>
  </StackPanel></ScrollViewer>

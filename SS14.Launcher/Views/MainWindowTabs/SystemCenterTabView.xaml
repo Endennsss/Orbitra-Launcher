@@ -12,12 +12,20 @@
         </StackPanel></Border>
         <Border Grid.Column="1" Classes="Surface" Padding="18" Margin="6,0,0,0"><StackPanel Spacing="10">
           <Grid ColumnDefinitions="*,Auto"><TextBlock Text="СТАТУС СЛУЖБ" Classes="SectionLabel"/><Button Grid.Column="1" Content="Обновить" Command="{Binding RefreshServices}"/></Grid>
-          <ItemsControl ItemsSource="{Binding Services}"><ItemsControl.ItemTemplate><DataTemplate><Grid ColumnDefinitions="24,130,*" Margin="0,3"><TextBlock Text="{Binding Marker}" Foreground="{Binding Color}"/><TextBlock Grid.Column="1" Text="{Binding Title}" FontWeight="SemiBold"/><TextBlock Grid.Column="2" Text="{Binding Details}" Classes="SubText" TextWrapping="Wrap"/></Grid></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+          <ItemsControl ItemsSource="{Binding Services}"><ItemsControl.ItemTemplate><DataTemplate><Grid ColumnDefinitions="24,165,*" Margin="0,3"><TextBlock Text="{Binding Marker}" Foreground="{Binding Color}"/><TextBlock Grid.Column="1" Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/><TextBlock Grid.Column="2" Text="{Binding Details}" Classes="SubText" TextWrapping="Wrap"/></Grid></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
         </StackPanel></Border>
       </Grid>
       <Border Classes="Surface" Padding="18"><StackPanel Spacing="10">
         <Grid ColumnDefinitions="*,Auto"><TextBlock Text="ИСТОРИЯ ОБНОВЛЕНИЙ" Classes="SectionLabel"/><Button Grid.Column="1" Content="Обновить" Command="{Binding RefreshReleases}"/></Grid>
-        <ItemsControl ItemsSource="{Binding Releases}"><ItemsControl.ItemTemplate><DataTemplate><Button Command="{Binding Open}" Margin="0,2" HorizontalContentAlignment="Stretch"><Grid ColumnDefinitions="90,*,100"><TextBlock Text="{Binding Version}" FontWeight="Bold"/><TextBlock Grid.Column="1" Text="{Binding Name}"/><TextBlock Grid.Column="2" Text="{Binding Date}" Classes="SubText" HorizontalAlignment="Right"/></Grid></Button></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+        <ItemsControl ItemsSource="{Binding Releases}"><ItemsControl.ItemTemplate><DataTemplate>
+          <Grid ColumnDefinitions="110,*,100,110" Margin="0,2">
+            <Button Content="{Binding Version}" Command="{Binding Install}" IsEnabled="{Binding CanInstall}"
+                    FontWeight="Bold" HorizontalContentAlignment="Left" ToolTip.Tip="Установить выбранную версию"/>
+            <Button Grid.Column="1" Content="{Binding Name}" Command="{Binding Open}" HorizontalContentAlignment="Left"/>
+            <TextBlock Grid.Column="2" Text="{Binding Date}" Classes="SubText" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="8,0"/>
+            <Button Grid.Column="3" Content="{Binding ActionText}" Command="{Binding Install}" IsEnabled="{Binding CanInstall}"/>
+          </Grid>
+        </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
       </StackPanel></Border>
       <Border Classes="Surface" Padding="18"><StackPanel Spacing="10">
         <Grid ColumnDefinitions="*,Auto,Auto,Auto">
@@ -41,12 +49,6 @@
             </Grid>
           </Border>
         </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
-      </StackPanel></Border>
-      <Border Classes="Surface" Padding="18"><StackPanel Spacing="10">
-        <TextBlock Text="СРАВНЕНИЕ ИЗБРАННЫХ СЕРВЕРОВ" Classes="SectionLabel"/>
-        <TextBlock Text="Выберите до трёх серверов для сравнения." Classes="SubText"/>
-        <ItemsControl ItemsSource="{Binding FavoriteTools}"><ItemsControl.ItemTemplate><DataTemplate><Grid ColumnDefinitions="Auto,*" Margin="8,3"><CheckBox IsChecked="{Binding IsCompared, Mode=TwoWay}"/><TextBlock Grid.Column="1" Text="{Binding Name}" Margin="8,0"/></Grid></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
-        <ItemsControl ItemsSource="{Binding ComparedServers}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="3"/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate><Border BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="12" Margin="4"><StackPanel><TextBlock Text="{Binding Name}" FontWeight="Bold" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding Server.PingString, StringFormat='Пинг: {0}'}"/><TextBlock Text="{Binding Server.PlayerCountString}"/><TextBlock Text="{Binding Server.CacheData.Map, StringFormat='Карта: {0}'}"/><TextBlock Text="{Binding Server.CacheData.GamePreset, StringFormat='Режим: {0}'}"/><TextBlock Text="{Binding RoundTime}" Classes="SubText"/><Path Data="{Binding Server.PingGraph}" Stroke="#8A8A8A" StrokeThickness="1.2" Height="28" Stretch="Fill" Margin="0,8,0,0"/></StackPanel></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
       </StackPanel></Border>
     </StackPanel>
   </ScrollViewer>

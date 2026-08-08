@@ -1,43 +1,18 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vml="clr-namespace:SS14.Launcher.ViewModels.Login;assembly=SS14.Launcher"
-             xmlns:loc="clr-namespace:SS14.Launcher.Localization"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="SS14.Launcher.Views.Login.AuthTfaView">
-  <Design.DataContext>
-    <vml:AuthTfaViewModel />
-  </Design.DataContext>
-
-  <DockPanel LastChildFill="False">
-    <TextBlock HorizontalAlignment="Center" DockPanel.Dock="Top" Classes="NanoHeadingMedium" Text="{loc:Loc login-2fa-title}" />
-
-    <TextBlock HorizontalAlignment="Center" DockPanel.Dock="Top" TextWrapping="Wrap" MaxWidth="400"
-               Text="{loc:Loc login-2fa-message}" />
-
-    <TextBox DockPanel.Dock="Top" Name="CodeBox" MaxWidth="300" Margin="0, 20, 0, 0"
-             Watermark="{loc:Loc login-2fa-input-watermark}"
-             Text="{Binding Code}" IsEnabled="{Binding !Busy}" />
-
-    <DockPanel DockPanel.Dock="Top" LastChildFill="False" MaxWidth="300" Margin="0 20 0 0">
-      <Button DockPanel.Dock="Right" HorizontalAlignment="Center" IsDefault="True"
-              Content="{loc:Loc login-2fa-button-confirm}" Command="{Binding ConfirmTfa}">
-        <Button.IsEnabled>
-          <MultiBinding Converter="{x:Static BoolConverters.And}">
-            <Binding Path="IsInputValid" />
-            <Binding Path="!Busy" />
-          </MultiBinding>
-        </Button.IsEnabled>
-      </Button>
-
-      <Button DockPanel.Dock="Left" HorizontalAlignment="Center" Content="{loc:Loc login-2fa-button-recovery-code}"
-              Command="{Binding RecoveryCode}" IsEnabled="{Binding !Busy}" />
-    </DockPanel>
-
-    <DockPanel DockPanel.Dock="Top" LastChildFill="False" MaxWidth="300">
-      <Button DockPanel.Dock="Left" HorizontalAlignment="Center" Content="{loc:Loc login-2fa-button-cancel}" Command="{Binding Cancel}"/>
-    </DockPanel>
-
-  </DockPanel>
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+ xmlns:vml="clr-namespace:SS14.Launcher.ViewModels.Login;assembly=SS14.Launcher" xmlns:loc="clr-namespace:SS14.Launcher.Localization"
+ mc:Ignorable="d" x:Class="SS14.Launcher.Views.Login.AuthTfaView">
+ <Design.DataContext><vml:AuthTfaViewModel/></Design.DataContext>
+ <StackPanel>
+  <TextBlock Text="TWO-FACTOR AUTHENTICATION" FontSize="10" FontWeight="Bold" LetterSpacing="1.6" Foreground="{DynamicResource ThemeSubTextBrush}"/>
+  <TextBlock Margin="0,8,0,0" Classes="NanoHeadingMedium" FontSize="28" Text="{loc:Loc login-2fa-title}"/>
+  <TextBlock Margin="0,9,0,26" TextWrapping="Wrap" LineHeight="21" Foreground="{DynamicResource ThemeSubTextBrush}" Text="{loc:Loc login-2fa-message}"/>
+  <TextBox Name="CodeBox" Height="50" Padding="14,0" FontSize="18" LetterSpacing="4" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+           Watermark="{loc:Loc login-2fa-input-watermark}" Text="{Binding Code}" IsEnabled="{Binding !Busy}"/>
+  <Button Height="48" Margin="0,18,0,0" HorizontalAlignment="Stretch" IsDefault="True" Content="{loc:Loc login-2fa-button-confirm}" Command="{Binding ConfirmTfa}">
+   <Button.IsEnabled><MultiBinding Converter="{x:Static BoolConverters.And}"><Binding Path="IsInputValid"/><Binding Path="!Busy"/></MultiBinding></Button.IsEnabled>
+  </Button>
+  <Button Margin="0,8,0,0" HorizontalAlignment="Stretch" Content="{loc:Loc login-2fa-button-recovery-code}" Command="{Binding RecoveryCode}" IsEnabled="{Binding !Busy}"/>
+  <Button Margin="0,18,0,0" Background="Transparent" BorderThickness="0" HorizontalAlignment="Center" Content="{loc:Loc login-2fa-button-cancel}" Command="{Binding Cancel}"/>
+ </StackPanel>
 </UserControl>

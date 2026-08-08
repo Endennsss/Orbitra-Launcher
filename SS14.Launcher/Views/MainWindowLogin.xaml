@@ -3,27 +3,69 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:SS14.Launcher.ViewModels;assembly=SS14.Launcher"
-             xmlns:vl="clr-namespace:SS14.Launcher.Views.Login;assembly=SS14.Launcher"
              xmlns:views="clr-namespace:SS14.Launcher.Views"
              xmlns:loc="clr-namespace:SS14.Launcher.Localization"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="680"
              x:Class="SS14.Launcher.Views.MainWindowLogin">
-  <Design.DataContext>
-    <vm:MainWindowLoginViewModel />
-  </Design.DataContext>
+  <Design.DataContext><vm:MainWindowLoginViewModel /></Design.DataContext>
 
-  <DockPanel LastChildFill="True">
-    <!-- The bottom -->
-    <DockPanel Background="{DynamicResource ThemeStripeBackBrush}" DockPanel.Dock="Bottom"
-               LastChildFill="False">
+  <UserControl.Styles>
+    <Style Selector="Border.AuthCard">
+      <Setter Property="Background" Value="{DynamicResource LauncherChromeBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Padding" Value="28,26" />
+      <Setter Property="Opacity" Value="1" />
+      <Setter Property="Transitions"><Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.32" Easing="CubicEaseOut" /></Transitions></Setter>
+    </Style>
+    <Style Selector="Button.AuthUtility">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Foreground" Value="{DynamicResource ThemeSubTextBrush}" />
+      <Setter Property="Padding" Value="10,7" />
+      <Setter Property="Transitions"><Transitions><BrushTransition Property="Foreground" Duration="0:0:0.18" /></Transitions></Setter>
+    </Style>
+    <Style Selector="Button.AuthUtility:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource ThemeControlHighBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}" />
+    </Style>
+  </UserControl.Styles>
 
-      <views:LanguageSelector DockPanel.Dock="Left" VerticalAlignment="Center" Margin="4" DataContext="{Binding LanguageSelector}" />
+  <Grid Background="{DynamicResource LauncherWorkspaceBrush}" ClipToBounds="True">
+    <Canvas IsHitTestVisible="False" Opacity="0.28">
+      <Ellipse Width="430" Height="430" Canvas.Left="-170" Canvas.Top="-210" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="1" />
+      <Ellipse Width="300" Height="300" Canvas.Left="-105" Canvas.Top="-145" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1" Opacity="0.22" />
+      <Path Data="M0,0 L560,560 M60,0 L620,560" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="1" Opacity="0.38" />
+    </Canvas>
 
-      <Button Content="{loc:Loc tab-options-open-log-directory}" DockPanel.Dock="Left" HorizontalAlignment="Left"
-              Command="{Binding OpenLogDirectory}" Margin="4" />
-    </DockPanel>
-    <Panel Background="{DynamicResource ThemeStripebackEdgeBrush}" MinHeight="2" DockPanel.Dock="Bottom" />
+    <Grid ColumnDefinitions="0.9*,1.1*" Margin="54,38,54,34">
+      <Grid Grid.Column="0" Margin="18,0,62,0">
+        <StackPanel VerticalAlignment="Center" Spacing="18">
+          <Border Width="88" Height="88" HorizontalAlignment="Left" Background="#050505"
+                  BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" CornerRadius="18">
+            <Image Width="86" Height="86" Source="{DynamicResource OrbitraLogo}" Stretch="UniformToFill">
+              <Image.Clip><RectangleGeometry Rect="0,0,86,86" RadiusX="17" RadiusY="17" /></Image.Clip>
+            </Image>
+          </Border>
+          <TextBlock Text="ORBITRA" FontSize="38" FontWeight="Bold" LetterSpacing="4.5"
+                     Foreground="{DynamicResource ThemeForegroundBrush}" />
+          <TextBlock Text="SPACE STATION 14 · CONTROL CENTER" FontSize="11" FontWeight="SemiBold"
+                     LetterSpacing="1.8" Foreground="{DynamicResource ThemeSubTextBrush}" />
+          <Border Width="52" Height="2" HorizontalAlignment="Left" Background="{DynamicResource ThemeForegroundBrush}" Margin="0,4,0,2" />
+          <TextBlock Text="{loc:Loc login-orbitra-brand-subtitle}"
+                     MaxWidth="380" TextWrapping="Wrap" FontSize="17" LineHeight="25"
+                     Foreground="{DynamicResource ThemeSubTextBrush}" />
+        </StackPanel>
+      </Grid>
 
-    <ContentControl Content="{Binding Screen}" />
-  </DockPanel>
+      <Border Grid.Column="1" Classes="AuthCard" MaxWidth="520" MinWidth="430"
+              HorizontalAlignment="Stretch" VerticalAlignment="Center">
+        <ContentControl Content="{Binding Screen}" />
+      </Border>
+    </Grid>
+
+    <Grid VerticalAlignment="Bottom" ColumnDefinitions="Auto,*" Margin="18,0,18,14">
+      <views:LanguageSelector VerticalAlignment="Center" DataContext="{Binding LanguageSelector}" />
+    </Grid>
+  </Grid>
 </UserControl>
