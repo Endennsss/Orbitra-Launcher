@@ -31,13 +31,7 @@
     </Style>
   </UserControl.Styles>
 
-  <Grid Background="{DynamicResource LauncherWorkspaceBrush}" ClipToBounds="True">
-    <Canvas IsHitTestVisible="False" Opacity="0.28">
-      <Ellipse Width="430" Height="430" Canvas.Left="-170" Canvas.Top="-210" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="1" />
-      <Ellipse Width="300" Height="300" Canvas.Left="-105" Canvas.Top="-145" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1" Opacity="0.22" />
-      <Path Data="M0,0 L560,560 M60,0 L620,560" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="1" Opacity="0.38" />
-    </Canvas>
-
+  <Grid Background="{DynamicResource ThemeStripeBackBrush}" ClipToBounds="True">
     <Grid ColumnDefinitions="0.9*,1.1*" Margin="54,38,54,34">
       <Grid Grid.Column="0" Margin="18,0,62,0">
         <StackPanel VerticalAlignment="Center" Spacing="18">

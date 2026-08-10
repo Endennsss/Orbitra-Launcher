@@ -71,7 +71,9 @@
               <Viewbox Width="19" Height="19" HorizontalAlignment="Center" VerticalAlignment="Center"><Canvas Width="24" Height="24"><Path Classes="NavToggleIcon" Data="{Binding NavigationToggleIcon}" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox>
             </Button>
           </Panel>
-          <ListBox ItemsSource="{Binding Tabs}" SelectedIndex="{Binding SelectedIndex,Mode=TwoWay}"
+          <ListBox Name="NavigationList" Classes="NavigationList"
+                   ItemsSource="{Binding Tabs}" SelectedIndex="{Binding SelectedIndex,Mode=TwoWay}"
+                   SelectionChanged="NavigationSelectionChanged"
                    Grid.Row="1"
                    ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                    Background="Transparent" BorderThickness="0">

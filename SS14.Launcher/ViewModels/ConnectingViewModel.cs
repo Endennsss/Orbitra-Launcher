@@ -103,7 +103,7 @@ public class ConnectingViewModel : ViewModelBase
                     {
                         PlaytimeTracker.Stop();
                         OrbitraProtocol.PublishPresence(null);
-                        DiscordRichPresenceService.Instance.ShowLauncher();
+                        DiscordRichPresenceService.Instance.ShowLauncherAfterGame();
                     }
 
                     if (_connector.Status == ClientRunning)

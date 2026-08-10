@@ -37,7 +37,7 @@ public sealed class DiscordRichPresenceService : IDisposable
     private int? _pingMilliseconds;
     private string? _map;
     private string? _gamePreset;
-    private bool _isPlaying;
+    private volatile bool _isPlaying;
     private string _smallImageKey = "player_avatar";
     private Guid? _avatarUserId;
     private DateTime _avatarCheckedAt;
@@ -165,20 +165,34 @@ public sealed class DiscordRichPresenceService : IDisposable
 
     public void ShowLauncher()
     {
+        // Navigation inside the launcher must not replace the game presence while
+        // the client process is still running.
+        if (_isPlaying)
+            return;
+
+        SetLauncherPresence("В лаунчере", "Главное меню");
+    }
+
+    public void ShowLauncherAfterGame()
+    {
         _isPlaying = false;
         SetLauncherPresence("В лаунчере", "Главное меню");
     }
 
     public void ShowSearching()
     {
-        _isPlaying = false;
+        if (_isPlaying)
+            return;
+
         SetLauncherPresence("Ищет сервер", "Просматривает список серверов");
     }
 
     public void SelectServer(string name, string address, int playerCount, int maxPlayerCount, TimeSpan? ping,
         string? map, string? gamePreset)
     {
-        _isPlaying = false;
+        if (_isPlaying)
+            return;
+
         _selectedServerName = string.IsNullOrWhiteSpace(name) ? address : name;
         _selectedServerAddress = address;
         UpdateStats(playerCount, maxPlayerCount, ping, map, gamePreset);
@@ -198,13 +212,15 @@ public sealed class DiscordRichPresenceService : IDisposable
 
     public void ShowConnecting(string address)
     {
+        if (_isPlaying)
+            return;
+
         if (!string.Equals(_selectedServerAddress, address, StringComparison.OrdinalIgnoreCase))
         {
             _selectedServerAddress = address;
             _selectedServerName = address;
         }
 
-        _isPlaying = false;
         SetLauncherPresence("Подключается к серверу", _selectedServerName!);
     }
 

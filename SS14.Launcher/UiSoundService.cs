@@ -33,6 +33,7 @@ public static class UiSoundService
         InputElement.PointerPressedEvent.AddClassHandler<TabItem>((_, _) => Play("navigation.wav"));
     }
 
+    public static void PlayNavigation() => Play("navigation.wav");
     public static void PlayNotification() => Play("notification.wav");
     public static void PlayError() => Play("error.wav");
     public static void Preview(string fileName) => Play(fileName);
