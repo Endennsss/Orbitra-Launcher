@@ -154,8 +154,9 @@ public class App : Application
         Current.Resources["ThemeForegroundColor"] = Color.Parse(useLightTheme ? "#181818" : "#F2F2F2");
         Current.Resources["ThemeListSeparatorColor"] = Color.Parse(useLightTheme ? "#AAC5C5C5" : "#AA383838");
         Current.Resources["ThemeListSeparatorColorTransparent"] = Color.Parse(useLightTheme ? "#00C5C5C5" : "#00383838");
-        Current.Resources["ThemeStripeBackBrush"] = new SolidColorBrush(
-            Color.Parse(useLightTheme ? "#EEEEEE" : "#0D0D0D"));
+        Current.Resources["ThemeStripeBackBrush"] = CreateDefaultBackgroundBrush(
+            Color.Parse(useLightTheme ? "#EEEEEE" : "#0D0D0D"),
+            Color.Parse(useLightTheme ? "#D8D8D8" : "#1D1D1D"));
     }
 
     public static void ApplyConfiguredTheme(DataManager cfg)
@@ -198,8 +199,32 @@ public class App : Application
         };
         foreach (var (key, color) in palette)
             Current.Resources[key] = new SolidColorBrush(Color.Parse(color));
-        Current.Resources["ThemeStripeBackBrush"] = new SolidColorBrush(Color.Parse(background));
+        var backgroundColor = Color.Parse(background);
+        var mutedColor = Color.Parse(muted);
+        Current.Resources["ThemeStripeBackBrush"] = CreateDefaultBackgroundBrush(
+            backgroundColor, Color.FromArgb(42, mutedColor.R, mutedColor.G, mutedColor.B));
         Current.Resources["ThemeForegroundColor"] = Color.Parse(text);
+    }
+
+    private static VisualBrush CreateDefaultBackgroundBrush(Color background, Color gridLine)
+    {
+        var tile = new Border
+        {
+            Width = 44,
+            Height = 44,
+            Background = new SolidColorBrush(background),
+            BorderBrush = new SolidColorBrush(gridLine),
+            BorderThickness = new Thickness(0, 0, 1, 1)
+        };
+
+        return new VisualBrush
+        {
+            Visual = tile,
+            TileMode = TileMode.Tile,
+            Stretch = Stretch.Fill,
+            SourceRect = new RelativeRect(0, 0, 44, 44, RelativeUnit.Absolute),
+            DestinationRect = new RelativeRect(0, 0, 44, 44, RelativeUnit.Absolute)
+        };
     }
 
     private void LoadBaseAssets()

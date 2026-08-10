@@ -63,9 +63,5 @@
         <ContentControl Content="{Binding Screen}" />
       </Border>
     </Grid>
-
-    <Grid VerticalAlignment="Bottom" ColumnDefinitions="Auto,*" Margin="18,0,18,14">
-      <views:LanguageSelector VerticalAlignment="Center" DataContext="{Binding LanguageSelector}" />
-    </Grid>
   </Grid>
 </UserControl>

@@ -49,6 +49,9 @@ public sealed partial class ServerListFiltersViewModel : ObservableObject
         "filters",
         ("filteredServers", FilteredServers),
         ("totalServers", TotalServers));
+    public int ActiveFilterCount => _dataManager.Filters.Count;
+    public bool HasActiveFilters => ActiveFilterCount > 0;
+    public string FilterSummaryText => HasActiveFilters ? $"Фильтры · {ActiveFilterCount}" : "Фильтры";
 
     public ServerListFiltersViewModel(DataManager dataManager, LocalizationManager loc)
     {
@@ -219,6 +222,7 @@ public sealed partial class ServerListFiltersViewModel : ObservableObject
             _dataManager.CommitConfig();
             FiltersUpdated?.Invoke();
         }
+        NotifyFilterStateChanged();
     }
 
     public void CounterUpdated()
@@ -226,6 +230,29 @@ public sealed partial class ServerListFiltersViewModel : ObservableObject
         FiltersUpdated?.Invoke();
 
         _dataManager.CommitConfig();
+    }
+
+    public void ResetFilters()
+    {
+        foreach (var filter in _dataManager.Filters.ToArray())
+            _dataManager.Filters.Remove(filter);
+
+        _dataManager.CommitConfig();
+        foreach (var filter in AllVisibleFilters()) filter.RefreshSelected();
+        NotifyFilterStateChanged();
+        FiltersUpdated?.Invoke();
+    }
+
+    private IEnumerable<ServerFilterViewModel> AllVisibleFilters() =>
+        FiltersLanguage.Concat(FiltersRegion).Concat(FiltersRolePlay).Concat(FiltersEighteenPlus)
+            .Concat(FiltersHub).Append(FilterPlayerCountHideEmpty).Append(FilterPlayerCountHideFull)
+            .Append(FilterPlayerCountMinimum).Append(FilterPlayerCountMaximum);
+
+    private void NotifyFilterStateChanged()
+    {
+        OnPropertyChanged(nameof(ActiveFilterCount));
+        OnPropertyChanged(nameof(HasActiveFilters));
+        OnPropertyChanged(nameof(FilterSummaryText));
     }
 
     /// <summary>

@@ -65,7 +65,23 @@
       <Border Grid.Row="1" IsVisible="{Binding HasRecentServers}" BorderBrush="{DynamicResource LauncherLineBrush}"
               BorderThickness="0,1,0,0" Padding="14,12">
         <StackPanel Spacing="8">
-          <TextBlock Text="НЕДАВНИЕ СЕРВЕРЫ" Classes="SectionLabel" />
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Text="НЕДАВНИЕ СЕРВЕРЫ" Classes="SectionLabel" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Command="{Binding ClearRecentServers}" Padding="10,5"
+                    MinHeight="30" ToolTip.Tip="Очистить недавние серверы">
+              <StackPanel Orientation="Horizontal" Spacing="7">
+                <!-- Official Lucide trash-2 icon. -->
+                <Viewbox Width="14" Height="14" VerticalAlignment="Center">
+                  <Canvas Width="24" Height="24">
+                    <Path Data="M3,6 L5,6 L21,6 M8,6 L8,4 A2,2 0 0 1 10,2 L14,2 A2,2 0 0 1 16,4 L16,6 M19,6 L18,20 A2,2 0 0 1 16,22 L8,22 A2,2 0 0 1 6,20 L5,6 M10,11 L10,17 M14,11 L14,17"
+                          Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}"
+                          StrokeThickness="1.8" StrokeLineCap="Round" StrokeJoin="Round" />
+                  </Canvas>
+                </Viewbox>
+                <TextBlock Text="Очистить" VerticalAlignment="Center" FontSize="11" />
+              </StackPanel>
+            </Button>
+          </Grid>
           <ItemsControl ItemsSource="{Binding RecentServers}">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>

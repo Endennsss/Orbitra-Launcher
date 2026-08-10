@@ -213,7 +213,7 @@ public sealed class DiscordRichPresenceService : IDisposable
         _isPlaying = true;
         var username = Locator.Current.GetService<LoginManager>()?.ActiveAccount?.Username ?? "Игрок";
         var online = _maxPlayerCount > 0 ? $"{_playerCount}/{_maxPlayerCount}" : _playerCount.ToString();
-        var ping = _pingMilliseconds is { } value ? $"{value} мс" : "—";
+        var ping = _pingMilliseconds is { } value ? $"{value} мс" : "-";
         var details = Config.GetCVar(CVars.DiscordRpcShowServer)
             ? $"Играет: {_selectedServerName ?? "Space Station 14"}"
             : "Играет в Space Station 14";
@@ -324,7 +324,7 @@ public sealed class DiscordRichPresenceService : IDisposable
                     {
                         LargeImageKey = largeImageKey,
                         LargeImageText = largeImageKey == "in_the_game"
-                            ? "Orbitra Launcher — в игре"
+                            ? "Orbitra Launcher - в игре"
                             : "Orbitra Launcher",
                         SmallImageKey = smallImageKey,
                         SmallImageText = smallImageText

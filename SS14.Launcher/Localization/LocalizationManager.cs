@@ -25,6 +25,7 @@ public sealed class LocalizationManager
     [
         new LanguageInfo(FallbackCultureSub),
         new LanguageInfo("ru"),
+        new LanguageInfo("uk-UA"),
     ];
 
     private const string FallbackCulture = "en";

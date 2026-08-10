@@ -43,12 +43,18 @@ public partial class ServerListTabViewModel : MainWindowTabViewModel
             OnPropertyChanging();
             _searchString = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(HasSearch));
 
             // Search string was changed, stop a potential old throttle timer and restart it
             _searchThrottle.Stop();
             _searchThrottle.Start();
         }
     }
+
+    public string ResultCountText => $"Найдено: {SearchedServers.Count}";
+    public string OnlineCountText => $"Онлайн: {_serverListCache.AllServers.Count(x => x.Status == ServerStatusCode.Online)}";
+    public bool HasSearch => !string.IsNullOrWhiteSpace(SearchString);
+    public void ClearSearch() => SearchString = string.Empty;
 
     public bool SpinnerVisible => _serverListCache.Status < RefreshListStatus.Updated;
     public void RequestSearchFocus() => SearchFocusRequested?.Invoke();
@@ -88,6 +94,7 @@ public partial class ServerListTabViewModel : MainWindowTabViewModel
     }
 
     [ObservableProperty] private bool _filtersVisible;
+    public void ToggleFilters() => FiltersVisible = !FiltersVisible;
 
     public ServerListFiltersViewModel Filters { get; }
 
@@ -187,6 +194,8 @@ public partial class ServerListTabViewModel : MainWindowTabViewModel
             => new ServerEntryViewModel(_windowVm, server, _serverListCache, _windowVm.Cfg)));
 
         OnPropertyChanged(nameof(ListText));
+        OnPropertyChanged(nameof(ResultCountText));
+        OnPropertyChanged(nameof(OnlineCountText));
     }
 
     private bool DoesSearchMatch(ServerStatusData data)
@@ -194,8 +203,12 @@ public partial class ServerListTabViewModel : MainWindowTabViewModel
         if (string.IsNullOrWhiteSpace(SearchString))
             return true;
 
-        return data.Name != null &&
-               data.Name.Contains(SearchString, StringComparison.CurrentCultureIgnoreCase);
+        var query = SearchString.Trim();
+        return Contains(data.Name) || Contains(data.Address) || Contains(data.Description) ||
+               Contains(data.Map) || Contains(data.GamePreset) || data.Tags.Any(Contains);
+
+        bool Contains(string? value) =>
+            value?.Contains(query, StringComparison.CurrentCultureIgnoreCase) == true;
     }
 
     private sealed class ServerSortComparer : NotNullComparer<ServerStatusData>

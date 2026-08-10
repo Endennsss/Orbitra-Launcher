@@ -21,7 +21,24 @@
   </StackPanel></Border>
 
   <Border Classes="Surface" Padding="20"><StackPanel Spacing="12"><StackPanel Spacing="3"><TextBlock Text="ПОИСК ЛЮДЕЙ" Classes="SectionLabel"/><TextBlock Text="Найдите профиль по точному нику аккаунта SS14" Classes="SubText"/></StackPanel><Grid ColumnDefinitions="*,Auto"><TextBox Watermark="Ник пользователя" Text="{Binding Search,Mode=TwoWay}"/><Button Grid.Column="1" Content="Найти" Command="{Binding FindUser}" Margin="8,0,0,0"/></Grid>
-   <Border IsVisible="{Binding HasFoundProfile}" Background="{DynamicResource LauncherSurfaceAltBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="14"><Grid ColumnDefinitions="74,*,Auto"><Ellipse Width="62" Height="62" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="2"><Ellipse.Fill><ImageBrush Source="{Binding FoundAvatar}" Stretch="UniformToFill"/></Ellipse.Fill></Ellipse><StackPanel Grid.Column="1" Spacing="6"><StackPanel Orientation="Horizontal" Spacing="7"><TextBlock Text="{Binding FoundProfile.Username}" FontSize="19" FontWeight="Bold"/><v:CreatorBadge Width="20" Height="20" IsVisible="{Binding FoundProfileIsCreator}"/><TextBlock Text="ОНЛАЙН" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ThemeAccentBrush}" VerticalAlignment="Center" IsVisible="{Binding FoundIsOnline}"/></StackPanel><TextBlock Text="{Binding FoundDescriptionDisplay}" TextWrapping="Wrap" Classes="SubText" MaxLines="2"/><TextBlock Text="{Binding FoundServerText}" Classes="SubText"/></StackPanel><StackPanel Grid.Column="2" Spacing="6" VerticalAlignment="Center"><Button Content="Посмотреть профиль" Command="{Binding OpenFoundProfile}"/><Button Content="Добавить в друзья" Command="{Binding AddFoundFriend}"/></StackPanel></Grid></Border>
+   <Border IsVisible="{Binding HasFoundProfile}" Background="{DynamicResource LauncherSurfaceAltBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="10,8">
+    <Grid ColumnDefinitions="50,*,Auto" MinHeight="46">
+     <Ellipse Width="42" Height="42" HorizontalAlignment="Left" VerticalAlignment="Center"
+              Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="2">
+      <Ellipse.Fill><ImageBrush Source="{Binding FoundAvatar}" Stretch="UniformToFill"/></Ellipse.Fill>
+     </Ellipse>
+     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="7" Margin="10,0,16,0" VerticalAlignment="Center">
+      <TextBlock Text="{Binding FoundProfile.Username}" FontSize="17" FontWeight="Bold" VerticalAlignment="Center"/>
+      <v:CreatorBadge Width="18" Height="18" IsVisible="{Binding FoundProfileIsCreator}"/>
+      <TextBlock Text="ОНЛАЙН" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource ThemeAccentBrush}"
+                 VerticalAlignment="Center" IsVisible="{Binding FoundIsOnline}"/>
+     </StackPanel>
+     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+      <Button Content="Профиль" Command="{Binding OpenFoundProfile}" MinHeight="34"/>
+      <Button Content="Добавить в друзья" Command="{Binding AddFoundFriend}" MinHeight="34"/>
+     </StackPanel>
+    </Grid>
+   </Border>
   </StackPanel></Border>
 
   <Border Classes="Surface" Padding="20"><StackPanel Spacing="10"><Grid ColumnDefinitions="*,Auto"><StackPanel Spacing="3"><TextBlock Text="ДРУЗЬЯ И ЗАЯВКИ" Classes="SectionLabel"/><TextBlock Text="Присутствие и быстрые действия" Classes="SubText"/></StackPanel><Button Grid.Column="1" Content="Обновить" Command="{Binding Refresh}"/></Grid>

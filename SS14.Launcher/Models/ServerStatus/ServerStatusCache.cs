@@ -60,6 +60,19 @@ public sealed class ServerStatusCache : IServerSource
         UpdateStatusFor(reg);
     }
 
+    /// <summary>
+    /// Refresh one cached server without updating every other registered server.
+    /// </summary>
+    public void RefreshStatus(ServerStatusData data)
+    {
+        if (!_cachedData.TryGetValue(data.Address, out var reg))
+            return;
+
+        reg.Cancellation?.Cancel();
+        reg.Data.InfoCancel?.Cancel();
+        UpdateStatusFor(reg);
+    }
+
     private async void UpdateStatusFor(CacheReg reg)
     {
         reg.DidInitialStatusUpdate = true;

@@ -339,6 +339,48 @@
     <Setter Property="Opacity" Value="0" />
   </Style>
 
+  <Style Selector="Border.AmbientGlow">
+    <Setter Property="Opacity" Value="0.55" />
+    <Style.Animations>
+      <Animation Duration="0:0:9" IterationCount="INFINITE" Easing="SineEaseInOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.32" /></KeyFrame>
+        <KeyFrame Cue="50%"><Setter Property="Opacity" Value="0.62" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.32" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <Style Selector="Canvas.AmbientOrbit">
+    <Setter Property="Opacity" Value="0.48" />
+    <Style.Animations>
+      <Animation Duration="0:0:18" IterationCount="INFINITE" Easing="SineEaseInOut">
+        <KeyFrame Cue="0%"><Setter Property="TranslateTransform.X" Value="0" /><Setter Property="TranslateTransform.Y" Value="0" /></KeyFrame>
+        <KeyFrame Cue="50%"><Setter Property="TranslateTransform.X" Value="-9" /><Setter Property="TranslateTransform.Y" Value="7" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="TranslateTransform.X" Value="0" /><Setter Property="TranslateTransform.Y" Value="0" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <Style Selector="Ellipse.AmbientBeacon">
+    <Style.Animations>
+      <Animation Duration="0:0:4.4" IterationCount="INFINITE" Easing="SineEaseInOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.05" /></KeyFrame>
+        <KeyFrame Cue="50%"><Setter Property="Opacity" Value="0.34" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.05" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <Style Selector="Ellipse.AmbientBeaconDelayed">
+    <Style.Animations>
+      <Animation Duration="0:0:6" IterationCount="INFINITE" Easing="SineEaseInOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.28" /></KeyFrame>
+        <KeyFrame Cue="50%"><Setter Property="Opacity" Value="0.04" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.28" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
   <Style Selector="Border.LauncherToast">
     <Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}" />

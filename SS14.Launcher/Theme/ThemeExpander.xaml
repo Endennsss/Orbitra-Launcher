@@ -16,10 +16,10 @@ Taken & modified from Avalonia's git repo.
                       VerticalAlignment="Center" Background="Transparent">
                 <!-- Lucide chevron-right. The toggle state rotates it instead of swapping geometry. -->
                 <Viewbox Name="PART_ChevronHost" Width="17" Height="17" HorizontalAlignment="Center" VerticalAlignment="Center"
-                         RenderTransformOrigin="50%,50%">
+                         RenderTransformOrigin="50%,50%" RenderTransform="rotate(0deg)">
                   <Viewbox.Transitions>
                     <Transitions>
-                      <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.28" Easing="CubicEaseOut" />
+                      <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut" />
                     </Transitions>
                   </Viewbox.Transitions>
                   <Canvas Width="24" Height="24">
@@ -61,14 +61,6 @@ Taken & modified from Avalonia's git repo.
 
   <Style Selector="Expander /template/ ToggleButton#PART_toggle:checked Viewbox#PART_ChevronHost">
     <Setter Property="RenderTransform" Value="rotate(90deg)" />
-  </Style>
-
-  <Style Selector="Expander /template/ ToggleButton#PART_toggle:pointerover Viewbox#PART_ChevronHost">
-    <Setter Property="RenderTransform" Value="rotate(8deg) scale(1.06)" />
-  </Style>
-
-  <Style Selector="Expander /template/ ToggleButton#PART_toggle:checked:pointerover Viewbox#PART_ChevronHost">
-    <Setter Property="RenderTransform" Value="rotate(98deg) scale(1.06)" />
   </Style>
 
   <Style Selector="Expander /template/ ToggleButton#PART_toggle:checked Path#PART_Chevron">

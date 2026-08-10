@@ -146,7 +146,7 @@ public sealed class ServerEntryViewModel : ObservableRecipient, IRecipient<Favor
 
     public string PingString => _cacheData.Ping is { } ping
         ? $"{Math.Max(1, (int)Math.Round(ping.TotalMilliseconds))} ms"
-        : "—";
+        : "-";
 
     public bool PingGood => _cacheData.Ping is { TotalMilliseconds: <= 80 };
     public bool PingMedium => _cacheData.Ping is { TotalMilliseconds: > 80 and <= 160 };

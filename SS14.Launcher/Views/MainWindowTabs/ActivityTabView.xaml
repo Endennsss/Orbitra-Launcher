@@ -11,10 +11,10 @@
         <ItemsControl ItemsSource="{Binding Entries}" IsVisible="{Binding !IsEmpty}">
           <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:ActivityEntryViewModel">
             <Border Background="{DynamicResource LauncherSurfaceAltBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="12,9" Margin="0,0,0,6">
-              <Grid ColumnDefinitions="105,110,*">
+              <Grid ColumnDefinitions="Auto,Auto,*">
                 <TextBlock Text="{Binding TimeText}" Classes="SubText" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Text="{Binding Category}" Classes="SectionLabel" VerticalAlignment="Center" />
-                <StackPanel Grid.Column="2"><TextBlock Text="{Binding Title}" FontWeight="SemiBold" /><TextBlock Text="{Binding Details}" Classes="SubText" TextWrapping="Wrap" /></StackPanel>
+                <TextBlock Grid.Column="1" Text="{Binding Category}" Classes="SectionLabel" VerticalAlignment="Center" Margin="16,0,0,0" />
+                <StackPanel Grid.Column="2" Margin="20,0,0,0"><TextBlock Text="{Binding Title}" FontWeight="SemiBold" /><TextBlock Text="{Binding Details}" Classes="SubText" TextWrapping="Wrap" /></StackPanel>
               </Grid>
             </Border>
           </DataTemplate></ItemsControl.ItemTemplate>

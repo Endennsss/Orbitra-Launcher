@@ -26,13 +26,17 @@ public class OptionsTabViewModel : MainWindowTabViewModel
     private int _selectedSettingsSection;
     public ObservableCollection<NavigationTabOptionViewModel> NavigationTabs { get; } = [];
 
-    public LanguageSelectorViewModel Language { get; } = new();
     public AccountDropDownViewModel? AccountDropDown { get; }
     public CustomThemeTabViewModel? CustomThemeTab => _mainWindow?.CustomThemeTab;
     public ActivityTabViewModel? ActivityTab => _mainWindow?.ActivityTab;
     public SystemCenterTabViewModel? SystemCenterTab => _mainWindow?.SystemCenterTab;
     public DevelopmentTabViewModel? DevelopmentTab => _mainWindow?.DevelopmentTab;
     public bool DevelopmentAvailable => DevelopmentTab != null;
+    public void RefreshDevelopmentAvailability()
+    {
+        OnPropertyChanged(nameof(DevelopmentTab));
+        OnPropertyChanged(nameof(DevelopmentAvailable));
+    }
     public int SelectedSettingsSection
     {
         get => _selectedSettingsSection;

@@ -88,7 +88,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
     public ProfileTabViewModel ProfileTab { get; }
     public ActivityTabViewModel ActivityTab { get; }
     public SystemCenterTabViewModel SystemCenterTab { get; }
-    public DevelopmentTabViewModel? DevelopmentTab { get; }
+    public DevelopmentTabViewModel? DevelopmentTab { get; private set; }
 
     public MainWindowViewModel()
     {
@@ -164,6 +164,20 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         IsNavigationCompact = !IsNavigationCompact;
         _cfg.SetCVar(CVars.NavigationCompact, IsNavigationCompact);
         _cfg.CommitConfig();
+    }
+
+    public void OpenSecretDevelopmentTab()
+    {
+        if (DevelopmentTab == null)
+        {
+            DevelopmentTab = new DevelopmentTabViewModel(this);
+            OnPropertyChanged(nameof(DevelopmentTab));
+            OptionsTab.RefreshDevelopmentAvailability();
+        }
+
+        SelectTab(OptionsTab);
+        OptionsTab.SelectedSettingsSection = 4;
+        ShowToast("Режим разработчика открыт");
     }
 
     public MainWindow? Control { get; set; }

@@ -22,6 +22,8 @@ public class ServerFilterViewModel : ObservableObject
         }
     }
 
+    public void RefreshSelected() => OnPropertyChanged(nameof(Selected));
+
     public ServerFilterViewModel(
         string name,
         string shortName,

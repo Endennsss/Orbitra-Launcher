@@ -54,6 +54,12 @@ public partial class MainWindow : Window
             _viewModel.ToggleCommandPalette();
             e.Handled = true;
         }
+        else if (e.Key == Key.D && e.KeyModifiers ==
+                 (KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt))
+        {
+            _viewModel.OpenSecretDevelopmentTab();
+            e.Handled = true;
+        }
         else if (e.Key == Key.K && e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
             _viewModel.SelectTabServers();

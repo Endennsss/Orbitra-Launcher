@@ -24,19 +24,21 @@
       <Setter Property="Foreground" Value="#E06B61" />
     </Style>
     <Style Selector="Border.ServerDetailsHost">
-      <Setter Property="MaxHeight" Value="0" />
-      <Setter Property="Opacity" Value="0" />
       <Setter Property="ClipToBounds" Value="True" />
-      <Setter Property="Transitions">
-        <Transitions>
-          <DoubleTransition Property="MaxHeight" Duration="0:0:0.34" Easing="CubicEaseOut" />
-          <DoubleTransition Property="Opacity" Duration="0:0:0.24" Easing="CubicEaseOut" />
-        </Transitions>
-      </Setter>
     </Style>
     <Style Selector="Border.ServerDetailsHost.Expanded">
-      <Setter Property="MaxHeight" Value="700" />
-      <Setter Property="Opacity" Value="1" />
+      <Style.Animations>
+        <Animation Duration="0:0:0.22" Easing="CubicEaseOut">
+          <KeyFrame Cue="0%">
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="TranslateTransform.Y" Value="-8" />
+          </KeyFrame>
+          <KeyFrame Cue="100%">
+            <Setter Property="Opacity" Value="1" />
+            <Setter Property="TranslateTransform.Y" Value="0" />
+          </KeyFrame>
+        </Animation>
+      </Style.Animations>
     </Style>
     <Style Selector="TextBlock.MetricUp">
       <Style.Animations><Animation Duration="0:0:0.65"><KeyFrame Cue="0%"><Setter Property="Foreground" Value="#62D68B" /><Setter Property="Opacity" Value="0.55" /></KeyFrame><KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /></KeyFrame></Animation></Style.Animations>

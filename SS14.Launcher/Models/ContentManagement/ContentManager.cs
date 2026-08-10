@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -25,7 +25,7 @@ public sealed class ContentManager
                    COALESCE(cv.ForkVersion, 'Без версии') AS ForkVersion,
                    cv.LastUsed,
                    COALESCE((SELECT ModuleVersion FROM ContentEngineDependency
-                             WHERE VersionId = cv.Id AND ModuleName = 'Robust'), '—') AS EngineVersion,
+                             WHERE VersionId = cv.Id AND ModuleName = 'Robust'), '-') AS EngineVersion,
                    COUNT(cm.Id) AS FileCount,
                    COALESCE(SUM(c.Size), 0) AS LogicalSize
             FROM ContentVersion cv

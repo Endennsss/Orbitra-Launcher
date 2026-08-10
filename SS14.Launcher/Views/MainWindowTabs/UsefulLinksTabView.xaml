@@ -39,7 +39,7 @@
                 <TextBlock Text="ПРОЕКТ АВТОРА" Classes="SectionLabel" FontSize="9" />
               </Border>
             </StackPanel>
-            <TextBlock Text="Отдельный проект автора лаунчера — помощник по химии для Space Station 14."
+            <TextBlock Text="Отдельный проект автора лаунчера - помощник по химии для Space Station 14."
                        Classes="SubText" TextWrapping="Wrap" />
           </StackPanel>
           <Button Grid.Column="2" Content="Открыть ChemHelper" Command="{Binding OpenChemHelper}"

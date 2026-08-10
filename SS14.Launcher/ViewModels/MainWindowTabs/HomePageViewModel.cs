@@ -116,7 +116,7 @@ public partial class HomePageViewModel : MainWindowTabViewModel
             if (Favorites.Count > 0 && _cfg.GetCVar(CVars.FavoriteNotificationsEnabled))
             {
                 foreach (var favorite in Favorites.Where(f => _cfg.IsFavoriteMonitored(f.CacheData.Address)))
-                    _notificationStatusCache.InitialUpdateStatus(_notificationServers[favorite.CacheData.Address]);
+                    _notificationStatusCache.RefreshStatus(_notificationServers[favorite.CacheData.Address]);
             }
         };
         _notificationRefreshTimer.Start();
@@ -195,6 +195,11 @@ public partial class HomePageViewModel : MainWindowTabViewModel
 
     private void FavoriteStatusChanged(object? sender, PropertyChangedEventArgs e)
     {
+        // Fetching is a transient state used for the HTTP request. It must not replace
+        // the last real online/offline snapshot or offline -> online notifications are lost.
+        if (sender is ServerStatusData { Status: ServerStatusCode.FetchingStatus })
+            return;
+
         if (sender is ServerStatusData server &&
             _cfg.IsFavoriteMonitored(server.Address) &&
             e.PropertyName is nameof(ServerStatusData.Status)
@@ -301,6 +306,17 @@ public partial class HomePageViewModel : MainWindowTabViewModel
             RecentServers.RemoveAt(RecentServers.Count - 1);
         OnPropertyChanged(nameof(HasRecentServers));
         SaveRecentServers();
+    }
+
+    public void ClearRecentServers()
+    {
+        if (RecentServers.Count == 0)
+            return;
+
+        RecentServers.Clear();
+        OnPropertyChanged(nameof(HasRecentServers));
+        SaveRecentServers();
+        MainWindowViewModel.ShowToast("Недавние серверы очищены");
     }
 
     private void LoadRecentServers()

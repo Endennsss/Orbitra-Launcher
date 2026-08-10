@@ -46,7 +46,7 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
     public string Status { get => _status; private set => SetProperty(ref _status, value); }
     public string Username => _main.ActiveAccount?.Username ?? "Не выполнен вход";
     public bool IsCreator => _main.ActiveAccount?.UserId == CreatorId;
-    public string UserId => _main.ActiveAccount?.UserId.ToString("D") ?? "—";
+    public string UserId => _main.ActiveAccount?.UserId.ToString("D") ?? "-";
     public string TotalPlaytime => FormatDuration(TimeSpan.FromSeconds(PlaytimeTracker.GetAll().Sum(x => x.Duration.TotalSeconds)));
     public int ServersPlayed => PlaytimeTracker.GetAll().Count;
     public Bitmap? Avatar { get => _avatar; private set => SetProperty(ref _avatar, value); }

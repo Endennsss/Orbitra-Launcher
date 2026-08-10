@@ -14,6 +14,26 @@
   </Design.DataContext>
 
   <Panel Background="{DynamicResource ThemeStripeBackBrush}" ClipToBounds="True">
+    <Panel IsVisible="False" IsHitTestVisible="False">
+      <Border Classes="AmbientGlow">
+        <Border.Background>
+          <RadialGradientBrush Center="82%,18%" GradientOrigin="82%,18%" RadiusX="0.72" RadiusY="0.72">
+            <GradientStop Offset="0" Color="#0CFFFFFF" />
+            <GradientStop Offset="0.42" Color="#04FFFFFF" />
+            <GradientStop Offset="1" Color="#00FFFFFF" />
+          </RadialGradientBrush>
+        </Border.Background>
+      </Border>
+      <Canvas Classes="AmbientOrbit" HorizontalAlignment="Right" VerticalAlignment="Top"
+              Width="680" Height="680" Margin="0,-245,-205,0">
+        <Ellipse Canvas.Left="34" Canvas.Top="34" Width="612" Height="612" Stroke="{DynamicResource ThemeAccentBrush}" StrokeThickness="1" Opacity="0.055" />
+        <Ellipse Canvas.Left="112" Canvas.Top="112" Width="456" Height="456" Stroke="{DynamicResource ThemeAccentBrush}" StrokeThickness="1" Opacity="0.045" />
+        <Ellipse Canvas.Left="218" Canvas.Top="218" Width="244" Height="244" Stroke="{DynamicResource ThemeAccentBrush}" StrokeThickness="1" Opacity="0.065" />
+        <Path Data="M52,410 C170,205 382,82 616,96 M102,512 C284,344 438,278 650,292" Stroke="{DynamicResource ThemeAccentBrush}" StrokeThickness="1" Opacity="0.04" />
+        <Ellipse Classes="AmbientBeacon" Canvas.Left="558" Canvas.Top="91" Width="7" Height="7" Fill="{DynamicResource ThemeAccentBrush}" />
+        <Ellipse Classes="AmbientBeaconDelayed" Canvas.Left="97" Canvas.Top="506" Width="5" Height="5" Fill="{DynamicResource ThemeAccentBrush}" />
+      </Canvas>
+    </Panel>
     <Image Source="{Binding ActiveThemeBackground}" Stretch="UniformToFill"
            IsVisible="{Binding CustomThemeTab.BackgroundVisible}" IsHitTestVisible="False">
       <Image.Effect><BlurEffect Radius="{Binding CustomThemeTab.Blur}" /></Image.Effect>
@@ -25,7 +45,7 @@
     </Image>
     <Border Background="#000000" Opacity="{Binding CustomThemeTab.BackgroundDimmingOpacity}"
             IsVisible="{Binding CustomThemeTab.BackgroundVisible}" IsHitTestVisible="False" />
-    <Border Classes="BackgroundScan" Height="180" VerticalAlignment="Top" IsHitTestVisible="False">
+    <Border Classes="BackgroundScan" Height="180" VerticalAlignment="Top" IsHitTestVisible="False" IsVisible="False">
       <Border.Background>
         <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
           <GradientStop Offset="0" Color="#00FFFFFF" />
@@ -234,16 +254,13 @@
             <TextBlock Text="Выберите основные параметры. Их всегда можно изменить в настройках."
                        Classes="SubText" TextWrapping="Wrap" Margin="0,4,0,0" />
           </StackPanel>
-          <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto">
+          <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto">
             <TextBlock Text="Аккаунт" VerticalAlignment="Center" />
             <v:AccountDropDown Grid.Column="1" Height="42" DataContext="{Binding AccountDropDown}" />
-            <TextBlock Grid.Row="1" Text="Язык" VerticalAlignment="Center" Margin="0,10,0,0" />
-            <v:LanguageSelector Grid.Row="1" Grid.Column="1" Margin="0,10,0,0" DataContext="{Binding OptionsTab.Language}"
-                                Placement="BottomEdgeAlignedLeft" />
-            <TextBlock Grid.Row="2" Text="Шрифт" VerticalAlignment="Center" Margin="0,10,0,0" />
-            <ComboBox Grid.Row="2" Grid.Column="1" Margin="0,10,0,0" ItemsSource="{Binding OptionsTab.AvailableFonts}"
+            <TextBlock Grid.Row="1" Text="Шрифт" VerticalAlignment="Center" Margin="0,10,0,0" />
+            <ComboBox Grid.Row="1" Grid.Column="1" Margin="0,10,0,0" ItemsSource="{Binding OptionsTab.AvailableFonts}"
                       SelectedItem="{Binding OptionsTab.SelectedFont, Mode=TwoWay}" />
-            <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="0,6,0,0">
+            <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,6,0,0">
               <CheckBox Content="Автоматически обновлять пинг избранного"
                         IsChecked="{Binding OptionsTab.AutoRefreshFavoritePing, Mode=TwoWay}" />
               <CheckBox Content="Включить Discord Rich Presence"

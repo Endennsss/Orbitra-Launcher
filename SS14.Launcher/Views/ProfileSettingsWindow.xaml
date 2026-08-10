@@ -12,7 +12,7 @@
     <StackPanel Grid.Column="1" Margin="16,12,0,0" Spacing="10"><StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="{Binding Username}" FontSize="24" FontWeight="Bold"/><local:CreatorBadge Width="23" Height="23" IsVisible="{Binding IsCreator}"/></StackPanel><Button Content="Выбрать и настроить аватар" Command="{Binding ChooseAvatar}" HorizontalAlignment="Left"/></StackPanel>
    </Grid>
   </Grid></Border>
-  <TextBlock Text="ОПИСАНИЕ ПРОФИЛЯ" Classes="SectionLabel"/><TextBox Text="{Binding Description,Mode=TwoWay}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="110" Watermark="Расскажите о себе — этот текст увидят другие пользователи"/><TextBlock Text="{Binding DescriptionCounter}" Classes="SubText" HorizontalAlignment="Right"/>
+  <TextBlock Text="ОПИСАНИЕ ПРОФИЛЯ" Classes="SectionLabel"/><TextBox Text="{Binding Description,Mode=TwoWay}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="110" Watermark="Расскажите о себе - этот текст увидят другие пользователи"/><TextBlock Text="{Binding DescriptionCounter}" Classes="SubText" HorizontalAlignment="Right"/>
   <TextBlock Text="ЛЮБИМЫЙ СЕРВЕР" Classes="SectionLabel"/><ComboBox ItemsSource="{Binding FavoriteServers}" SelectedItem="{Binding SelectedFavoriteServer,Mode=TwoWay}"/>
   <TextBlock Text="ПРИВАТНОСТЬ" Classes="SectionLabel"/>
   <Border Classes="Surface" Padding="16"><StackPanel Spacing="8"><CheckBox Content="Режим инкогнито" IsChecked="{Binding IsIncognito,Mode=TwoWay}"/><TextBlock Text="Инкогнито скрывает отметку «Онлайн» и текущий сервер, пока Orbitra запущена." Classes="SubText" TextWrapping="Wrap"/><CheckBox Content="Показывать друзьям текущий сервер" IsChecked="{Binding ShareCurrentServer,Mode=TwoWay}"/></StackPanel></Border>

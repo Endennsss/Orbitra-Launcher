@@ -64,4 +64,5 @@ Taken & modified from Avalonia's git repo.
     <Setter Property="Background" Value="{DynamicResource ThemeControlHighBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource ThemeBackgroundBrush}" />
   </Style>
+
 </Styles>
