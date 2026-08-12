@@ -263,8 +263,6 @@
             <ComboBox Grid.Row="1" Grid.Column="1" Margin="0,10,0,0" ItemsSource="{Binding OptionsTab.AvailableFonts}"
                       SelectedItem="{Binding OptionsTab.SelectedFont, Mode=TwoWay}" />
             <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,6,0,0">
-              <CheckBox Content="Автоматически обновлять пинг избранного"
-                        IsChecked="{Binding OptionsTab.AutoRefreshFavoritePing, Mode=TwoWay}" />
               <CheckBox Content="Включить Discord Rich Presence"
                         IsChecked="{Binding OptionsTab.DiscordRpcEnabled, Mode=TwoWay}" />
             </StackPanel>

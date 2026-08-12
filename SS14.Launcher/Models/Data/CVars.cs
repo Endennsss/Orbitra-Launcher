@@ -165,8 +165,6 @@ public static class CVars
     /// <summary>
     /// Automatically refresh favorite server status and ping every three seconds.
     /// </summary>
-    public static readonly CVarDef<bool> AutoRefreshFavoritePing =
-        CVarDef.Create("AutoRefreshFavoritePing", true);
     public static readonly CVarDef<bool> FavoriteNotificationsEnabled =
         CVarDef.Create("FavoriteNotificationsEnabled", true);
     public static readonly CVarDef<string> MonitoredFavoriteServers =

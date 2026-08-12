@@ -177,16 +177,6 @@ public class OptionsTabViewModel : MainWindowTabViewModel
     public void PreviewNotificationSound() => UiSoundService.Preview("notification.wav");
     public void PreviewErrorSound() => UiSoundService.Preview("error.wav");
 
-    public bool AutoRefreshFavoritePing
-    {
-        get => Cfg.GetCVar(CVars.AutoRefreshFavoritePing);
-        set
-        {
-            Cfg.SetCVar(CVars.AutoRefreshFavoritePing, value);
-            Cfg.CommitConfig();
-        }
-    }
-
     public bool FavoriteNotificationsEnabled
     {
         get => Cfg.GetCVar(CVars.FavoriteNotificationsEnabled);

@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Threading;
+using System.Net.Http;
+using Splat;
+using SS14.Launcher.Utility;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using Avalonia.Controls;
@@ -32,6 +36,7 @@ public sealed class ServerEntryViewModel : ObservableRecipient, IRecipient<Favor
     private bool _pingMetricDown;
     private bool _playerMetricUp;
     private bool _playerMetricDown;
+    private bool _isPinging;
     private Bitmap? _serverIcon;
     private readonly Queue<double> _pingHistory = new();
     private readonly Queue<double> _onlineHistory = new();
@@ -77,6 +82,36 @@ public sealed class ServerEntryViewModel : ObservableRecipient, IRecipient<Favor
         _windowVm.HomeTab.RecordRecentServer(Name, Address);
         _windowVm.ShowToast($"Подключение к «{Name}»");
         ConnectingViewModel.StartConnect(_windowVm, Address);
+    }
+
+    public bool IsPinging => _isPinging;
+
+    public async void PingPressed()
+    {
+        if (_isPinging)
+            return;
+
+        _isPinging = true;
+        OnPropertyChanged(nameof(IsPinging));
+        var started = DateTime.UtcNow;
+        try
+        {
+            using var timeout = new CancellationTokenSource(ConfigConstants.ServerStatusTimeout);
+            var http = Locator.Current.GetRequiredService<HttpClient>();
+            await ServerStatusCache.UpdateStatusFor(_cacheData, http, timeout.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            // The status updater already exposes an offline state for timeouts.
+        }
+        finally
+        {
+            var remaining = TimeSpan.FromMilliseconds(420) - (DateTime.UtcNow - started);
+            if (remaining > TimeSpan.Zero)
+                await Task.Delay(remaining);
+            _isPinging = false;
+            OnPropertyChanged(nameof(IsPinging));
+        }
     }
 
     public FavoriteServer? Favorite { get; }

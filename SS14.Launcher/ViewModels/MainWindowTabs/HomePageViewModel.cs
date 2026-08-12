@@ -28,10 +28,6 @@ public partial class HomePageViewModel : MainWindowTabViewModel
     private readonly ServerStatusCache _statusCache = new ServerStatusCache();
     private readonly ServerStatusCache _notificationStatusCache = new ServerStatusCache();
     private readonly ServerListCache _serverListCache;
-    private readonly DispatcherTimer _favoriteRefreshTimer = new()
-    {
-        Interval = TimeSpan.FromSeconds(3)
-    };
     private readonly DispatcherTimer _notificationRefreshTimer = new()
     {
         Interval = TimeSpan.FromSeconds(12)
@@ -54,9 +50,6 @@ public partial class HomePageViewModel : MainWindowTabViewModel
             .OnItemAdded(a =>
             {
                 a.CacheData.PropertyChanged += FavoriteUiStatusChanged;
-                if (IsSelected || _cfg.GetCVar(CVars.AutoRefreshFavoritePing))
-                    _statusCache.InitialUpdateStatus(a.CacheData);
-
                 var backgroundData = _notificationStatusCache.GetStatusFor(a.CacheData.Address);
                 backgroundData.PropertyChanged += FavoriteStatusChanged;
                 _notificationServers[a.CacheData.Address] = backgroundData;
@@ -70,23 +63,8 @@ public partial class HomePageViewModel : MainWindowTabViewModel
                     backgroundData.PropertyChanged -= FavoriteStatusChanged;
                 _favoritePresence.Remove(a.CacheData.Address);
             })
-            .AutoRefresh(x => x.CacheData.Status)
-            .AutoRefresh(x => x.CacheData.Ping)
-            .AutoRefresh(x => x.CacheData.PlayerCount)
+            .AutoRefresh(x => x.Favorite!.RaiseTime)
             .Sort(Comparer<ServerEntryViewModel>.Create((a, b) => {
-                var online = b.IsOnline.CompareTo(a.IsOnline);
-                if (online != 0)
-                    return online;
-                var ping = a.CacheData.Ping is null
-                    ? (b.CacheData.Ping is null ? 0 : 1)
-                    : b.CacheData.Ping is null
-                        ? -1
-                        : a.CacheData.Ping.Value.CompareTo(b.CacheData.Ping.Value);
-                if (ping != 0)
-                    return ping;
-                var players = b.CacheData.PlayerCount.CompareTo(a.CacheData.PlayerCount);
-                if (players != 0)
-                    return players;
                 var dc = a.Favorite!.RaiseTime.CompareTo(b.Favorite!.RaiseTime);
                 if (dc != 0)
                 {
@@ -103,13 +81,6 @@ public partial class HomePageViewModel : MainWindowTabViewModel
 
         Favorites = favorites;
         LoadRecentServers();
-
-        _favoriteRefreshTimer.Tick += (_, _) =>
-        {
-            if (Favorites.Count > 0 && _cfg.GetCVar(CVars.AutoRefreshFavoritePing))
-                _statusCache.Refresh();
-        };
-        _favoriteRefreshTimer.Start();
 
         _notificationRefreshTimer.Tick += (_, _) =>
         {

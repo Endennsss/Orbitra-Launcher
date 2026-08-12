@@ -1,6 +1,7 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:loc="clr-namespace:SS14.Launcher.Localization"
+        xmlns:controls="using:SS14.Launcher.Controls"
         xmlns:views="using:SS14.Launcher.Views"
         xmlns:mwt="using:SS14.Launcher.Views.MainWindowTabs">
   <Style Selector="ItemsControl.ServerList > ContentPresenter:nth-child(2n)">
@@ -42,6 +43,12 @@
     <Setter Property="Background" Value="{DynamicResource LauncherHoverBrush}" />
   </Style>
 
+  <Style Selector="controls|ClickableCommandText.ServerSortHeader">
+    <Setter Property="Padding" Value="4,3" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+
   <Style Selector="Border.GridCell">
     <Setter Property="BorderBrush">
       <SolidColorBrush Color="{DynamicResource ThemeListSeparatorColor}" />
@@ -78,7 +85,7 @@
     <Setter Property="Template">
       <ControlTemplate>
         <DockPanel ZIndex="-1" Grid.IsSharedSizeScope="True">
-          <Grid DockPanel.Dock="Top" Margin="24,8" IsVisible="{TemplateBinding ShowHeader}">
+          <Grid DockPanel.Dock="Top" Margin="0,8" IsVisible="{TemplateBinding ShowHeader}">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*" /> <!-- Server Name -->
               <ColumnDefinition SharedSizeGroup="TimeCol" MinWidth="80" Width="Auto" />
@@ -88,16 +95,24 @@
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" Classes="GridCell">
-              <TextBlock Text="{loc:Loc tab-servers-table-name}" Classes="SubText" />
+              <controls:ClickableCommandText Classes="ServerSortHeader" Command="{TemplateBinding SortNameCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="6"><TextBlock Text="{loc:Loc tab-servers-table-name}" Classes="SubText"/><TextBlock Text="{TemplateBinding NameSortMark}" Classes="SubText"/></StackPanel>
+              </controls:ClickableCommandText>
             </Border>
             <Border Grid.Column="1" Classes="GridCell">
-              <TextBlock Text="{loc:Loc tab-servers-table-round-time}" Classes="SubText Center" />
+              <controls:ClickableCommandText Classes="ServerSortHeader" Command="{TemplateBinding SortRoundTimeCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center"><TextBlock Text="{loc:Loc tab-servers-table-round-time}" Classes="SubText"/><TextBlock Text="{TemplateBinding RoundTimeSortMark}" Classes="SubText"/></StackPanel>
+              </controls:ClickableCommandText>
             </Border>
             <Border Grid.Column="2" Classes="GridCell">
-              <TextBlock Text="{loc:Loc tab-servers-table-players}" Classes="SubText Center" />
+              <controls:ClickableCommandText Classes="ServerSortHeader" Command="{TemplateBinding SortPlayersCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center"><TextBlock Text="{loc:Loc tab-servers-table-players}" Classes="SubText"/><TextBlock Text="{TemplateBinding PlayersSortMark}" Classes="SubText"/></StackPanel>
+              </controls:ClickableCommandText>
             </Border>
             <Border Grid.Column="3" Classes="GridCell">
-              <TextBlock Text="PING" Classes="SubText Center" />
+              <controls:ClickableCommandText Classes="ServerSortHeader" Command="{TemplateBinding SortPingCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center"><TextBlock Text="PING" Classes="SubText"/><TextBlock Text="{TemplateBinding PingSortMark}" Classes="SubText"/></StackPanel>
+              </controls:ClickableCommandText>
             </Border>
             <Border Grid.Column="4" Classes="GridCell">
               <TextBlock Text="" Classes="SubText Center" />
@@ -114,7 +129,7 @@
 
                 <Grid>
                   <!-- Virtualization keeps large hub lists responsive: only visible cards are created. -->
-                  <ListBox ItemsSource="{TemplateBinding List}" Classes="ServerList"
+                  <ListBox ItemsSource="{TemplateBinding DisplayList}" Classes="ServerList"
                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                            ScrollViewer.VerticalScrollBarVisibility="Auto">
                     <ListBox.ItemsPanel>

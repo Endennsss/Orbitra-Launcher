@@ -23,22 +23,22 @@
     <Style Selector="TextBlock.PingBad">
       <Setter Property="Foreground" Value="#E06B61" />
     </Style>
-    <Style Selector="Border.ServerDetailsHost">
+    <Style Selector="controls|AnimatedCollapsePanel.ServerDetailsHost">
+      <Setter Property="Progress" Value="0" />
+      <Setter Property="Opacity" Value="0" />
       <Setter Property="ClipToBounds" Value="True" />
+      <Setter Property="IsHitTestVisible" Value="False" />
+      <Setter Property="Transitions">
+        <Transitions>
+          <DoubleTransition Property="Progress" Duration="0:0:0.22" Easing="CubicEaseInOut" />
+          <DoubleTransition Property="Opacity" Duration="0:0:0.15" Easing="CubicEaseInOut" />
+        </Transitions>
+      </Setter>
     </Style>
-    <Style Selector="Border.ServerDetailsHost.Expanded">
-      <Style.Animations>
-        <Animation Duration="0:0:0.22" Easing="CubicEaseOut">
-          <KeyFrame Cue="0%">
-            <Setter Property="Opacity" Value="0" />
-            <Setter Property="TranslateTransform.Y" Value="-8" />
-          </KeyFrame>
-          <KeyFrame Cue="100%">
-            <Setter Property="Opacity" Value="1" />
-            <Setter Property="TranslateTransform.Y" Value="0" />
-          </KeyFrame>
-        </Animation>
-      </Style.Animations>
+    <Style Selector="controls|AnimatedCollapsePanel.ServerDetailsHost.Expanded">
+      <Setter Property="Progress" Value="1" />
+      <Setter Property="Opacity" Value="1" />
+      <Setter Property="IsHitTestVisible" Value="True" />
     </Style>
     <Style Selector="TextBlock.MetricUp">
       <Style.Animations><Animation Duration="0:0:0.65"><KeyFrame Cue="0%"><Setter Property="Foreground" Value="#62D68B" /><Setter Property="Opacity" Value="0.55" /></KeyFrame><KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /></KeyFrame></Animation></Style.Animations>
@@ -64,11 +64,24 @@
         </Animation>
       </Style.Animations>
     </Style>
+    <Style Selector="Viewbox.ServerPingIcon">
+      <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    </Style>
+    <Style Selector="Button:pointerover Viewbox.ServerPingIcon, Viewbox.ServerPingIcon.Pinging">
+      <Style.Animations>
+        <Animation Duration="0:0:0.62" IterationCount="INFINITE" Easing="LinearEasing">
+          <KeyFrame Cue="0%"><Setter Property="RotateTransform.Angle" Value="0" /></KeyFrame>
+          <KeyFrame Cue="100%"><Setter Property="RotateTransform.Angle" Value="360" /></KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
   </UserControl.Styles>
 
   <Panel>
     <Panel.ContextMenu>
-      <ContextMenu>
+      <ContextMenu Classes="ServerActionsMenu">
+        <MenuItem Classes="MenuSection" Header="ДЕЙСТВИЯ С СЕРВЕРОМ" IsEnabled="False" />
+        <Separator />
         <MenuItem Header="Подключиться" Command="{Binding ConnectPressed}" IsEnabled="{Binding CanConnect}" />
         <MenuItem Header="Добавить / убрать из избранного" Command="{Binding FavoriteButtonPressed}" />
         <MenuItem Header="{Binding TrayMonitoringText}" Command="{Binding ToggleTrayMonitoring}"
@@ -169,17 +182,34 @@
           </Border>
 
           <Border Grid.Column="4" Classes="GridCell">
-            <Button IsEnabled="{Binding CanConnect}" DockPanel.Dock="Right" MinWidth="112" Classes="ConnectAction"
+            <StackPanel Orientation="Horizontal" Spacing="6">
+            <Button Width="38" Height="38" Padding="0" Command="{Binding PingPressed}"
+                    IsEnabled="{Binding !IsPinging}" ToolTip.Tip="Проверить сервер">
+              <Viewbox Classes="ServerPingIcon" Classes.Pinging="{Binding IsPinging}"
+                       Width="18" Height="18" Stretch="Uniform">
+                <Canvas Width="24" Height="24">
+                  <Path Data="M21,12 A9,9 0 0 1 5.83,18.55 L3,16 M3,22 L3,16 L9,16 M3,12 A9,9 0 0 1 18.17,5.45 L21,8 M21,2 L21,8 L15,8"
+                        Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="2" StrokeLineCap="Round" />
+                </Canvas>
+              </Viewbox>
+            </Button>
+            <Button IsEnabled="{Binding CanConnect}" MinWidth="112" Classes="ConnectAction"
                     Classes.Connecting="{Binding IsConnecting}"
                     Command="{Binding ConnectPressed}">
               <Grid>
-                <StackPanel Orientation="Horizontal" Spacing="7" IsVisible="{Binding !IsConnecting}"
-                            HorizontalAlignment="Center" VerticalAlignment="Center">
-                  <TextBlock Text="{loc:Loc server-entry-connect}" VerticalAlignment="Center" />
-                  <Path Classes="ConnectArrow" Data="M4,12 L19,12 M14,7 L19,12 L14,17"
-                        Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.8"
-                        StrokeLineCap="Round" Width="16" Height="16" Stretch="Uniform" />
-                </StackPanel>
+                <Grid ColumnDefinitions="Auto,18" IsVisible="{Binding !IsConnecting}"
+                      HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <TextBlock Grid.Column="0" Text="{loc:Loc server-entry-connect}"
+                             Margin="0,0,7,0" VerticalAlignment="Center" />
+                  <Viewbox Grid.Column="1" Width="18" Height="18" Stretch="Uniform"
+                           HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Canvas Width="24" Height="24">
+                      <Path Classes="ConnectArrow" Data="M5,12 L19,12 M14,7 L19,12 L14,17"
+                            Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.8"
+                            StrokeLineCap="Round" />
+                    </Canvas>
+                  </Viewbox>
+                </Grid>
                 <StackPanel Spacing="4" IsVisible="{Binding IsConnectionBusy}"
                             HorizontalAlignment="Center" VerticalAlignment="Center">
                   <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
@@ -206,10 +236,12 @@
                 </StackPanel>
               </Grid>
             </Button>
+            </StackPanel>
           </Border>
         </Grid>
       </Expander.Header>
-      <Border Classes="ServerDetailsHost" Classes.Expanded="{Binding IsExpanded}">
+      <controls:AnimatedCollapsePanel Classes="ServerDetailsHost" Classes.Expanded="{Binding IsExpanded}">
+      <Border>
       <DockPanel Margin="8,6,8,8" ClipToBounds="True">
         <TextBlock DockPanel.Dock="Top"
           Name="Description" Margin="4,0,4,4"
@@ -318,6 +350,7 @@
         </views:RowSideAlignedPanel>
       </DockPanel>
       </Border>
+      </controls:AnimatedCollapsePanel>
     </Expander>
   </Panel>
 

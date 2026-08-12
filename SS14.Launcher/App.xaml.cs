@@ -369,6 +369,8 @@ public class App : Application
 
         _trayMenu.Items.Clear();
 
+        _trayMenu.Add(new NativeMenuItem("ORBITRA LAUNCHER") { IsEnabled = false });
+        _trayMenu.Add(new NativeMenuItemSeparator());
         var showItem = new NativeMenuItem("Открыть лаунчер");
         showItem.Click += (_, _) => ShowMainWindow();
         _trayMenu.Add(showItem);
@@ -387,7 +389,12 @@ public class App : Application
             {
                 var captured = account;
                 var active = ReferenceEquals(loginManager.ActiveAccount, captured);
-                var item = new NativeMenuItem($"{(active ? "✓ " : string.Empty)}{captured.Username}");
+                var item = new NativeMenuItem(captured.Username)
+                {
+                    ToggleType = NativeMenuItemToggleType.Radio,
+                    IsChecked = active,
+                    ToolTip = active ? "Активный аккаунт" : "Переключиться на этот аккаунт"
+                };
                 item.Click += (_, _) =>
                 {
                     ShowMainWindow();
@@ -414,14 +421,21 @@ public class App : Application
             {
                 var captured = favorite;
                 var monitored = Locator.Current.GetRequiredService<DataManager>().IsFavoriteMonitored(captured.Address);
-                var item = new NativeMenuItem($"{(monitored ? "✓ " : string.Empty)}{(string.IsNullOrWhiteSpace(captured.Name)
+                var item = new NativeMenuItem($"{(string.IsNullOrWhiteSpace(captured.Name)
                     ? captured.Address
-                    : captured.Name)}");
+                    : captured.Name)}")
+                {
+                    ToolTip = monitored ? "Фоновая проверка включена" : "Фоновая проверка выключена"
+                };
                 var serverMenu = new NativeMenu();
                 var connectItem = new NativeMenuItem("Подключиться");
                 connectItem.Click += (_, _) => ConnectFavorite(captured);
                 serverMenu.Add(connectItem);
-                var monitorItem = new NativeMenuItem(monitored ? "Не проверять в фоне" : "Проверять в фоне");
+                var monitorItem = new NativeMenuItem("Проверять в фоне")
+                {
+                    ToggleType = NativeMenuItemToggleType.CheckBox,
+                    IsChecked = monitored
+                };
                 monitorItem.Click += (_, _) =>
                 {
                     if (_mainWindowViewModel != null)
@@ -474,6 +488,7 @@ public class App : Application
         _mainWindowViewModel.ShowToast($"Подключение к «{name}»");
         ConnectingViewModel.StartConnect(_mainWindowViewModel, favorite.Address);
     }
+
 
     private void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {

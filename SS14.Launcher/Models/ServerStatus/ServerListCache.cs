@@ -129,6 +129,8 @@ public sealed partial class ServerListCache : ObservableObject, IServerSource
                 return statusData;
             }));
 
+            // Measure latency once after the Hub list is loaded. Further updates are
+            // manual per-server checks; there is deliberately no recurring timer.
             _ = MeasureServerPingsAsync(AllServers.ToArray(), cancel);
 
             if (AllServers.Count == 0)
