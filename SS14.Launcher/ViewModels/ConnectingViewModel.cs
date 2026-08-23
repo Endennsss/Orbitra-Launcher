@@ -47,6 +47,10 @@ public class ConnectingViewModel : ViewModelBase
            _connector.Status == NotAContentBundle ||
            _connector is { Status: ClientExited, ClientExitedBadly: true };
     public bool IsConnected => _connector.Status == ClientRunning;
+    public bool CanQuickReconnect => _connectionType == ConnectionType.Server &&
+                                     !string.IsNullOrWhiteSpace(TargetAddress) &&
+                                     _connector is { Status: ClientExited, ClientExitedBadly: true };
+    public bool ShowErrorDismissButton => IsErrored && !CanQuickReconnect;
 
     public static event Action? StartedConnecting;
 
@@ -91,11 +95,15 @@ public class ConnectingViewModel : ViewModelBase
                     OnPropertyChanged(nameof(IsErrored));
                     OnPropertyChanged(nameof(IsAskingPrivacyPolicy));
                     OnPropertyChanged(nameof(IsConnected));
+                    OnPropertyChanged(nameof(CanQuickReconnect));
+                    OnPropertyChanged(nameof(ShowErrorDismissButton));
 
                     if (IsErrored && !_errorToastShown)
                     {
                         _errorToastShown = true;
-                        _windowVm.ShowToast("Не удалось подключиться к серверу", true);
+                        _windowVm.ShowToast(CanQuickReconnect
+                            ? "Клиент завершился с ошибкой · доступно быстрое переподключение"
+                            : "Не удалось подключиться к серверу", true);
                         ActivityLog.Record("Подключение", "Ошибка запуска клиента", TargetAddress ?? "Неизвестный сервер", true);
                     }
 
@@ -104,6 +112,13 @@ public class ConnectingViewModel : ViewModelBase
                         PlaytimeTracker.Stop();
                         OrbitraProtocol.PublishPresence(null);
                         DiscordRichPresenceService.Instance.ShowLauncherAfterGame();
+                        if (CanQuickReconnect)
+                        {
+                            DiagnosticsVisible = false;
+                            _windowVm.ConnectingVM = this;
+                            ActivityLog.Record("Подключение", "Клиент аварийно завершён",
+                                $"{TargetAddress} · доступно быстрое переподключение", true);
+                        }
                     }
 
                     if (_connector.Status == ClientRunning)
@@ -130,6 +145,8 @@ public class ConnectingViewModel : ViewModelBase
                 case nameof(_connector.ClientExitedBadly):
                     OnPropertyChanged(nameof(StatusText));
                     OnPropertyChanged(nameof(IsErrored));
+                    OnPropertyChanged(nameof(CanQuickReconnect));
+                    OnPropertyChanged(nameof(ShowErrorDismissButton));
                     break;
             }
         };
@@ -446,6 +463,16 @@ public class ConnectingViewModel : ViewModelBase
     public void ErrorDismissed()
     {
         CloseOverlay();
+    }
+
+    public void QuickReconnect()
+    {
+        if (!CanQuickReconnect || string.IsNullOrWhiteSpace(TargetAddress))
+            return;
+
+        var address = TargetAddress;
+        ActivityLog.Record("Подключение", "Быстрое переподключение", address);
+        StartConnect(_windowVm, address, "Повторный запуск после вылета клиента");
     }
 
     private void CloseOverlay()

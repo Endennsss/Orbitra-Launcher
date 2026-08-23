@@ -2,7 +2,7 @@
              xmlns:vm="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs"
              x:Class="SS14.Launcher.Views.MainWindowTabs.PlaytimeTabView">
   <StackPanel Spacing="16">
-    <Grid ColumnDefinitions="*,Auto,Auto">
+    <Grid Classes="MotionHeader" ColumnDefinitions="*,Auto,Auto">
       <StackPanel><TextBlock Text="STATISTICS" Classes="SectionLabel" /><TextBlock Text="Журнал игрового времени" Classes="NanoHeadingMedium" /></StackPanel>
       <StackPanel Grid.Column="1" HorizontalAlignment="Right" Margin="0,0,16,0"><TextBlock Text="ВСЕГО" Classes="SectionLabel" HorizontalAlignment="Right" /><TextBlock Text="{Binding TotalText}" FontSize="20" FontWeight="SemiBold" /></StackPanel>
       <Button Grid.Column="2" Content="Очистить" Command="{Binding RequestClear}" VerticalAlignment="Center" />
@@ -17,7 +17,7 @@
     </Border>
     <Border Classes="Surface" Padding="14">
       <ScrollViewer>
-        <ItemsControl ItemsSource="{Binding Servers}" IsVisible="{Binding !IsEmpty}">
+        <ItemsControl Classes="MotionList" ItemsSource="{Binding Servers}" IsVisible="{Binding !IsEmpty}">
           <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:PlaytimeEntryViewModel">
             <Grid ColumnDefinitions="*,180,150" Margin="0,0,0,6" Background="{DynamicResource LauncherSurfaceAltBrush}">
               <StackPanel Margin="12,9"><TextBlock Text="{Binding Name}" FontWeight="SemiBold" /><TextBlock Text="{Binding Address}" Classes="SubText" /></StackPanel>

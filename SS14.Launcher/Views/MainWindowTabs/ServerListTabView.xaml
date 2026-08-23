@@ -2,125 +2,499 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:mainWindowTabs="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs"
-             xmlns:mainWindowTabsViews="clr-namespace:SS14.Launcher.Views.MainWindowTabs"
-             xmlns:loc="clr-namespace:SS14.Launcher.Localization"
+             xmlns:vm="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs"
+             xmlns:mwtv="clr-namespace:SS14.Launcher.Views.MainWindowTabs"
+             xmlns:controls="clr-namespace:SS14.Launcher.Controls"
              xmlns:views="clr-namespace:SS14.Launcher.Views"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="SS14.Launcher.Views.MainWindowTabs.ServerListTabView">
-  <Design.DataContext>
-    <mainWindowTabs:ServerListTabViewModel />
-  </Design.DataContext>
+             xmlns:models="clr-namespace:SS14.Launcher.Models"
+             mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="720"
+             x:Class="SS14.Launcher.Views.MainWindowTabs.ServerListTabView"
+             ClipToBounds="True">
+  <Design.DataContext><vm:ServerListTabViewModel /></Design.DataContext>
 
   <UserControl.Styles>
-    <Style Selector=":is(mainWindowTabsViews|ServerList).filtersClosed">
-      <Setter Property="Grid.RowSpan" Value="3"></Setter>
-    </Style>
     <Style Selector="Border.ServerStatChip">
-      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}" />
-      <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="Padding" Value="11,6" />
+      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="11,6"/>
     </Style>
     <Style Selector="Border.ServerStatChip TextBlock">
-      <Setter Property="Foreground" Value="{DynamicResource ThemeSubTextBrush}" />
-      <Setter Property="FontSize" Value="11" />
-      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{DynamicResource ThemeSubTextBrush}"/>
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
     <Style Selector="Border.ServerSearchBox">
-      <Setter Property="Height" Value="44" />
-      <Setter Property="Padding" Value="10,0,2,0" />
-      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceBrush}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}" />
-      <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="Transitions"><Transitions><BrushTransition Property="BorderBrush" Duration="0:0:0.18" /></Transitions></Setter>
+      <Setter Property="Height" Value="44"/>
+      <Setter Property="Padding" Value="10,0,2,0"/>
+      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Transitions"><Transitions><BrushTransition Property="BorderBrush" Duration="0:0:0.18"/></Transitions></Setter>
     </Style>
     <Style Selector="Border.ServerSearchBox:focus-within">
-      <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
     </Style>
     <Style Selector="Button.SearchClear">
-      <Setter Property="Background" Value="Transparent" />
-      <Setter Property="BorderThickness" Value="0" />
-      <Setter Property="Padding" Value="0" />
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="0"/>
     </Style>
     <Style Selector="Button.ServerFiltersButton">
-      <Setter Property="Height" Value="44" />
-      <Setter Property="MinWidth" Value="132" />
-      <Setter Property="Padding" Value="15,0" />
-      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceBrush}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}" />
-      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Height" Value="44"/>
+      <Setter Property="MinWidth" Value="132"/>
+      <Setter Property="Padding" Value="15,0"/>
+      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}"/>
+      <Setter Property="BorderThickness" Value="1"/>
     </Style>
     <Style Selector="Button.ServerFiltersButton:pointerover">
-      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}" />
+      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+    </Style>
+    <Style Selector="Button.ServerFiltersButton:pressed, Button.ServerFiltersButton:focus">
+      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+      <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}"/>
+    </Style>
+    <Style Selector="ListBox.MasterServerList">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="0"/>
+    </Style>
+    <Style Selector="ListBox.MasterServerList > ListBoxItem">
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Margin" Value="0"/>
+      <Setter Property="MinHeight" Value="0"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="ListBox.MasterServerList > ListBoxItem:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource LauncherHoverBrush}"/>
+    </Style>
+    <Style Selector="ListBox.MasterServerList > ListBoxItem:selected /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+      <Setter Property="BorderThickness" Value="3,0,0,0"/>
+    </Style>
+    <Style Selector="Border.MasterServerRow">
+      <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.16"/>
+          <BrushTransition Property="BorderBrush" Duration="0:0:0.18"/>
+          <DoubleTransition Property="Opacity" Duration="0:0:0.18"/>
+          <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Border.MasterServerRow:pointerover">
+      <Setter Property="Background" Value="{DynamicResource LauncherHoverBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.PingGood"><Setter Property="Foreground" Value="#62D68B"/></Style>
+    <Style Selector="TextBlock.PingMedium"><Setter Property="Foreground" Value="#E4C65A"/></Style>
+    <Style Selector="TextBlock.PingBad"><Setter Property="Foreground" Value="#E06B61"/></Style>
+    <Style Selector="Border.DetailMetric">
+      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="12"/>
+      <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="BorderBrush" Duration="0:0:0.18"/>
+          <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="CubicEaseOut"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Border.DetailMetric:pointerover">
+      <Setter Property="BorderBrush" Value="{DynamicResource ThemeForegroundMutedBrush}"/>
+    </Style>
+    <Style Selector="controls|ClickableCommandText.MasterSort">
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Padding" Value="2"/>
+      <Setter Property="Opacity" Value="0.82"/>
+    </Style>
+    <Style Selector="controls|ClickableCommandText.MasterSort:pointerover">
+      <Setter Property="Opacity" Value="1"/>
+    </Style>
+    <Style Selector="controls|ClickableCommandText.MasterSort">
+      <Setter Property="Transitions">
+        <Transitions>
+          <DoubleTransition Property="Opacity" Duration="0:0:0.16"/>
+          <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.16" Easing="CubicEaseOut"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="UserControl.Narrow TextBlock.ServerPageSubtitle">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="UserControl.Narrow Border.OptionalServerStat">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="UserControl.Narrow TextBlock.FilterButtonLabel">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="UserControl.Narrow Button.ServerFiltersButton">
+      <Setter Property="MinWidth" Value="44"/>
+      <Setter Property="Width" Value="44"/>
+      <Setter Property="Padding" Value="0"/>
+    </Style>
+    <Style Selector="UserControl.Narrow TextBlock.SplitFavoriteLabel">
+      <Setter Property="IsVisible" Value="False"/>
     </Style>
   </UserControl.Styles>
 
-  <DockPanel LastChildFill="True">
-    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+  <Grid RowDefinitions="Auto,Auto,*">
+    <Grid Classes="MotionHeader" ColumnDefinitions="*,Auto" Margin="0,0,0,14">
       <StackPanel>
-        <TextBlock Text="NETWORK" Classes="SectionLabel" />
-        <TextBlock Text="{loc:Loc tab-servers-table-name}" Classes="NanoHeadingMedium" />
+        <TextBlock Text="NETWORK" Classes="SectionLabel"/>
+        <TextBlock Text="Серверы" Classes="NanoHeadingMedium"/>
+        <TextBlock Text="Выберите сервер, чтобы увидеть карту, режим и подробности" Classes="SubText ServerPageSubtitle"/>
       </StackPanel>
       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
-        <Border Classes="ServerStatChip"><TextBlock Text="{Binding OnlineCountText}" /></Border>
-        <Border Classes="ServerStatChip"><TextBlock Text="{Binding ResultCountText}" /></Border>
+        <Border Classes="ServerStatChip OptionalServerStat"><TextBlock Text="{Binding OnlineCountText}"/></Border>
+        <Border Classes="ServerStatChip"><TextBlock Text="{Binding ResultCountText}"/></Border>
       </StackPanel>
     </Grid>
-    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
       <Border Classes="ServerSearchBox" Margin="0,0,10,0">
         <Grid ColumnDefinitions="28,*,38">
-          <!-- Official Lucide search icon. -->
-          <Viewbox Width="18" Height="18" VerticalAlignment="Center"><Canvas Width="24" Height="24"><Path Data="M21,21 L16.65,16.65 M19,11 A8,8 0 1 1 3,11 A8,8 0 0 1 19,11 Z" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox>
+          <Viewbox Classes="MotionIcon SearchIcon" Width="18" Height="18" VerticalAlignment="Center">
+            <Canvas Width="24" Height="24"><Path Data="M21,21 L16.65,16.65 M19,11 A8,8 0 1 1 3,11 A8,8 0 0 1 19,11 Z" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas>
+          </Viewbox>
           <TextBox Name="SearchBox" Grid.Column="1" Text="{Binding SearchString, Mode=TwoWay}"
-                   Watermark="Название, адрес, карта, режим или описание"
-                   UseFloatingWatermark="False" Background="Transparent" BorderThickness="0" Padding="6,0"
-                   VerticalContentAlignment="Center" VerticalAlignment="Stretch" />
+                   Watermark="Название, адрес, карта, режим или описание" UseFloatingWatermark="False"
+                   Background="Transparent" BorderThickness="0" Padding="6,0"
+                   VerticalContentAlignment="Center" VerticalAlignment="Stretch"/>
           <Button Grid.Column="2" Classes="SearchClear" Command="{Binding ClearSearch}" IsVisible="{Binding HasSearch}" ToolTip.Tip="Очистить поиск">
-            <Viewbox Width="15" Height="15"><Canvas Width="24" Height="24"><Path Data="M18,6 L6,18 M6,6 L18,18" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="2" StrokeLineCap="Round"/></Canvas></Viewbox>
+            <Viewbox Classes="MotionIcon ClearIcon" Width="15" Height="15"><Canvas Width="24" Height="24"><Path Data="M18,6 L6,18 M6,6 L18,18" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="2" StrokeLineCap="Round"/></Canvas></Viewbox>
           </Button>
         </Grid>
       </Border>
       <Button Grid.Column="1" Command="{Binding ToggleFilters}" Classes="ServerFiltersButton">
         <StackPanel Orientation="Horizontal" Spacing="9">
-          <!-- Official Lucide sliders-horizontal icon. -->
-          <Viewbox Width="18" Height="18"><Canvas Width="24" Height="24"><Path Data="M21,4 L14,4 M10,4 L3,4 M21,12 L12,12 M8,12 L3,12 M21,20 L16,20 M12,20 L3,20 M14,2 L14,6 M8,10 L8,14 M16,18 L16,22" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox>
-          <TextBlock Text="{Binding Filters.FilterSummaryText}" VerticalAlignment="Center" />
+          <Viewbox Classes="MotionIcon FilterIcon" Width="18" Height="18"><Canvas Width="24" Height="24"><Path Data="M21,4 L14,4 M10,4 L3,4 M21,12 L12,12 M8,12 L3,12 M21,20 L16,20 M12,20 L3,20 M14,2 L14,6 M8,10 L8,14 M16,18 L16,22" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox>
+          <TextBlock Text="{Binding Filters.FilterSummaryText}" Classes="FilterButtonLabel" VerticalAlignment="Center"/>
         </StackPanel>
       </Button>
     </Grid>
 
-    <Border Classes="Surface">
-    <Grid>
-      <Grid.RowDefinitions>
-        <RowDefinition Height="*" MinHeight="180" /> <!-- Server List -->
-        <RowDefinition Height="4" /> <!-- Grabber -->
-        <RowDefinition MinHeight="150" /> <!-- Filters Pane -->
-      </Grid.RowDefinitions>
+    <Grid Grid.Row="2">
+      <Carousel Name="ServerLayoutCarousel" SelectedIndex="{Binding ServerLayoutPageIndex}">
 
-      <!-- Main server list table -->
-      <mainWindowTabsViews:ServerList Grid.Row="0" DockPanel.Dock="Top" List="{Binding SearchedServers}"
-                                      ListText="{Binding ListText}"
-                                      SpinnerVisible="{Binding SpinnerVisible}"
-                                      ShowHeader="True"
-                                      Classes.filtersClosed="{Binding !FiltersVisible}" />
+      <Grid Name="SplitLayoutGrid" ColumnDefinitions="360,5,*">
+        <Border Name="SplitListPane" Grid.Column="0" Classes="Surface" ClipToBounds="True" MinWidth="280">
+          <Grid RowDefinitions="Auto,*,Auto">
+            <Grid ColumnDefinitions="*,64,72,72" Margin="12,9" Background="{DynamicResource LauncherChromeBrush}">
+              <controls:ClickableCommandText Classes="MasterSort" Command="{Binding SortByName}">
+                <StackPanel Orientation="Horizontal" Spacing="5"><TextBlock Text="Сервер" Classes="SubText"/><TextBlock Text="{Binding NameSortMark}" Classes="SubText"/></StackPanel>
+              </controls:ClickableCommandText>
+              <controls:ClickableCommandText Grid.Column="1" Classes="MasterSort" Command="{Binding SortByRoundTime}">
+                <StackPanel Orientation="Horizontal" Spacing="3" HorizontalAlignment="Center"><TextBlock Text="Время" Classes="SubText"/><TextBlock Text="{Binding RoundTimeSortMark}" Classes="SubText"/></StackPanel>
+              </controls:ClickableCommandText>
+              <controls:ClickableCommandText Grid.Column="2" Classes="MasterSort" Command="{Binding SortByPlayers}">
+                <StackPanel Orientation="Horizontal" Spacing="3" HorizontalAlignment="Center"><TextBlock Text="Игроки" Classes="SubText"/><TextBlock Text="{Binding PlayersSortMark}" Classes="SubText"/></StackPanel>
+              </controls:ClickableCommandText>
+              <controls:ClickableCommandText Grid.Column="3" Classes="MasterSort" Command="{Binding SortByPing}">
+                <StackPanel Orientation="Horizontal" Spacing="3" HorizontalAlignment="Center"><TextBlock Text="Пинг" Classes="SubText"/><TextBlock Text="{Binding PingSortMark}" Classes="SubText"/></StackPanel>
+              </controls:ClickableCommandText>
+            </Grid>
 
-      <GridSplitter Grid.Row="1" BorderThickness="0"
-                    HorizontalAlignment="Stretch"
-                    ResizeDirection="Rows"
-                    IsVisible="{Binding FiltersVisible}">
-      </GridSplitter>
+            <Grid Grid.Row="1">
+              <ListBox Classes="MasterServerList" ItemsSource="{Binding SearchedServers}"
+                       SelectedItem="{Binding SelectedServer, Mode=TwoWay}"
+                       DoubleTapped="ServerListDoubleTapped"
+                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                       ScrollViewer.VerticalScrollBarVisibility="Visible">
+                <ListBox.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel/></ItemsPanelTemplate></ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:ServerEntryViewModel">
+                    <Border Classes="MasterServerRow" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,0,0,1" Padding="11,9">
+                      <Border.ContextMenu>
+                        <ContextMenu Classes="ServerActionsMenu">
+                          <MenuItem Header="Подключиться" Command="{Binding ConnectPressed}" IsEnabled="{Binding CanConnect}"/>
+                          <MenuItem Header="Добавить или убрать из избранного" Command="{Binding FavoriteButtonPressed}"/>
+                          <MenuItem Header="Проверить пинг" Command="{Binding PingPressed}"/>
+                          <Separator/>
+                          <MenuItem Header="Скопировать адрес" Command="{Binding CopyAddressPressed}"/>
+                          <MenuItem Header="Создать ярлык" Command="{Binding CreateDesktopShortcut}"/>
+                          <MenuItem Header="Открыть сайт сервера" Command="{Binding OpenWebsitePressed}"/>
+                        </ContextMenu>
+                      </Border.ContextMenu>
+                      <Grid ColumnDefinitions="*,64,72,72" MinHeight="38">
+                        <Grid ColumnDefinitions="18,*">
+                          <Path Data="M12,2 L15.09,8.26 L22,9.27 L17,14.14 L18.18,21.02 L12,17.77 L5.82,21.02 L7,14.14 L2,9.27 L8.91,8.26 Z"
+                                Width="14" Height="14" Stretch="Uniform" Stroke="{DynamicResource ThemeSubTextBrush}"
+                                StrokeThickness="1.4" Fill="{DynamicResource ThemeForegroundBrush}" IsVisible="{Binding IsFavorite}"
+                                VerticalAlignment="Center"/>
+                          <StackPanel Grid.Column="1" Margin="5,0,7,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding CacheData.Map}" Classes="SubText" FontSize="10" TextTrimming="CharacterEllipsis"/>
+                          </StackPanel>
+                        </Grid>
+                        <Grid Grid.Column="1" VerticalAlignment="Center">
+                          <controls:TimerTextCell Value="{Binding RoundStartTime}" HorizontalAlignment="Center" IsVisible="{Binding HaveData}"/>
+                          <TextBlock Text="-" Classes="SubText" HorizontalAlignment="Center" IsVisible="{Binding !HaveData}"/>
+                        </Grid>
+                        <TextBlock Grid.Column="2" Text="{Binding PlayerCountString}" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Mono"/>
+                        <TextBlock Grid.Column="3" Text="{Binding PingString}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Classes.PingGood="{Binding PingGood}" Classes.PingMedium="{Binding PingMedium}" Classes.PingBad="{Binding PingBad}"/>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
 
-      <!-- Filters dialog -->
-      <Border Grid.Row="2" DockPanel.Dock="Bottom" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,1,0,0"
-              IsVisible="{Binding FiltersVisible}"
-              BoxShadow="0 -8 24 #70000000">
-        <Panel Background="{DynamicResource LauncherWorkspaceBrush}">
-          <mainWindowTabsViews:ServerListFiltersView DataContext="{Binding Filters}" />
-        </Panel>
+              <TextBlock Text="{Binding ListText}" TextWrapping="Wrap" TextAlignment="Center"
+                         HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24"/>
+              <StackPanel IsVisible="{Binding SpinnerVisible}" VerticalAlignment="Top" Margin="14" Spacing="8">
+                <Border Classes="SkeletonBar" Height="48"/>
+                <Border Classes="SkeletonBar Delay1" Height="48"/>
+                <Border Classes="SkeletonBar Delay2" Height="48"/>
+                <Border Classes="SkeletonBar Delay3" Height="48"/>
+              </StackPanel>
+            </Grid>
+
+            <Border Grid.Row="2" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,1,0,0" Padding="12,8">
+              <TextBlock Text="{Binding ResultCountText}" Classes="SubText"/>
+            </Border>
+          </Grid>
+        </Border>
+
+        <GridSplitter Name="SplitDivider" Grid.Column="1" ResizeDirection="Columns" Background="{DynamicResource LauncherLineBrush}"/>
+
+        <Border Name="SplitDetailPane" Grid.Column="2" Classes="Surface" ClipToBounds="True" MinWidth="460">
+          <Grid>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="7" IsVisible="{Binding !HasSelectedServer}">
+              <TextBlock Text="Выберите сервер" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+              <TextBlock Text="Подробная информация появится здесь" Classes="SubText"/>
+            </StackPanel>
+
+            <TransitioningContentControl Content="{Binding SelectedServer}"
+                                         IsVisible="{Binding HasSelectedServer}">
+              <TransitioningContentControl.PageTransition>
+                <CrossFade Duration="0:0:0.28"/>
+              </TransitioningContentControl.PageTransition>
+              <TransitioningContentControl.ContentTemplate>
+                <DataTemplate x:DataType="vm:ServerEntryViewModel">
+            <Grid RowDefinitions="Auto,Auto,*,Auto" Classes="MotionCard">
+              <Border Padding="20" Background="{DynamicResource LauncherChromeBrush}"
+                      BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,0,0,1">
+                <Grid ColumnDefinitions="70,*" RowDefinitions="Auto,Auto">
+                  <Border Grid.RowSpan="2" Width="58" Height="58" Background="{DynamicResource LauncherControlBrush}"
+                          BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" ClipToBounds="True">
+                    <Grid>
+                      <Image Source="{Binding ServerIcon}" Stretch="UniformToFill" IsVisible="{Binding HasServerIcon}"/>
+                      <Viewbox Width="28" Height="28" IsVisible="{Binding !HasServerIcon}">
+                        <Canvas Width="24" Height="24"><Path Data="M4,4 L20,4 L20,20 L4,20 Z M8,9 L16,9 M8,13 L16,13 M8,17 L13,17" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.5"/></Canvas>
+                      </Viewbox>
+                    </Grid>
+                  </Border>
+                  <Grid Grid.Column="1" ColumnDefinitions="*,Auto" Margin="12,0,0,4" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Name}" FontSize="21" FontWeight="Bold"
+                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10,0,0,0" VerticalAlignment="Center">
+                      <Border BorderBrush="#62D68B" BorderThickness="1" Padding="8,2" IsVisible="{Binding IsOnline}" VerticalAlignment="Center">
+                        <TextBlock Text="ОНЛАЙН" Foreground="#62D68B" FontSize="9" FontWeight="Bold"/>
+                      </Border>
+                      <Border BorderBrush="#E06B61" BorderThickness="1" Padding="8,2" IsVisible="{Binding !IsOnline}" VerticalAlignment="Center">
+                        <TextBlock Text="НЕДОСТУПЕН" Foreground="#E06B61" FontSize="9" FontWeight="Bold"/>
+                      </Border>
+                    </StackPanel>
+                  </Grid>
+                  <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="*,Auto" Margin="12,0,0,0">
+                    <TextBlock Text="{Binding Address}" Classes="SubText" FontFamily="Mono"
+                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <Button Width="42" Height="40" Padding="0" Command="{Binding PingPressed}" IsEnabled="{Binding !IsPinging}" ToolTip.Tip="Проверить пинг">
+                      <Viewbox Classes="ServerPingIcon" Classes.Pinging="{Binding IsPinging}" Width="18" Height="18">
+                        <Canvas Width="24" Height="24"><Path Data="M21,12 A9,9 0 0 1 5.83,18.55 L3,16 M3,22 L3,16 L9,16 M3,12 A9,9 0 0 1 18.17,5.45 L21,8 M21,2 L21,8 L15,8" Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="2" StrokeLineCap="Round"/></Canvas>
+                      </Viewbox>
+                    </Button>
+                    <Button Height="40" Command="{Binding FavoriteButtonPressed}">
+                      <StackPanel Orientation="Horizontal" Spacing="7">
+                        <Path Data="M12,2 L15.09,8.26 L22,9.27 L17,14.14 L18.18,21.02 L12,17.77 L5.82,21.02 L7,14.14 L2,9.27 L8.91,8.26 Z"
+                              Width="16" Height="16" Stretch="Uniform" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.5"
+                              Fill="Transparent" IsVisible="{Binding !IsFavorite}"/>
+                        <Path Data="M12,2 L15.09,8.26 L22,9.27 L17,14.14 L18.18,21.02 L12,17.77 L5.82,21.02 L7,14.14 L2,9.27 L8.91,8.26 Z"
+                              Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource ThemeForegroundBrush}" IsVisible="{Binding IsFavorite}"/>
+                        <TextBlock Classes="SplitFavoriteLabel" Text="В избранном" IsVisible="{Binding IsFavorite}"/>
+                        <TextBlock Classes="SplitFavoriteLabel" Text="В избранное" IsVisible="{Binding !IsFavorite}"/>
+                      </StackPanel>
+                    </Button>
+                  </StackPanel>
+                  </Grid>
+                </Grid>
+              </Border>
+
+              <Grid Name="SplitMetricGrid" Grid.Row="1" ColumnDefinitions="*,*,*" Margin="16,16,16,8">
+                <Border Classes="DetailMetric" Margin="0,0,5,0"><StackPanel Spacing="4"><TextBlock Text="ИГРОКИ" Classes="SectionLabel"/><TextBlock Text="{Binding PlayerCountString}" FontSize="20" FontWeight="SemiBold"/></StackPanel></Border>
+                <Border Grid.Column="1" Classes="DetailMetric" Margin="5,0"><StackPanel Spacing="4"><TextBlock Text="ПИНГ" Classes="SectionLabel"/><TextBlock Text="{Binding PingString}" FontSize="20" FontWeight="SemiBold" Classes.PingGood="{Binding PingGood}" Classes.PingMedium="{Binding PingMedium}" Classes.PingBad="{Binding PingBad}"/></StackPanel></Border>
+                <Border Grid.Column="2" Classes="DetailMetric" Margin="5,0,0,0"><StackPanel Spacing="4"><TextBlock Text="ВРЕМЯ РАУНДА" Classes="SectionLabel"/><controls:TimerTextCell Value="{Binding RoundStartTime}" FontSize="20" FontWeight="SemiBold"/></StackPanel></Border>
+              </Grid>
+
+              <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" Margin="16,8">
+                <StackPanel Spacing="12">
+                  <WrapPanel>
+                    <Border Classes="DetailMetric" Margin="0,0,8,0" MinWidth="170"><StackPanel Spacing="4"><TextBlock Text="КАРТА" Classes="SectionLabel"/><TextBlock Text="{Binding CacheData.Map}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"/></StackPanel></Border>
+                    <Border Classes="DetailMetric" MinWidth="170"><StackPanel Spacing="4"><TextBlock Text="РЕЖИМ" Classes="SectionLabel"/><TextBlock Text="{Binding CacheData.GamePreset}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"/></StackPanel></Border>
+                    <Border Classes="DetailMetric" Margin="8,0,0,0" MinWidth="150"><StackPanel Spacing="4"><TextBlock Text="ВАШЕ ВРЕМЯ" Classes="SectionLabel"/><TextBlock Text="{Binding PlaytimeText}" FontSize="16" FontWeight="SemiBold"/></StackPanel></Border>
+                  </WrapPanel>
+
+                  <Border Classes="DetailMetric">
+                    <StackPanel Spacing="6">
+                      <TextBlock Text="ОПИСАНИЕ" Classes="SectionLabel"/>
+                      <TextBlock Text="{Binding Description}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                  </Border>
+
+                  <Grid Classes="SplitGraphGrid" ColumnDefinitions="*,*">
+                    <Border Classes="DetailMetric" Margin="0,0,5,0"><StackPanel Spacing="6"><TextBlock Text="ПИНГ · ИСТОРИЯ" Classes="SectionLabel"/><Grid Height="54" ClipToBounds="True"><Path Data="M0,52 L260,52" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="1" Stretch="Fill"/><Path Data="{Binding PingGraph}" Stroke="#A8A8A8" StrokeThickness="1.8" Stretch="Fill"/></Grid></StackPanel></Border>
+                    <Border Grid.Column="1" Classes="DetailMetric SplitGraphSecond" Margin="5,0,0,0"><StackPanel Spacing="6"><TextBlock Text="ОНЛАЙН · ИСТОРИЯ" Classes="SectionLabel"/><Grid Height="54" ClipToBounds="True"><Path Data="M0,52 L260,52" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="1" Stretch="Fill"/><Path Data="{Binding OnlineGraph}" Stroke="#777777" StrokeThickness="1.8" Stretch="Fill"/></Grid></StackPanel></Border>
+                  </Grid>
+
+                  <ItemsControl ItemsSource="{Binding CacheData.Links}">
+                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate><DataTemplate x:DataType="models:ServerInfoLink"><views:ServerInfoLinkControl DataContext="{Binding}"/></DataTemplate></ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </ScrollViewer>
+
+              <Border Grid.Row="3" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,1,0,0" Padding="16,12">
+                <Grid Classes="SplitFooterGrid" ColumnDefinitions="*,Auto">
+                  <StackPanel Name="SplitFooterActions" Orientation="Horizontal" Spacing="6">
+                    <Button Content="Скопировать адрес" Command="{Binding CopyAddressPressed}"/>
+                    <Button Content="Создать ярлык" Command="{Binding CreateDesktopShortcut}"/>
+                  </StackPanel>
+                  <Button Classes="SplitConnectButton" Grid.Column="1" Width="178" Height="42" Command="{Binding ConnectPressed}" IsEnabled="{Binding CanConnect}">
+                    <Grid>
+                      <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" IsVisible="{Binding !IsConnecting}">
+                        <TextBlock Text="Подключиться"/>
+                        <Viewbox Width="17" Height="17"><Canvas Width="24" Height="24"><Path Data="M5,12 L19,12 M14,7 L19,12 L14,17" Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox>
+                      </StackPanel>
+                      <StackPanel IsVisible="{Binding IsConnectionBusy}" HorizontalAlignment="Center" Spacing="3">
+                        <TextBlock Text="{Binding ConnectionStageText}" FontSize="9" FontWeight="Bold" MaxWidth="135" TextTrimming="CharacterEllipsis"/>
+                        <ProgressBar Width="112" Height="3" Maximum="1" Value="{Binding ConnectionProgress}" IsIndeterminate="{Binding ConnectionProgressIndeterminate}"/>
+                      </StackPanel>
+                      <StackPanel Orientation="Horizontal" Spacing="7" IsVisible="{Binding IsConnectionSuccess}" HorizontalAlignment="Center">
+                        <Path Data="M4,12 L9.2,17 L20,6" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="2.4" Width="17" Height="17" Stretch="Uniform"/>
+                        <TextBlock Text="ГОТОВО" FontSize="9" FontWeight="Bold"/>
+                      </StackPanel>
+                    </Grid>
+                  </Button>
+                </Grid>
+              </Border>
+            </Grid>
+                </DataTemplate>
+              </TransitioningContentControl.ContentTemplate>
+            </TransitioningContentControl>
+          </Grid>
+        </Border>
+      </Grid>
+
+      <!-- Variant 1: the classic table with expandable cards. -->
+      <Border Classes="Surface">
+        <mwtv:ServerList List="{Binding SearchedServers}" ListText="{Binding ListText}"
+                         SpinnerVisible="{Binding SpinnerVisible}" ShowHeader="True"/>
+      </Border>
+
+      <!-- Variant 3: a full-width list that navigates to a separate server page. -->
+      <Border Classes="Surface" ClipToBounds="True">
+        <Grid RowDefinitions="Auto,*,Auto">
+          <Grid RowDefinitions="Auto,Auto" Margin="14,10" Background="{DynamicResource LauncherChromeBrush}">
+            <StackPanel>
+              <TextBlock Text="СПИСОК СЕРВЕРОВ" Classes="SectionLabel"/>
+              <TextBlock Text="Один клик открывает страницу сервера" Classes="SubText"/>
+            </StackPanel>
+            <WrapPanel Grid.Row="1" Margin="0,8,0,0" VerticalAlignment="Center">
+              <controls:ClickableCommandText Classes="MasterSort" Command="{Binding SortByName}" Margin="7,0">
+                <StackPanel Orientation="Horizontal" Spacing="4"><TextBlock Text="Название" Classes="SubText"/><TextBlock Text="{Binding NameSortMark}" Classes="SubText"/></StackPanel>
+              </controls:ClickableCommandText>
+              <controls:ClickableCommandText Classes="MasterSort" Command="{Binding SortByRoundTime}" Margin="7,0">
+                <StackPanel Orientation="Horizontal" Spacing="4"><TextBlock Text="Время" Classes="SubText"/><TextBlock Text="{Binding RoundTimeSortMark}" Classes="SubText"/></StackPanel>
+              </controls:ClickableCommandText>
+              <controls:ClickableCommandText Classes="MasterSort" Command="{Binding SortByPlayers}" Margin="7,0">
+                <StackPanel Orientation="Horizontal" Spacing="4"><TextBlock Text="Игроки" Classes="SubText"/><TextBlock Text="{Binding PlayersSortMark}" Classes="SubText"/></StackPanel>
+              </controls:ClickableCommandText>
+              <controls:ClickableCommandText Classes="MasterSort" Command="{Binding SortByPing}" Margin="7,0">
+                <StackPanel Orientation="Horizontal" Spacing="4"><TextBlock Text="Пинг" Classes="SubText"/><TextBlock Text="{Binding PingSortMark}" Classes="SubText"/></StackPanel>
+              </controls:ClickableCommandText>
+            </WrapPanel>
+          </Grid>
+
+          <Grid Grid.Row="1">
+            <ListBox Classes="MasterServerList MotionList" ItemsSource="{Binding SearchedServers}"
+                     SelectedItem="{Binding SelectedServer, Mode=TwoWay}"
+                     SelectionChanged="FocusServerSelectionChanged"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     ScrollViewer.VerticalScrollBarVisibility="Visible">
+              <ListBox.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel/></ItemsPanelTemplate></ListBox.ItemsPanel>
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:ServerEntryViewModel">
+                  <Border Classes="MasterServerRow" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,0,0,1" Padding="14,11">
+                    <Border.ContextMenu>
+                      <ContextMenu Classes="ServerActionsMenu">
+                        <MenuItem Header="Подключиться" Command="{Binding ConnectPressed}" IsEnabled="{Binding CanConnect}"/>
+                        <MenuItem Header="Добавить или убрать из избранного" Command="{Binding FavoriteButtonPressed}"/>
+                        <MenuItem Header="Проверить пинг" Command="{Binding PingPressed}"/>
+                        <Separator/>
+                        <MenuItem Header="Скопировать адрес" Command="{Binding CopyAddressPressed}"/>
+                        <MenuItem Header="Создать ярлык" Command="{Binding CreateDesktopShortcut}"/>
+                        <MenuItem Header="Открыть сайт сервера" Command="{Binding OpenWebsitePressed}"/>
+                      </ContextMenu>
+                    </Border.ContextMenu>
+                    <Grid ColumnDefinitions="5,*" RowDefinitions="Auto,Auto" MinHeight="62">
+                      <Border Grid.RowSpan="2" Width="3" Background="#62D68B" IsVisible="{Binding IsOnline}"/>
+                      <Border Grid.RowSpan="2" Width="3" Background="#E06B61" IsVisible="{Binding !IsOnline}"/>
+                      <Grid Grid.Column="1" ColumnDefinitions="*,Auto" Margin="12,0,0,0">
+                        <StackPanel Spacing="5">
+                          <StackPanel Orientation="Horizontal" Spacing="7">
+                            <Path Data="M12,2 L15.09,8.26 L22,9.27 L17,14.14 L18.18,21.02 L12,17.77 L5.82,21.02 L7,14.14 L2,9.27 L8.91,8.26 Z"
+                                  Width="14" Height="14" Stretch="Uniform" Fill="{DynamicResource ThemeForegroundBrush}" IsVisible="{Binding IsFavorite}"/>
+                            <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                          </StackPanel>
+                          <WrapPanel>
+                            <TextBlock Text="{Binding CacheData.Map, StringFormat='Карта: {0}'}" Classes="SubText" Margin="0,0,14,0"/>
+                            <TextBlock Text="{Binding CacheData.GamePreset, StringFormat='Режим: {0}'}" Classes="SubText"/>
+                          </WrapPanel>
+                        </StackPanel>
+                        <Viewbox Grid.Column="1" Width="18" Height="18" Margin="12,0,2,0" VerticalAlignment="Center"><Canvas Width="24" Height="24"><Path Data="M9,18 L15,12 L9,6" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="2" StrokeLineCap="Round"/></Canvas></Viewbox>
+                      </Grid>
+                      <WrapPanel Grid.Row="1" Grid.Column="1" Margin="12,9,0,0">
+                        <Border Classes="ServerStatChip" Margin="0,0,6,0"><TextBlock Text="{Binding PlayerCountString}"/></Border>
+                        <Border Classes="ServerStatChip" Margin="0,0,6,0"><controls:TimerTextCell Value="{Binding RoundStartTime}"/></Border>
+                        <Border Classes="ServerStatChip" MinWidth="76"><TextBlock Text="{Binding PingString}" HorizontalAlignment="Center" Classes.PingGood="{Binding PingGood}" Classes.PingMedium="{Binding PingMedium}" Classes.PingBad="{Binding PingBad}"/></Border>
+                      </WrapPanel>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+            <TextBlock Text="{Binding ListText}" TextAlignment="Center" TextWrapping="Wrap"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24"/>
+            <StackPanel IsVisible="{Binding SpinnerVisible}" VerticalAlignment="Top" Margin="16" Spacing="8">
+              <Border Classes="SkeletonBar" Height="62"/><Border Classes="SkeletonBar Delay1" Height="62"/>
+              <Border Classes="SkeletonBar Delay2" Height="62"/><Border Classes="SkeletonBar Delay3" Height="62"/>
+            </StackPanel>
+          </Grid>
+
+          <Border Grid.Row="2" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,1,0,0" Padding="14,9">
+            <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding ResultCountText}" Classes="SubText"/><TextBlock Grid.Column="1" Text="Enter — подключиться · Esc — назад" Classes="SubText"/></Grid>
+          </Border>
+        </Grid>
+      </Border>
+
+      <mwtv:ServerFocusDetailView/>
+      </Carousel>
+
+      <Border IsVisible="{Binding FiltersVisible}" VerticalAlignment="Top" HorizontalAlignment="Stretch"
+              Margin="24,10,24,0" MaxHeight="330" ZIndex="20"
+              Background="{DynamicResource LauncherWorkspaceBrush}" BorderBrush="{DynamicResource ThemeAccentBrush}"
+              BorderThickness="1" BoxShadow="0 12 30 #A0000000">
+        <mwtv:ServerListFiltersView DataContext="{Binding Filters}"/>
       </Border>
     </Grid>
-    </Border>
-  </DockPanel>
+  </Grid>
 </UserControl>

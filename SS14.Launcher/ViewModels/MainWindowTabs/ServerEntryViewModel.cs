@@ -27,7 +27,7 @@ public sealed class ServerEntryViewModel : ObservableRecipient, IRecipient<Favor
     private readonly IServerSource _serverSource;
     private readonly DataManager _cfg;
     private readonly MainWindowViewModel _windowVm;
-    private string Address => _cacheData.Address;
+    public string Address => _cacheData.Address;
     private string _fallbackName = string.Empty;
     private bool _isExpanded;
     private TimeSpan? _lastPing;
@@ -40,6 +40,7 @@ public sealed class ServerEntryViewModel : ObservableRecipient, IRecipient<Favor
     private Bitmap? _serverIcon;
     private readonly Queue<double> _pingHistory = new();
     private readonly Queue<double> _onlineHistory = new();
+    public bool SuppressIconOnActivation { get; set; }
 
     public ServerEntryViewModel(MainWindowViewModel windowVm, ServerStatusData cacheData, IServerSource serverSource,
         DataManager cfg)
@@ -127,7 +128,10 @@ public sealed class ServerEntryViewModel : ObservableRecipient, IRecipient<Favor
             _isExpanded = value;
             OnPropertyChanged(nameof(IsExpanded));
             if (value)
+            {
                 UpdateDiscordSelection();
+                LoadServerIcon();
+            }
             CheckUpdateInfo();
         }
     }
@@ -358,7 +362,8 @@ public sealed class ServerEntryViewModel : ObservableRecipient, IRecipient<Favor
         _cacheData.PropertyChanged += OnCacheDataOnPropertyChanged;
         _windowVm.PropertyChanged += OnWindowViewModelPropertyChanged;
         PlaytimeTracker.Changed += OnPlaytimeChanged;
-        LoadServerIcon();
+        if (!SuppressIconOnActivation)
+            LoadServerIcon();
     }
 
     protected override void OnDeactivated()

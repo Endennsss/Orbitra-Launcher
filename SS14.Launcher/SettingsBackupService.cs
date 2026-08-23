@@ -21,6 +21,7 @@ public static class SettingsBackupService
             [CVars.CustomThemeDimming.Name] = cfg.GetCVar(CVars.CustomThemeDimming),
             [CVars.UiSoundsEnabled.Name] = cfg.GetCVar(CVars.UiSoundsEnabled), [CVars.UiSoundVolume.Name] = cfg.GetCVar(CVars.UiSoundVolume),
             [CVars.CloseToTray.Name] = cfg.GetCVar(CVars.CloseToTray), [CVars.NavigationTabOrder.Name] = cfg.GetCVar(CVars.NavigationTabOrder),
+            [CVars.ServerListLayout.Name] = cfg.GetCVar(CVars.ServerListLayout),
             [CVars.HiddenNavigationTabs.Name] = cfg.GetCVar(CVars.HiddenNavigationTabs), [CVars.DiscordRpcEnabled.Name] = cfg.GetCVar(CVars.DiscordRpcEnabled),
             [CVars.FavoriteNotificationsEnabled.Name] = cfg.GetCVar(CVars.FavoriteNotificationsEnabled)
         };
@@ -41,6 +42,7 @@ public static class SettingsBackupService
         SetString(CVars.CustomThemeBackground); SetString(CVars.CustomThemeSurface); SetString(CVars.CustomThemeControl);
         SetString(CVars.CustomThemeAccent); SetString(CVars.CustomThemeText); SetString(CVars.CustomThemeMuted); SetInt(CVars.CustomThemeBlur); SetInt(CVars.CustomThemeDimming);
         SetBool(CVars.UiSoundsEnabled); SetInt(CVars.UiSoundVolume); SetBool(CVars.CloseToTray);
+        SetInt(CVars.ServerListLayout);
         SetString(CVars.NavigationTabOrder); SetString(CVars.HiddenNavigationTabs); SetBool(CVars.DiscordRpcEnabled); SetBool(CVars.FavoriteNotificationsEnabled);
         var background = archive.Entries.Find(e => e.FullName.StartsWith("background.", StringComparison.OrdinalIgnoreCase));
         if (background != null)

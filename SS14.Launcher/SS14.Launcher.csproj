@@ -10,6 +10,11 @@
     <IsPackable>false</IsPackable>
     <DefineConstants Condition="'$(FullRelease)' == 'True'">FULL_RELEASE;$(DefineConstants)</DefineConstants>
     <DefineConstants Condition="'$(FullRelease)' != 'True'">DEVELOPMENT;$(DefineConstants)</DefineConstants>
+    <!-- Published Debug builds are handed to testers as normal executables. HotAvalonia
+         weaves a development-only startup hook into them, but its runtime dependencies
+         are deliberately omitted from publish output. Keep it opt-in so a Debug publish
+         is self-consistent; developers can still enable it with -p:HotAvalonia=true. -->
+    <HotAvalonia Condition="'$(HotAvalonia)' == ''">false</HotAvalonia>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>CA1416</NoWarn>
   </PropertyGroup>

@@ -20,6 +20,7 @@ public sealed partial class ServerList : TemplatedControl
     private SortColumn _sortColumn;
     private bool _sortDescending;
     private INotifyCollectionChanged? _observableList;
+    private Grid? _headerGrid;
 
     public static readonly DirectProperty<ServerList, ObservableCollection<ServerEntryViewModel>> DisplayListProperty =
         AvaloniaProperty.RegisterDirect<ServerList, ObservableCollection<ServerEntryViewModel>>(nameof(DisplayList), o => o.DisplayList);
@@ -44,6 +45,33 @@ public sealed partial class ServerList : TemplatedControl
         SortPlayersCommand = new RelayCommand(() => ApplySort(SortColumn.Players));
         SortPingCommand = new RelayCommand(() => ApplySort(SortColumn.Ping));
         SortRoundTimeCommand = new RelayCommand(() => ApplySort(SortColumn.RoundTime));
+    }
+
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+        _headerGrid = e.NameScope.Find<Grid>("PART_ServerHeader");
+        UpdateResponsiveHeader();
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == BoundsProperty)
+            UpdateResponsiveHeader();
+    }
+
+    private void UpdateResponsiveHeader()
+    {
+        if (_headerGrid == null || Bounds.Width <= 0)
+            return;
+
+        _headerGrid.ColumnDefinitions = Bounds.Width switch
+        {
+            < 520 => new ColumnDefinitions("*,0,0,82,152,Auto"),
+            < 650 => new ColumnDefinitions("*,0,82,90,152,Auto"),
+            _ => new ColumnDefinitions("*,88,96,100,196,Auto")
+        };
     }
 
     public static readonly DirectProperty<ServerList, bool> ShowHeaderProperty =

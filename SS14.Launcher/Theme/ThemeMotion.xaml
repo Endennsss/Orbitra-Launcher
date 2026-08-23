@@ -1,0 +1,249 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Orbitra motion language: short transform and color transitions keep the
+       interface responsive without re-measuring large lists. -->
+  <Style Selector="Button, ToggleButton">
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.18" />
+        <BrushTransition Property="Foreground" Duration="0:0:0.18" />
+        <DoubleTransition Property="Opacity" Duration="0:0:0.16" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Button:pointerover, ToggleButton:pointerover">
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="RenderTransform" Value="scale(1.006)" />
+  </Style>
+  <Style Selector="Button:pressed, ToggleButton:pressed">
+    <Setter Property="RenderTransform" Value="scale(0.985)" />
+  </Style>
+  <Style Selector="Button:disabled, ToggleButton:disabled">
+    <Setter Property="RenderTransform" Value="none" />
+  </Style>
+
+  <Style Selector="Button.WindowCommand:pointerover">
+    <Setter Property="RenderTransform" Value="none" />
+  </Style>
+  <Style Selector="Button.WindowCommand:pressed">
+    <Setter Property="RenderTransform" Value="scale(0.96)" />
+  </Style>
+  <Style Selector="Button.WindowCommand Path, Button.WindowCommand Rectangle">
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="CubicEaseOut" />
+        <DoubleTransition Property="Opacity" Duration="0:0:0.16" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Button.WindowCommand:pointerover Path, Button.WindowCommand:pointerover Rectangle">
+    <Setter Property="RenderTransform" Value="scale(1.12)" />
+  </Style>
+  <Style Selector="Button.WindowCommand.Close:pointerover Path">
+    <Setter Property="RenderTransform" Value="rotate(90deg) scale(1.08)" />
+  </Style>
+
+  <Style Selector="TextBox, ComboBox">
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.2" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.2" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="CubicEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="TextBox:focus, ComboBox:focus">
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}" />
+  </Style>
+
+  <Style Selector="CheckBox /template/ Border#border">
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.18" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.18" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="CubicEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="CheckBox:pointerover /template/ Border#border">
+    <Setter Property="RenderTransform" Value="scale(1.08)" />
+  </Style>
+  <Style Selector="CheckBox:checked /template/ Border#border">
+    <Setter Property="Background" Value="{DynamicResource LauncherControlBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}" />
+  </Style>
+  <Style Selector="CheckBox:checked /template/ Path#checkMark">
+    <Style.Animations>
+      <Animation Duration="0:0:0.24" Easing="CubicEaseOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.35" /><Setter Property="ScaleTransform.ScaleX" Value="0.55" /><Setter Property="ScaleTransform.ScaleY" Value="0.55" /></KeyFrame>
+        <KeyFrame Cue="70%"><Setter Property="Opacity" Value="1" /><Setter Property="ScaleTransform.ScaleX" Value="1.15" /><Setter Property="ScaleTransform.ScaleY" Value="1.15" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /><Setter Property="ScaleTransform.ScaleX" Value="1" /><Setter Property="ScaleTransform.ScaleY" Value="1" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <Style Selector="Slider /template/ Thumb">
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.18" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="CubicEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Slider:pointerover /template/ Thumb">
+    <Setter Property="RenderTransform" Value="scale(1.22)" />
+    <Setter Property="Background" Value="{DynamicResource ThemeAccentBrush}" />
+  </Style>
+  <Style Selector="Slider:pressed /template/ Thumb">
+    <Setter Property="RenderTransform" Value="scale(0.94)" />
+  </Style>
+
+  <Style Selector="ProgressBar">
+    <Setter Property="Transitions">
+      <Transitions><DoubleTransition Property="Value" Duration="0:0:0.32" Easing="CubicEaseOut" /></Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="TabItem /template/ ContentPresenter">
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.2" />
+        <BrushTransition Property="Foreground" Duration="0:0:0.2" />
+        <DoubleTransition Property="Opacity" Duration="0:0:0.18" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="CubicEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="TabItem:pointerover /template/ ContentPresenter">
+    <Setter Property="Opacity" Value="1" />
+  </Style>
+  <Style Selector="TabItem:selected /template/ ContentPresenter">
+    <Setter Property="RenderTransform" Value="none" />
+  </Style>
+
+  <Style Selector="Path.MotionGlyph, Viewbox.MotionIcon">
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.24" Easing="CubicEaseOut" />
+        <DoubleTransition Property="Opacity" Duration="0:0:0.18" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Button:pointerover Path.MotionGlyph, Button:pointerover Viewbox.MotionIcon">
+    <Setter Property="RenderTransform" Value="scale(1.1)" />
+  </Style>
+  <Style Selector="Button:pressed Path.MotionGlyph, Button:pressed Viewbox.MotionIcon">
+    <Setter Property="RenderTransform" Value="scale(0.88)" />
+  </Style>
+  <Style Selector="Button:pointerover Viewbox.RotateIcon">
+    <Setter Property="RenderTransform" Value="rotate(14deg) scale(1.08)" />
+  </Style>
+  <Style Selector="Border.ServerSearchBox:focus-within Viewbox.SearchIcon">
+    <Setter Property="RenderTransform" Value="scale(1.12)" />
+  </Style>
+  <Style Selector="Button.SearchClear:pointerover Viewbox.ClearIcon">
+    <Setter Property="RenderTransform" Value="rotate(90deg) scale(1.08)" />
+  </Style>
+  <Style Selector="Button.ServerFiltersButton:pointerover Viewbox.FilterIcon">
+    <Setter Property="RenderTransform" Value="scale(1.06)" />
+  </Style>
+
+  <Style Selector="Border.MotionCard">
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.22" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.22" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.24" Easing="CubicEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Border.MotionCard:pointerover">
+    <Setter Property="BorderBrush" Value="{DynamicResource ThemeForegroundMutedBrush}" />
+    <Setter Property="RenderTransform" Value="scale(1.003)" />
+  </Style>
+
+  <Style Selector="Button.MotionCardAction">
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+  </Style>
+  <Style Selector="Button.MotionCardAction:pointerover">
+    <Setter Property="RenderTransform" Value="scale(1.008)" />
+  </Style>
+  <Style Selector="UniformGrid.ResourceGrid Button:pointerover">
+    <Setter Property="RenderTransform" Value="scale(1.005)" />
+  </Style>
+
+  <Style Selector="ItemsControl.MotionList > ContentPresenter, ListBox.MotionList > ListBoxItem">
+    <Style.Animations>
+      <Animation Duration="0:0:0.22" Easing="CubicEaseOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.9" /><Setter Property="TranslateTransform.Y" Value="4" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /><Setter Property="TranslateTransform.Y" Value="0" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <Style Selector="ContentControl.PageHost.PagePulse">
+    <Style.Animations>
+      <Animation Duration="0:0:0.2" Easing="CubicEaseOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.94" /><Setter Property="TranslateTransform.Y" Value="4" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /><Setter Property="TranslateTransform.Y" Value="0" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <Style Selector="Border.ModalPanel">
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Style.Animations>
+      <Animation Duration="0:0:0.24" Easing="CubicEaseOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.88" /><Setter Property="ScaleTransform.ScaleX" Value="0.985" /><Setter Property="ScaleTransform.ScaleY" Value="0.985" /><Setter Property="TranslateTransform.Y" Value="8" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /><Setter Property="ScaleTransform.ScaleX" Value="1" /><Setter Property="ScaleTransform.ScaleY" Value="1" /><Setter Property="TranslateTransform.Y" Value="0" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <Style Selector="StackPanel.DialogContent, DockPanel.DialogContent, Grid.DialogContent">
+    <Style.Animations>
+      <Animation Duration="0:0:0.26" Easing="CubicEaseOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.9" /><Setter Property="TranslateTransform.Y" Value="7" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /><Setter Property="TranslateTransform.Y" Value="0" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <Style Selector="Border.MediaFrame">
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="Transitions"><Transitions><BrushTransition Property="BorderBrush" Duration="0:0:0.22"/><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.26" Easing="CubicEaseOut"/></Transitions></Setter>
+  </Style>
+  <Style Selector="Border.MediaFrame:pointerover">
+    <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}" />
+    <Setter Property="RenderTransform" Value="scale(1.008)" />
+  </Style>
+
+  <Style Selector="Border.ImportantBadge">
+    <Style.Animations>
+      <Animation Duration="0:0:1.8" IterationCount="INFINITE" PlaybackDirection="Alternate" Easing="SineEaseInOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.76" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <Style Selector="ContextMenu.ServerActionsMenu MenuItem">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.16" />
+        <BrushTransition Property="Foreground" Duration="0:0:0.16" />
+      </Transitions>
+    </Setter>
+  </Style>
+</Styles>

@@ -16,8 +16,27 @@
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="Padding" Value="28,26" />
       <Setter Property="Opacity" Value="1" />
-      <Setter Property="Transitions"><Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.32" Easing="CubicEaseOut" /></Transitions></Setter>
+      <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+      <Style.Animations>
+        <Animation Duration="0:0:0.38" Easing="CubicEaseOut">
+          <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.9" /><Setter Property="TranslateTransform.X" Value="12" /><Setter Property="ScaleTransform.ScaleX" Value="0.99" /><Setter Property="ScaleTransform.ScaleY" Value="0.99" /></KeyFrame>
+          <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /><Setter Property="TranslateTransform.X" Value="0" /><Setter Property="ScaleTransform.ScaleX" Value="1" /><Setter Property="ScaleTransform.ScaleY" Value="1" /></KeyFrame>
+        </Animation>
+      </Style.Animations>
     </Style>
+    <Style Selector="StackPanel.AuthBrand">
+      <Style.Animations>
+        <Animation Duration="0:0:0.44" Easing="CubicEaseOut">
+          <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.86" /><Setter Property="TranslateTransform.X" Value="-12" /></KeyFrame>
+          <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /><Setter Property="TranslateTransform.X" Value="0" /></KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+    <Style Selector="Border.AuthLogo">
+      <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+      <Setter Property="Transitions"><Transitions><BrushTransition Property="BorderBrush" Duration="0:0:0.24"/><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.28" Easing="CubicEaseOut"/></Transitions></Setter>
+    </Style>
+    <Style Selector="Border.AuthLogo:pointerover"><Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/><Setter Property="RenderTransform" Value="rotate(-3deg) scale(1.045)"/></Style>
     <Style Selector="Button.AuthUtility">
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
@@ -34,9 +53,9 @@
   <Grid Background="{DynamicResource ThemeStripeBackBrush}" ClipToBounds="True">
     <Grid ColumnDefinitions="0.9*,1.1*" Margin="54,38,54,34">
       <Grid Grid.Column="0" Margin="18,0,62,0">
-        <StackPanel VerticalAlignment="Center" Spacing="18">
-          <Border Width="88" Height="88" HorizontalAlignment="Left" Background="#050505"
-                  BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" CornerRadius="18">
+        <StackPanel Classes="AuthBrand" VerticalAlignment="Center" Spacing="18">
+          <Border Classes="AuthLogo" Width="88" Height="88" HorizontalAlignment="Left" Background="#050505"
+                  BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" CornerRadius="0">
             <Image Width="86" Height="86" Source="{DynamicResource OrbitraLogo}" Stretch="UniformToFill">
               <Image.Clip><RectangleGeometry Rect="0,0,86,86" RadiusX="17" RadiusY="17" /></Image.Clip>
             </Image>

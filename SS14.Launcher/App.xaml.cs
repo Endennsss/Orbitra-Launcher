@@ -343,6 +343,7 @@ public class App : Application
         }
 
         window.Show();
+        PerformanceTelemetry.MarkUiReady();
     }
 
     private void InitializeTray(IClassicDesktopStyleApplicationLifetime desktop)

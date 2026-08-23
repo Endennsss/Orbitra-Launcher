@@ -51,9 +51,9 @@
   <Style Selector="views|DropDown:pointerover Path.AccountIcon">
     <Style.Animations>
       <Animation Duration="0:0:0.3" Easing="CubicEaseOut">
-        <KeyFrame Cue="0%"><Setter Property="TranslateTransform.Y" Value="0" /></KeyFrame>
-        <KeyFrame Cue="50%"><Setter Property="TranslateTransform.Y" Value="-2" /></KeyFrame>
-        <KeyFrame Cue="100%"><Setter Property="TranslateTransform.Y" Value="0" /></KeyFrame>
+        <KeyFrame Cue="0%"><Setter Property="ScaleTransform.ScaleX" Value="1" /><Setter Property="ScaleTransform.ScaleY" Value="1" /></KeyFrame>
+        <KeyFrame Cue="50%"><Setter Property="ScaleTransform.ScaleX" Value="1.08" /><Setter Property="ScaleTransform.ScaleY" Value="1.08" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="ScaleTransform.ScaleX" Value="1" /><Setter Property="ScaleTransform.ScaleY" Value="1" /></KeyFrame>
       </Animation>
     </Style.Animations>
   </Style>

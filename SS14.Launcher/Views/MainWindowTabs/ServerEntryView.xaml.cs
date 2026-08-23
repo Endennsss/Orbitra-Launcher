@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.LogicalTree;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
+using SS14.Launcher.ViewModels.MainWindowTabs;
 
 namespace SS14.Launcher.Views.MainWindowTabs;
 
@@ -15,6 +16,23 @@ public partial class ServerEntryView : UserControl
         InitializeComponent();
 
         Links.LayoutUpdated += ApplyStyle;
+        SizeChanged += (_, _) => UpdateResponsiveHeader();
+    }
+
+    private void UpdateResponsiveHeader()
+    {
+        if (Bounds.Width <= 0)
+            return;
+
+        var hideRoundTime = Bounds.Width < 650;
+        ServerRowGrid.ColumnDefinitions = Bounds.Width switch
+        {
+            < 520 => new ColumnDefinitions("*,0,0,82,152"),
+            < 650 => new ColumnDefinitions("*,0,82,90,152"),
+            _ => new ColumnDefinitions("*,88,96,100,196")
+        };
+
+        RowPingButton.IsVisible = !hideRoundTime;
     }
 
     // Sets the style for the link buttons correctly so that they look correct
@@ -52,6 +70,9 @@ public partial class ServerEntryView : UserControl
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
+
+        if (DataContext is ServerEntryViewModel { ViewedInFavoritesPane: true })
+            return;
 
         if (DataContext is ObservableRecipient r)
             r.IsActive = false;

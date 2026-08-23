@@ -47,7 +47,10 @@
     <Setter Property="Padding" Value="4,3" />
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="Transitions"><Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.16"/><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/></Transitions></Setter>
   </Style>
+  <Style Selector="controls|ClickableCommandText.ServerSortHeader:pointerover"><Setter Property="Opacity" Value="1"/></Style>
 
   <Style Selector="Border.GridCell">
     <Setter Property="BorderBrush">
@@ -85,38 +88,43 @@
     <Setter Property="Template">
       <ControlTemplate>
         <DockPanel ZIndex="-1" Grid.IsSharedSizeScope="True">
-          <Grid DockPanel.Dock="Top" Margin="0,8" IsVisible="{TemplateBinding ShowHeader}">
+          <Grid Name="PART_ServerHeader" DockPanel.Dock="Top" Margin="0,8" IsVisible="{TemplateBinding ShowHeader}">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*" /> <!-- Server Name -->
-              <ColumnDefinition SharedSizeGroup="TimeCol" MinWidth="80" Width="Auto" />
-              <ColumnDefinition SharedSizeGroup="StatusCol" MinWidth="80" Width="Auto" />
-              <ColumnDefinition SharedSizeGroup="PingCol" MinWidth="72" Width="Auto" />
-              <ColumnDefinition SharedSizeGroup="ConnectCol" Width="Auto" />
+              <ColumnDefinition Width="88" />
+              <ColumnDefinition Width="96" />
+              <ColumnDefinition Width="100" />
+              <ColumnDefinition Width="196" />
+              <!-- Keep the header on the same viewport width as the rows. The
+                   list always reserves this lane for its vertical scrollbar. -->
+              <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" Classes="GridCell">
               <controls:ClickableCommandText Classes="ServerSortHeader" Command="{TemplateBinding SortNameCommand}">
-                <StackPanel Orientation="Horizontal" Spacing="6"><TextBlock Text="{loc:Loc tab-servers-table-name}" Classes="SubText"/><TextBlock Text="{TemplateBinding NameSortMark}" Classes="SubText"/></StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6"><TextBlock Text="{loc:Loc tab-servers-table-name}" Classes="SubText"/><TextBlock Text="{TemplateBinding NameSortMark}" Classes="SubText SortMark"/></StackPanel>
               </controls:ClickableCommandText>
             </Border>
             <Border Grid.Column="1" Classes="GridCell">
               <controls:ClickableCommandText Classes="ServerSortHeader" Command="{TemplateBinding SortRoundTimeCommand}">
-                <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center"><TextBlock Text="{loc:Loc tab-servers-table-round-time}" Classes="SubText"/><TextBlock Text="{TemplateBinding RoundTimeSortMark}" Classes="SubText"/></StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center"><TextBlock Text="{loc:Loc tab-servers-table-round-time}" Classes="SubText"/><TextBlock Text="{TemplateBinding RoundTimeSortMark}" Classes="SubText SortMark"/></StackPanel>
               </controls:ClickableCommandText>
             </Border>
             <Border Grid.Column="2" Classes="GridCell">
               <controls:ClickableCommandText Classes="ServerSortHeader" Command="{TemplateBinding SortPlayersCommand}">
-                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center"><TextBlock Text="{loc:Loc tab-servers-table-players}" Classes="SubText"/><TextBlock Text="{TemplateBinding PlayersSortMark}" Classes="SubText"/></StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center"><TextBlock Text="{loc:Loc tab-servers-table-players}" Classes="SubText"/><TextBlock Text="{TemplateBinding PlayersSortMark}" Classes="SubText SortMark"/></StackPanel>
               </controls:ClickableCommandText>
             </Border>
             <Border Grid.Column="3" Classes="GridCell">
               <controls:ClickableCommandText Classes="ServerSortHeader" Command="{TemplateBinding SortPingCommand}">
-                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center"><TextBlock Text="PING" Classes="SubText"/><TextBlock Text="{TemplateBinding PingSortMark}" Classes="SubText"/></StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center"><TextBlock Text="PING" Classes="SubText"/><TextBlock Text="{TemplateBinding PingSortMark}" Classes="SubText SortMark"/></StackPanel>
               </controls:ClickableCommandText>
             </Border>
             <Border Grid.Column="4" Classes="GridCell">
               <TextBlock Text="" Classes="SubText Center" />
             </Border>
+            <ScrollBar Grid.Column="5" Orientation="Vertical" Opacity="0"
+                       IsHitTestVisible="False" Focusable="False" />
           </Grid>
 
           <Panel DockPanel.Dock="Top" Classes="ScrollViewerSep" IsVisible="{TemplateBinding ShowHeader}" />
@@ -131,7 +139,7 @@
                   <!-- Virtualization keeps large hub lists responsive: only visible cards are created. -->
                   <ListBox ItemsSource="{TemplateBinding DisplayList}" Classes="ServerList"
                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                           ScrollViewer.VerticalScrollBarVisibility="Auto">
+                           ScrollViewer.VerticalScrollBarVisibility="Visible">
                     <ListBox.ItemsPanel>
                       <ItemsPanelTemplate><VirtualizingStackPanel /></ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
@@ -142,29 +150,33 @@
                              Text="{TemplateBinding ListText}" />
                   <StackPanel IsVisible="{TemplateBinding SpinnerVisible}"
                               VerticalAlignment="Top" Margin="18,16" Spacing="8">
-                    <Grid ColumnDefinitions="*,86,74,72" Height="42">
+                    <Grid ColumnDefinitions="*,88,96,100,196" Height="42" Margin="0,0,24,0">
                       <Border Classes="SkeletonBar" Margin="12,10" />
                       <Border Grid.Column="1" Classes="SkeletonBar" Margin="10,10" />
                       <Border Grid.Column="2" Classes="SkeletonBar" Margin="10,10" />
                       <Border Grid.Column="3" Classes="SkeletonBar" Margin="10,10" />
+                      <Border Grid.Column="4" Classes="SkeletonBar" Margin="10,10" />
                     </Grid>
-                    <Grid ColumnDefinitions="*,86,74,72" Height="42">
+                    <Grid ColumnDefinitions="*,88,96,100,196" Height="42" Margin="0,0,24,0">
                       <Border Classes="SkeletonBar Delay1" Margin="12,10" />
                       <Border Grid.Column="1" Classes="SkeletonBar Delay1" Margin="10,10" />
                       <Border Grid.Column="2" Classes="SkeletonBar Delay1" Margin="10,10" />
                       <Border Grid.Column="3" Classes="SkeletonBar Delay1" Margin="10,10" />
+                      <Border Grid.Column="4" Classes="SkeletonBar Delay1" Margin="10,10" />
                     </Grid>
-                    <Grid ColumnDefinitions="*,86,74,72" Height="42">
+                    <Grid ColumnDefinitions="*,88,96,100,196" Height="42" Margin="0,0,24,0">
                       <Border Classes="SkeletonBar Delay2" Margin="12,10" />
                       <Border Grid.Column="1" Classes="SkeletonBar Delay2" Margin="10,10" />
                       <Border Grid.Column="2" Classes="SkeletonBar Delay2" Margin="10,10" />
                       <Border Grid.Column="3" Classes="SkeletonBar Delay2" Margin="10,10" />
+                      <Border Grid.Column="4" Classes="SkeletonBar Delay2" Margin="10,10" />
                     </Grid>
-                    <Grid ColumnDefinitions="*,86,74,72" Height="42">
+                    <Grid ColumnDefinitions="*,88,96,100,196" Height="42" Margin="0,0,24,0">
                       <Border Classes="SkeletonBar Delay3" Margin="12,10" />
                       <Border Grid.Column="1" Classes="SkeletonBar Delay3" Margin="10,10" />
                       <Border Grid.Column="2" Classes="SkeletonBar Delay3" Margin="10,10" />
                       <Border Grid.Column="3" Classes="SkeletonBar Delay3" Margin="10,10" />
+                      <Border Grid.Column="4" Classes="SkeletonBar Delay3" Margin="10,10" />
                     </Grid>
                     <TextBlock Text="Загрузка серверов…" Classes="SubText" HorizontalAlignment="Center" Margin="0,8" />
                   </StackPanel>

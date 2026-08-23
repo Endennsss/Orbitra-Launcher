@@ -6,18 +6,88 @@
              xmlns:loc="clr-namespace:SS14.Launcher.Localization"
              xmlns:v="clr-namespace:SS14.Launcher.Views"
              xmlns:mwt="clr-namespace:SS14.Launcher.Views.MainWindowTabs"
+             xmlns:controls="clr-namespace:SS14.Launcher.Controls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SS14.Launcher.Views.MainWindowTabs.HomePageView">
   <Design.DataContext>
     <mainWindowTabs:HomePageViewModel />
   </Design.DataContext>
 
+  <UserControl.Resources>
+    <DataTemplate x:Key="FavoriteServerCard" x:DataType="mainWindowTabs:ServerEntryViewModel">
+      <Border Classes="FavoriteServerRow" BorderBrush="{DynamicResource LauncherLineBrush}"
+              BorderThickness="0,0,0,1" Padding="13,10">
+        <Border.ContextMenu>
+          <ContextMenu Classes="ServerActionsMenu FavoriteActionsMenu">
+            <MenuItem Classes="MenuSection" Header="ИЗБРАННЫЙ СЕРВЕР" IsEnabled="False"/>
+            <Separator/>
+            <MenuItem Header="Подключиться" Command="{Binding ConnectPressed}" IsEnabled="{Binding CanConnect}"/>
+            <MenuItem Header="Проверить пинг" Command="{Binding PingPressed}"/>
+            <MenuItem Header="{Binding TrayMonitoringText}" Command="{Binding ToggleTrayMonitoring}"/>
+            <Separator/>
+            <MenuItem Header="Скопировать адрес" Command="{Binding CopyAddressPressed}"/>
+            <MenuItem Header="Создать ярлык" Command="{Binding CreateDesktopShortcut}"/>
+            <MenuItem Header="Открыть сайт сервера" Command="{Binding OpenWebsitePressed}"/>
+            <Separator/>
+            <MenuItem Header="Удалить из избранного" Command="{Binding FavoriteButtonPressed}"/>
+          </ContextMenu>
+        </Border.ContextMenu>
+        <Grid ColumnDefinitions="4,46,*,Auto" RowDefinitions="Auto,Auto" MinHeight="58">
+          <Border Grid.RowSpan="2" Width="3" Background="#62D68B" IsVisible="{Binding IsOnline}"/>
+          <Border Grid.RowSpan="2" Width="3" Background="#E06B61" IsVisible="{Binding !IsOnline}"/>
+          <Border Grid.Column="1" Grid.RowSpan="2" Width="34" Height="34" VerticalAlignment="Center"
+                  Background="{DynamicResource LauncherControlBrush}" BorderBrush="{DynamicResource LauncherLineBrush}"
+                  BorderThickness="1" ClipToBounds="True">
+            <Grid>
+              <Image Source="{Binding ServerIcon}" Stretch="UniformToFill" IsVisible="{Binding HasServerIcon}"/>
+              <Viewbox Width="17" Height="17" IsVisible="{Binding !HasServerIcon}"><Canvas Width="24" Height="24"><Path Data="M4,4 L20,4 L20,20 L4,20 Z M8,9 L16,9 M8,13 L16,13 M8,17 L13,17" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.5"/></Canvas></Viewbox>
+            </Grid>
+          </Border>
+          <StackPanel Grid.Column="2" Margin="0,0,10,0" Spacing="3" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="15" TextTrimming="CharacterEllipsis"/>
+            <TextBlock Text="{Binding CacheData.Map}" Classes="SubText" FontSize="10" TextTrimming="CharacterEllipsis"/>
+          </StackPanel>
+          <Viewbox Grid.Column="3" Width="16" Height="16" VerticalAlignment="Center"><Canvas Width="24" Height="24"><Path Data="M9,18 L15,12 L9,6" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="2" StrokeLineCap="Round"/></Canvas></Viewbox>
+          <WrapPanel Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,8,0,0">
+            <Border Classes="FavoriteMetric"><TextBlock Text="{Binding PlayerCountString}"/></Border>
+            <Border Classes="FavoriteMetric"><controls:TimerTextCell Value="{Binding RoundStartTime}"/></Border>
+            <Border Classes="FavoriteMetric"><TextBlock Text="{Binding PingString}" Classes.PingGood="{Binding PingGood}" Classes.PingMedium="{Binding PingMedium}" Classes.PingBad="{Binding PingBad}"/></Border>
+          </WrapPanel>
+        </Grid>
+      </Border>
+    </DataTemplate>
+  </UserControl.Resources>
+
+  <UserControl.Styles>
+    <Style Selector="ListBox.FavoriteServerList"><Setter Property="Background" Value="Transparent"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Padding" Value="0"/></Style>
+    <Style Selector="ListBox.FavoriteServerList > ListBoxItem"><Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Background" Value="Transparent"/></Style>
+    <Style Selector="ListBox.FavoriteServerList > ListBoxItem:selected /template/ ContentPresenter"><Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/><Setter Property="BorderThickness" Value="3,0,0,0"/></Style>
+    <Style Selector="Border.FavoriteServerRow"><Setter Property="RenderTransformOrigin" Value="50%,50%"/><Setter Property="Transitions"><Transitions><BrushTransition Property="Background" Duration="0:0:0.16"/><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/></Transitions></Setter></Style>
+    <Style Selector="Border.FavoriteServerRow:pointerover"><Setter Property="Background" Value="{DynamicResource LauncherHoverBrush}"/></Style>
+    <Style Selector="Border.FavoriteMetric"><Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="Padding" Value="7,3"/><Setter Property="Margin" Value="0,0,5,0"/></Style>
+    <Style Selector="Border.FavoriteMetric TextBlock"><Setter Property="FontSize" Value="10"/><Setter Property="Foreground" Value="{DynamicResource ThemeSubTextBrush}"/></Style>
+    <Style Selector="TextBlock.PingGood"><Setter Property="Foreground" Value="#62D68B"/></Style>
+    <Style Selector="TextBlock.PingMedium"><Setter Property="Foreground" Value="#E4C65A"/></Style>
+    <Style Selector="TextBlock.PingBad"><Setter Property="Foreground" Value="#E06B61"/></Style>
+    <Style Selector="ContextMenu.FavoriteActionsMenu"><Setter Property="CornerRadius" Value="0"/><Setter Property="MinWidth" Value="286"/></Style>
+  </UserControl.Styles>
+
   <DockPanel>
     <!-- Header controls -->
-    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,18">
+    <Grid DockPanel.Dock="Top" Classes="MotionHeader" ColumnDefinitions="*,Auto" Margin="0,0,0,18">
       <StackPanel Grid.Column="0" Spacing="3">
         <TextBlock Text="OVERVIEW" Classes="SectionLabel" />
-        <TextBlock Text="{loc:Loc tab-home-favorite-servers}" Classes="NanoHeadingMedium" />
+        <StackPanel Orientation="Horizontal" Spacing="9">
+          <!-- Official Lucide star icon. -->
+          <Viewbox Width="20" Height="20" VerticalAlignment="Center">
+            <Canvas Width="24" Height="24">
+              <Path Data="M12,2 L15.09,8.26 L22,9.27 L17,14.14 L18.18,21.02 L12,17.77 L5.82,21.02 L7,14.14 L2,9.27 L8.91,8.26 Z"
+                    Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.8"
+                    StrokeLineCap="Round" />
+            </Canvas>
+          </Viewbox>
+          <TextBlock Text="{loc:Loc tab-home-favorite-servers}" Classes="NanoHeadingMedium" VerticalAlignment="Center" />
+        </StackPanel>
       </StackPanel>
       <Button Grid.Column="1" Classes="IconAction" Command="{Binding AddFavoritePressed}"
               ToolTip.Tip="{loc:Loc tab-home-add-favorite}">
@@ -37,12 +107,40 @@
               Click="OpenReplayClicked" />
     </DockPanel>
 
-    <Border Classes="Surface">
+    <Border Classes="Surface" ClipToBounds="True">
       <Grid RowDefinitions="*,Auto">
-      <mwt:ServerList Grid.Row="0" List="{Binding Favorites}" ShowHeader="True" IsVisible="{Binding !FavoritesEmpty}">
-        <Button Content="{loc:Loc tab-home-go-to-servers-tab}"
-                Command="{Binding MainWindowViewModel.SelectTabServers}" />
-      </mwt:ServerList>
+      <Carousel Name="FavoriteLayoutCarousel" Grid.Row="0" SelectedIndex="{Binding ServerLayoutPageIndex}" IsVisible="{Binding !FavoritesEmpty}">
+
+        <!-- Variant 2: favorites list and details side by side. -->
+        <Grid Name="FavoriteSplitGrid" ColumnDefinitions="360,5,*">
+          <Border Name="FavoriteSplitListPane" Grid.Column="0" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,0,1,0" MinWidth="280">
+            <Grid RowDefinitions="Auto,*">
+              <StackPanel Margin="14,11" Spacing="3"><TextBlock Text="ИЗБРАННОЕ" Classes="SectionLabel"/><TextBlock Text="Выберите сервер для просмотра" Classes="SubText"/></StackPanel>
+              <ListBox Grid.Row="1" Classes="FavoriteServerList MotionList" ItemsSource="{Binding Favorites}" SelectedItem="{Binding SelectedServer, Mode=TwoWay}" ItemTemplate="{StaticResource FavoriteServerCard}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible"><ListBox.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel/></ItemsPanelTemplate></ListBox.ItemsPanel></ListBox>
+            </Grid>
+          </Border>
+          <GridSplitter Name="FavoriteSplitDivider" Grid.Column="1" ResizeDirection="Columns" Background="{DynamicResource LauncherLineBrush}"/>
+          <Grid Name="FavoriteSplitDetailPane" Grid.Column="2" MinWidth="460">
+            <StackPanel IsVisible="{Binding !HasSelectedServer}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6"><TextBlock Text="Выберите сервер" FontSize="20" FontWeight="SemiBold"/><TextBlock Text="Карта, режим и статистика появятся здесь" Classes="SubText"/></StackPanel>
+            <mwt:ServerFocusDetailView ShowNavigation="False" IsVisible="{Binding HasSelectedServer}"/>
+          </Grid>
+        </Grid>
+
+        <!-- Variant 1: original expandable table. -->
+        <mwt:ServerList List="{Binding Favorites}" ShowHeader="True">
+          <Button Content="{loc:Loc tab-home-go-to-servers-tab}" Command="{Binding MainWindowViewModel.SelectTabServers}"/>
+        </mwt:ServerList>
+
+        <!-- Variant 3: compact favorites list opening a full server page. -->
+        <Border>
+          <Grid RowDefinitions="Auto,*">
+            <StackPanel Margin="14,11" Spacing="3"><TextBlock Text="ИЗБРАННЫЕ СЕРВЕРЫ" Classes="SectionLabel"/><TextBlock Text="Нажмите на сервер, чтобы открыть его страницу" Classes="SubText"/></StackPanel>
+            <ListBox Grid.Row="1" Classes="FavoriteServerList MotionList" ItemsSource="{Binding Favorites}" SelectedItem="{Binding SelectedServer, Mode=TwoWay}" SelectionChanged="FavoriteFocusSelectionChanged" ItemTemplate="{StaticResource FavoriteServerCard}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible"><ListBox.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel/></ItemsPanelTemplate></ListBox.ItemsPanel></ListBox>
+          </Grid>
+        </Border>
+
+        <mwt:ServerFocusDetailView ShowNavigation="True"/>
+      </Carousel>
 
       <StackPanel Grid.Row="0" IsVisible="{Binding FavoritesEmpty}"
                   Orientation="Vertical" VerticalAlignment="Center">
@@ -79,7 +177,7 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
               <DataTemplate>
-                <Button Command="{Binding ConnectPressed}" Margin="0,0,8,6" Padding="12,8">
+                <Button Classes="MotionCardAction" Command="{Binding ConnectPressed}" Margin="0,0,8,6" Padding="12,8">
                   <StackPanel>
                     <TextBlock Text="{Binding Name}" MaxWidth="170" TextTrimming="CharacterEllipsis"
                                FontWeight="SemiBold" />

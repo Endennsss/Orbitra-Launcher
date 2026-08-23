@@ -82,9 +82,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
     public ServerListTabViewModel ServersTab { get; }
     public NewsTabViewModel NewsTab { get; }
     public UsefulLinksTabViewModel UsefulLinksTab { get; }
+    public LocalServersTabViewModel LocalServersTab { get; }
     public OptionsTabViewModel OptionsTab { get; }
     public CustomThemeTabViewModel CustomThemeTab { get; }
     public PlaytimeTabViewModel PlaytimeTab { get; }
+    public AchievementsTabViewModel AchievementsTab { get; }
     public ProfileTabViewModel ProfileTab { get; }
     public ActivityTabViewModel ActivityTab { get; }
     public SystemCenterTabViewModel SystemCenterTab { get; }
@@ -104,9 +106,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         ServersTab = new ServerListTabViewModel(this);
         NewsTab = new NewsTabViewModel(this);
         UsefulLinksTab = new UsefulLinksTabViewModel();
+        LocalServersTab = new LocalServersTabViewModel(this);
         HomeTab = new HomePageViewModel(this);
         CustomThemeTab = new CustomThemeTabViewModel(this);
         PlaytimeTab = new PlaytimeTabViewModel();
+        AchievementsTab = new AchievementsTabViewModel();
         ProfileTab = new ProfileTabViewModel(this);
         ActivityTab = new ActivityTabViewModel();
         SystemCenterTab = new SystemCenterTabViewModel(this);
@@ -120,7 +124,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
             ServersTab,
             NewsTab,
             UsefulLinksTab,
+            LocalServersTab,
             PlaytimeTab,
+            AchievementsTab,
             ProfileTab,
             OptionsTab,
         ]);
@@ -191,9 +197,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         if (ReferenceEquals(tab, ServersTab)) return "servers";
         if (ReferenceEquals(tab, NewsTab)) return "news";
         if (ReferenceEquals(tab, UsefulLinksTab)) return "links";
+        if (ReferenceEquals(tab, LocalServersTab)) return "local-servers";
         if (ReferenceEquals(tab, OptionsTab)) return "options";
         if (ReferenceEquals(tab, CustomThemeTab)) return "custom-theme";
         if (ReferenceEquals(tab, PlaytimeTab)) return "playtime";
+        if (ReferenceEquals(tab, AchievementsTab)) return "achievements";
         if (ReferenceEquals(tab, ProfileTab)) return "profile";
         if (ReferenceEquals(tab, ActivityTab)) return "activity";
         if (ReferenceEquals(tab, SystemCenterTab)) return "system-center";
@@ -228,11 +236,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
 
     private void ApplySavedNavigationOrder()
     {
-        if (_cfg.GetCVar(CVars.NavigationOrderVersion) < 3)
+        if (_cfg.GetCVar(CVars.NavigationOrderVersion) < 5)
         {
             _cfg.SetCVar(CVars.NavigationTabOrder,
-                "home,servers,news,links,playtime,profile,activity,system-center,custom-theme,options,development");
-            _cfg.SetCVar(CVars.NavigationOrderVersion, 3);
+                "home,servers,local-servers,news,links,playtime,achievements,profile,activity,system-center,custom-theme,options,development");
+            _cfg.SetCVar(CVars.NavigationOrderVersion, 5);
             _cfg.CommitConfig();
         }
         var order = ParseCsv(_cfg.GetCVar(CVars.NavigationTabOrder)).ToList();
@@ -365,6 +373,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
     {
         "home" => "ОБЗОР",
         "servers" => "СЕТЬ SS14",
+        "local-servers" => "LOCAL HOST",
         "news" => "ТРАНСЛЯЦИИ",
         "links" => "РЕСУРСЫ",
         "playtime" => "СТАТИСТИКА",
@@ -615,14 +624,13 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IErrorOverlayOw
         if (Tabs[SelectedIndex] == ServersTab)
             ServersTab.ConnectCurrent();
         else if (Tabs[SelectedIndex] == HomeTab)
-            HomeTab.Favorites.FirstOrDefault(x => x.IsExpanded && x.CanConnect)?.ConnectPressed();
+            HomeTab.ConnectCurrent();
     }
 
     public void CloseExpandedServers()
     {
         ServersTab.CloseExpanded();
-        foreach (var server in HomeTab.Favorites.Where(x => x.IsExpanded))
-            server.IsExpanded = false;
+        HomeTab.CloseExpanded();
     }
 
     public void ToggleCommandPalette()

@@ -118,7 +118,7 @@
     </Setter>
   </Style>
   <Style Selector="ListBoxItem:pointerover Path.NavIcon">
-    <Setter Property="RenderTransform" Value="translate(2px, 0px) scale(1.08)" />
+    <Setter Property="RenderTransform" Value="scale(1.08)" />
     <Setter Property="Opacity" Value="1" />
   </Style>
   <Style Selector="ListBoxItem:pressed Path.NavIcon">

@@ -8,7 +8,7 @@
              x:Class="SS14.Launcher.Views.MainWindowTabs.CustomThemeTabView">
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
     <StackPanel Spacing="16">
-      <StackPanel Margin="0,0,0,4">
+      <StackPanel Classes="MotionHeader" Margin="0,0,0,4">
         <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
           <StackPanel>
             <TextBlock Text="APPEARANCE" Classes="SectionLabel" />
@@ -127,7 +127,7 @@
       </Expander>
       -->
 
-      <Border Classes="Surface" Padding="20">
+      <Border Classes="Surface MotionCard" Padding="20">
         <StackPanel Spacing="9">
           <CheckBox Content="Использовать кастомную тему" IsChecked="{Binding Enabled, Mode=TwoWay}" />
           <TextBlock Text="При включении светлая тема автоматически отключается и становится недоступной."
@@ -177,7 +177,7 @@
         </StackPanel>
       </Border>
 
-      <Border Classes="Surface" Padding="20" IsVisible="{Binding HasImportPreview}">
+      <Border Classes="Surface MotionCard" Padding="20" IsVisible="{Binding HasImportPreview}">
         <StackPanel Spacing="10">
           <TextBlock Text="ПРЕДПРОСМОТР ИМПОРТА" Classes="SectionLabel" />
           <TextBlock Text="Архив ещё не применён. Проверьте палитру, фон и размытие." Classes="SubText" />
@@ -204,7 +204,7 @@
         </StackPanel>
       </Border>
 
-      <Border Classes="Surface" Padding="20">
+      <Border Classes="Surface MotionCard" Padding="20">
         <StackPanel Spacing="10">
           <TextBlock Text="ФОН И РАЗМЫТИЕ" Classes="SectionLabel" />
           <WrapPanel>
@@ -242,7 +242,7 @@
         </StackPanel>
       </Border>
 
-      <Border Classes="Surface" Padding="20">
+      <Border Classes="Surface MotionCard" Padding="20">
         <StackPanel Spacing="10">
           <Grid ColumnDefinitions="*,Auto">
             <StackPanel>

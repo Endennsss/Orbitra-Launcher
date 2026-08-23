@@ -55,6 +55,7 @@ public sealed partial class ServerListCache : ObservableObject, IServerSource
 
     public async void RefreshServerList(CancellationToken cancel)
     {
+        var performanceTimer = Stopwatch.StartNew();
         AllServers.Clear();
         Status = RefreshListStatus.UpdatingMaster;
 
@@ -141,12 +142,18 @@ public sealed partial class ServerListCache : ObservableObject, IServerSource
                 Status = RefreshListStatus.PartialError;
             else
                 Status = RefreshListStatus.Updated;
+
+            performanceTimer.Stop();
+            PerformanceTelemetry.Record("Загрузка списка серверов", performanceTimer.Elapsed,
+                $"{AllServers.Count:N0} серверов");
         }
         catch (OperationCanceledException)
         {
         }
         catch (Exception e)
         {
+            performanceTimer.Stop();
+            PerformanceTelemetry.Record("Загрузка списка серверов", performanceTimer.Elapsed, "Ошибка");
             Log.Error(e, "Failed to fetch server list due to exception");
             Status = RefreshListStatus.Error;
         }
@@ -154,6 +161,7 @@ public sealed partial class ServerListCache : ObservableObject, IServerSource
 
     private async Task MeasureServerPingsAsync(ServerStatusData[] servers, CancellationToken cancel)
     {
+        var performanceTimer = Stopwatch.StartNew();
         using var throttle = new SemaphoreSlim(12);
         var tasks = servers.Select(async server =>
         {
@@ -192,6 +200,12 @@ public sealed partial class ServerListCache : ObservableObject, IServerSource
         }
         catch (OperationCanceledException)
         {
+        }
+        finally
+        {
+            performanceTimer.Stop();
+            PerformanceTelemetry.Record("Проверка пинга серверов", performanceTimer.Elapsed,
+                $"{servers.Length:N0} серверов");
         }
     }
 

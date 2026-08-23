@@ -37,6 +37,7 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        PerformanceTelemetry.MarkProcessStart();
 #if DEBUG
         Console.OutputEncoding = Encoding.UTF8;
 #endif

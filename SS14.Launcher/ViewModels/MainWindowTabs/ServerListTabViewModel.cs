@@ -8,6 +8,7 @@ using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Splat;
 using SS14.Launcher.Localization;
 using SS14.Launcher.Models.ServerStatus;
+using SS14.Launcher.Models.Data;
 using SS14.Launcher.Utility;
 
 namespace SS14.Launcher.ViewModels.MainWindowTabs;
@@ -18,6 +19,10 @@ public partial class ServerListTabViewModel : MainWindowTabViewModel
     private readonly MainWindowViewModel _windowVm;
     private readonly ServerListCache _serverListCache;
     private readonly List<ServerStatusData> _badgeServers = [];
+    private ServerEntryViewModel? _selectedServer;
+    private ServerSortMode _sortMode = ServerSortMode.Players;
+    private bool _sortDescending = true;
+    private bool _isFocusedDetailOpen;
 
     public ObservableList<ServerEntryViewModel> SearchedServers { get; } = [];
     public event Action? SearchFocusRequested;
@@ -55,13 +60,73 @@ public partial class ServerListTabViewModel : MainWindowTabViewModel
     public bool HasSearch => !string.IsNullOrWhiteSpace(SearchString);
     public void ClearSearch() => SearchString = string.Empty;
 
+    public ServerEntryViewModel? SelectedServer
+    {
+        get => _selectedServer;
+        set
+        {
+            if (ReferenceEquals(_selectedServer, value)) return;
+            if (_selectedServer != null) _selectedServer.IsExpanded = false;
+            SetProperty(ref _selectedServer, value);
+            if (_selectedServer != null) _selectedServer.IsExpanded = true;
+            OnPropertyChanged(nameof(HasSelectedServer));
+            OnPropertyChanged(nameof(SelectedStatusText));
+        }
+    }
+    public bool HasSelectedServer => SelectedServer != null;
+    public string SelectedStatusText => SelectedServer == null ? "Выберите сервер слева" : "Сервер выбран";
+    public int ServerListLayout => Math.Clamp(_windowVm.Cfg.GetCVar(CVars.ServerListLayout), 1, 3);
+    public bool IsTableLayout => ServerListLayout == 1;
+    public bool IsSplitLayout => ServerListLayout == 2;
+    public bool IsFocusLayout => ServerListLayout == 3;
+    public bool ShowFocusList => IsFocusLayout && !IsFocusedDetailOpen;
+    public bool ShowFocusDetail => IsFocusLayout && IsFocusedDetailOpen && SelectedServer != null;
+    public int ServerLayoutPageIndex => IsSplitLayout ? 0 : IsTableLayout ? 1 : ShowFocusDetail ? 3 : 2;
+    public bool IsFocusedDetailOpen
+    {
+        get => _isFocusedDetailOpen;
+        private set
+        {
+            if (!SetProperty(ref _isFocusedDetailOpen, value)) return;
+            OnPropertyChanged(nameof(ShowFocusList));
+            OnPropertyChanged(nameof(ShowFocusDetail));
+            OnPropertyChanged(nameof(ServerLayoutPageIndex));
+        }
+    }
+    public string NameSortMark => SortMark(ServerSortMode.Name);
+    public string RoundTimeSortMark => SortMark(ServerSortMode.RoundTime);
+    public string PlayersSortMark => SortMark(ServerSortMode.Players);
+    public string PingSortMark => SortMark(ServerSortMode.Ping);
+
+    public void SortByName() => ApplySort(ServerSortMode.Name);
+    public void SortByRoundTime() => ApplySort(ServerSortMode.RoundTime);
+    public void SortByPlayers() => ApplySort(ServerSortMode.Players);
+    public void SortByPing() => ApplySort(ServerSortMode.Ping);
+    public void UseTableLayout() => SetServerListLayout(1);
+    public void UseSplitLayout() => SetServerListLayout(2);
+    public void UseFocusLayout() => SetServerListLayout(3);
+    public void OpenSelectedServer()
+    {
+        if (IsFocusLayout && SelectedServer != null)
+            IsFocusedDetailOpen = true;
+    }
+    public void BackToServerList()
+    {
+        IsFocusedDetailOpen = false;
+        if (IsFocusLayout) SelectedServer = null;
+    }
+
     public bool SpinnerVisible => _serverListCache.Status < RefreshListStatus.Updated;
     public void RequestSearchFocus() => SearchFocusRequested?.Invoke();
-    public void ConnectCurrent() => SearchedServers.FirstOrDefault(x => x.IsExpanded && x.CanConnect)?.ConnectPressed();
+    public void ConnectCurrent()
+    {
+        if (SelectedServer is { CanConnect: true } selected)
+            selected.ConnectPressed();
+    }
     public void CloseExpanded()
     {
-        foreach (var entry in SearchedServers.Where(x => x.IsExpanded))
-            entry.IsExpanded = false;
+        if (ShowFocusDetail) BackToServerList();
+        else SelectedServer = null;
     }
 
     public string ListText
@@ -168,6 +233,7 @@ public partial class ServerListTabViewModel : MainWindowTabViewModel
 
     private void UpdateSearchedList()
     {
+        var selectedAddress = SelectedServer?.Address;
         var sortList = new List<ServerStatusData>();
 
         foreach (var server in _serverListCache.AllServers)
@@ -180,15 +246,89 @@ public partial class ServerListTabViewModel : MainWindowTabViewModel
 
         Filters.ApplyFilters(sortList);
 
-        sortList.Sort(ServerSortComparer.Instance);
+        ApplySelectedSort(sortList);
 
-        SearchedServers.SetItems(sortList.Select(server
-            => new ServerEntryViewModel(_windowVm, server, _serverListCache, _windowVm.Cfg)));
+        foreach (var oldEntry in SearchedServers)
+            oldEntry.IsActive = false;
+
+        var entries = sortList.Select(server =>
+        {
+            var entry = new ServerEntryViewModel(_windowVm, server, _serverListCache, _windowVm.Cfg)
+            {
+                SuppressIconOnActivation = !IsTableLayout
+            };
+            if (!IsTableLayout)
+                entry.IsActive = true;
+            return entry;
+        }).ToArray();
+        SearchedServers.SetItems(entries);
+        if (IsFocusLayout && !IsFocusedDetailOpen)
+            SelectedServer = null;
+        else
+            SelectedServer = entries.FirstOrDefault(x => string.Equals(x.Address, selectedAddress, StringComparison.OrdinalIgnoreCase))
+                             ?? entries.FirstOrDefault();
 
         OnPropertyChanged(nameof(ListText));
         OnPropertyChanged(nameof(ResultCountText));
         OnPropertyChanged(nameof(OnlineCountText));
     }
+
+    private void SetServerListLayout(int layout)
+    {
+        layout = Math.Clamp(layout, 1, 3);
+        if (ServerListLayout == layout) return;
+        _windowVm.Cfg.SetCVar(CVars.ServerListLayout, layout);
+        _windowVm.Cfg.CommitConfig();
+        IsFocusedDetailOpen = false;
+        OnPropertyChanged(nameof(ServerListLayout));
+        OnPropertyChanged(nameof(IsTableLayout));
+        OnPropertyChanged(nameof(IsSplitLayout));
+        OnPropertyChanged(nameof(IsFocusLayout));
+        OnPropertyChanged(nameof(ShowFocusList));
+        OnPropertyChanged(nameof(ShowFocusDetail));
+        OnPropertyChanged(nameof(ServerLayoutPageIndex));
+        UpdateSearchedList();
+    }
+
+    private void ApplySort(ServerSortMode mode)
+    {
+        if (_sortMode == mode)
+            _sortDescending = !_sortDescending;
+        else
+        {
+            _sortMode = mode;
+            _sortDescending = mode == ServerSortMode.Players;
+        }
+
+        OnPropertyChanged(nameof(NameSortMark));
+        OnPropertyChanged(nameof(RoundTimeSortMark));
+        OnPropertyChanged(nameof(PlayersSortMark));
+        OnPropertyChanged(nameof(PingSortMark));
+        UpdateSearchedList();
+    }
+
+    private void ApplySelectedSort(List<ServerStatusData> items)
+    {
+        var direction = _sortDescending ? -1 : 1;
+        items.Sort((left, right) =>
+        {
+            var result = _sortMode switch
+            {
+                ServerSortMode.Name => string.Compare(left.Name, right.Name, StringComparison.CurrentCultureIgnoreCase),
+                ServerSortMode.RoundTime => Nullable.Compare(RoundDuration(left), RoundDuration(right)),
+                ServerSortMode.Players => left.PlayerCount.CompareTo(right.PlayerCount),
+                ServerSortMode.Ping => Nullable.Compare(left.Ping, right.Ping),
+                _ => 0
+            };
+            if (result == 0)
+                result = string.Compare(left.Name, right.Name, StringComparison.CurrentCultureIgnoreCase);
+            return result * direction;
+        });
+    }
+
+    private string SortMark(ServerSortMode mode) => _sortMode == mode ? (_sortDescending ? "↓" : "↑") : string.Empty;
+    private static TimeSpan? RoundDuration(ServerStatusData server) =>
+        server.RoundStartTime is { } start ? DateTime.UtcNow - start.ToUniversalTime() : null;
 
     private bool DoesSearchMatch(ServerStatusData data)
     {
@@ -203,24 +343,5 @@ public partial class ServerListTabViewModel : MainWindowTabViewModel
             value?.Contains(query, StringComparison.CurrentCultureIgnoreCase) == true;
     }
 
-    private sealed class ServerSortComparer : NotNullComparer<ServerStatusData>
-    {
-        public static readonly ServerSortComparer Instance = new();
-
-        public override int Compare(ServerStatusData x, ServerStatusData y)
-        {
-            // Sort by player count descending.
-            var res = x.PlayerCount.CompareTo(y.PlayerCount);
-            if (res != 0)
-                return -res;
-
-            // Sort by name.
-            res = string.Compare(x.Name, y.Name, StringComparison.CurrentCultureIgnoreCase);
-            if (res != 0)
-                return res;
-
-            // Sort by address.
-            return string.Compare(x.Address, y.Address, StringComparison.Ordinal);
-        }
-    }
+    private enum ServerSortMode { Name, RoundTime, Players, Ping }
 }

@@ -45,6 +45,7 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
     public bool Busy { get => _busy; private set => SetProperty(ref _busy, value); }
     public string Status { get => _status; private set => SetProperty(ref _status, value); }
     public string Username => _main.ActiveAccount?.Username ?? "Не выполнен вход";
+    public string UsernameInitial => string.IsNullOrWhiteSpace(Username) ? "?" : Username[..1].ToUpperInvariant();
     public bool IsCreator => _main.ActiveAccount?.UserId == CreatorId;
     public string UserId => _main.ActiveAccount?.UserId.ToString("D") ?? "-";
     public string TotalPlaytime => FormatDuration(TimeSpan.FromSeconds(PlaytimeTracker.GetAll().Sum(x => x.Duration.TotalSeconds)));
@@ -58,13 +59,43 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
     public string DescriptionDisplay => string.IsNullOrWhiteSpace(Description) ? "Описание пока не заполнено." : Description;
     public FavoriteServerOption? SelectedFavoriteServer { get => _favoriteServer; set => SetProperty(ref _favoriteServer, value); }
     public string Search { get => _search; set => SetProperty(ref _search, value); }
-    public OrbitraProfileDto? FoundProfile { get => _found; private set { SetProperty(ref _found, value); OnPropertyChanged(nameof(HasFoundProfile)); OnPropertyChanged(nameof(FoundServerText)); OnPropertyChanged(nameof(FoundPresenceText)); OnPropertyChanged(nameof(FoundIsOnline)); OnPropertyChanged(nameof(FoundDescriptionDisplay)); OnPropertyChanged(nameof(FoundProfileIsCreator)); } }
+    public OrbitraProfileDto? FoundProfile { get => _found; private set { SetProperty(ref _found, value); NotifyFoundProfileState(); } }
     public bool FoundProfileIsCreator => FoundProfile?.UserId == CreatorId;
+    public string FoundInitial => string.IsNullOrWhiteSpace(FoundProfile?.Username) ? "?" : FoundProfile.Username[..1].ToUpperInvariant();
     public bool HasFoundProfile => FoundProfile != null && _showFoundProfileInSearch;
     public string FoundServerText => VisibleServer(FoundProfile);
     public string FoundPresenceText => "Онлайн";
     public bool FoundIsOnline => IsProfileOnline(FoundProfile);
     public string FoundDescriptionDisplay => string.IsNullOrWhiteSpace(FoundProfile?.Description) ? "Пользователь пока ничего о себе не рассказал." : FoundProfile.Description;
+    public string FoundFavoriteServerText => string.IsNullOrWhiteSpace(FoundProfile?.FavoriteServerName)
+        ? "Не выбран"
+        : FoundProfile.FavoriteServerName;
+    public string FoundActivityText => FoundIsOnline
+        ? string.IsNullOrWhiteSpace(FoundServerText) ? "Сейчас в Orbitra" : FoundServerText
+        : "Сейчас не в сети";
+    public bool HasFoundThemes => FoundThemes.Count > 0;
+    private OrbitraFriendItemViewModel? FoundFriend => FoundProfile == null
+        ? null
+        : Friends.FirstOrDefault(x => x.UserId == FoundProfile.UserId);
+    public bool FoundIsSelf => FoundProfile != null && _main.ActiveAccount?.UserId == FoundProfile.UserId;
+    public bool FoundIsFriend => FoundFriend?.IsAccepted == true;
+    public bool FoundHasIncomingRequest => FoundFriend?.IsIncoming == true;
+    public bool FoundHasOutgoingRequest => FoundFriend is { IsAccepted: false, IsIncoming: false };
+    public bool CanAddFoundFriend => FoundProfile != null && !FoundIsSelf && FoundFriend == null;
+    public bool CanAcceptFoundFriend => FoundHasIncomingRequest;
+    public bool CanRemoveFoundFriend => FoundFriend != null;
+    public bool FoundCanConnect => FoundFriend?.CanConnect == true;
+    public bool FoundCanInvite => FoundFriend?.CanInvite == true;
+    public string FoundRelationshipText => FoundIsSelf ? "Это ваш профиль"
+        : FoundIsFriend ? "В друзьях"
+        : FoundHasIncomingRequest ? "Хочет добавить вас в друзья"
+        : FoundHasOutgoingRequest ? "Заявка отправлена"
+        : "Не в друзьях";
+    public string FoundRemoveActionText => FoundIsFriend ? "Удалить из друзей"
+        : FoundHasIncomingRequest ? "Отклонить заявку"
+        : "Отменить заявку";
+    public bool HasFriends => Friends.Count > 0;
+    public bool HasMyThemes => MyThemes.Count > 0;
     public string OwnPresenceText => "Онлайн";
     public bool OwnIsOnline => !IsIncognito;
     public bool IsIncognito
@@ -107,7 +138,7 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
     private async Task RefreshAsync()
     {
         var account = _main.ActiveAccount;
-        OnPropertyChanged(nameof(Username)); OnPropertyChanged(nameof(IsCreator)); OnPropertyChanged(nameof(UserId)); OnPropertyChanged(nameof(TotalPlaytime)); OnPropertyChanged(nameof(ServersPlayed));
+        OnPropertyChanged(nameof(Username)); OnPropertyChanged(nameof(UsernameInitial)); OnPropertyChanged(nameof(IsCreator)); OnPropertyChanged(nameof(UserId)); OnPropertyChanged(nameof(TotalPlaytime)); OnPropertyChanged(nameof(ServersPlayed));
         if (account == null) { Status = "Войдите в аккаунт SS14, чтобы открыть профиль."; return; }
         Busy = true;
         try
@@ -122,6 +153,9 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
             var friends = await _social.GetFriendsAsync(account.UserId);
             Friends.Clear(); foreach (var friend in friends) Friends.Add(new(this, friend));
             await LoadThemesAsync(account.UserId, MyThemes);
+            OnPropertyChanged(nameof(HasFriends));
+            OnPropertyChanged(nameof(HasMyThemes));
+            NotifyFoundProfileState();
             Status = $"Друзей: {Friends.Count(x => x.IsAccepted)} · входящих заявок: {Friends.Count(x => x.IsIncoming)}";
         }
         catch (Exception e) { Status = e.Message; }
@@ -209,6 +243,22 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
         try { await _social.SendFriendRequestAsync(me.UserId, FoundProfile.UserId); _main.ShowToast("Заявка в друзья отправлена"); await RefreshAsync(); }
         catch (Exception e) { _main.ShowToast(e.Message, true); }
     }
+    public void AcceptFoundFriend()
+    {
+        if (FoundFriend is { } friend) Accept(friend);
+    }
+    public void RemoveFoundFriend()
+    {
+        if (FoundFriend is { } friend) Remove(friend);
+    }
+    public void ConnectFoundFriend()
+    {
+        if (FoundFriend is { } friend) Connect(friend);
+    }
+    public void InviteFoundFriend()
+    {
+        if (FoundFriend is { } friend) Invite(friend);
+    }
     internal async void Accept(OrbitraFriendItemViewModel item)
     { var me=_main.ActiveAccount; if(me==null)return; try { await _social.AcceptFriendAsync(me.UserId,item.UserId); await RefreshAsync(); } catch(Exception e){_main.ShowToast(e.Message,true);} }
     internal async void Remove(OrbitraFriendItemViewModel item)
@@ -261,14 +311,41 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
     private async Task LoadThemesAsync(Guid? userId, ObservableCollection<ProfileThemeItemViewModel> target)
     {
         target.Clear();
+        if (ReferenceEquals(target, FoundThemes)) OnPropertyChanged(nameof(HasFoundThemes));
+        if (ReferenceEquals(target, MyThemes)) OnPropertyChanged(nameof(HasMyThemes));
         if (userId == null) return;
         try
         {
             var themes = await _workshop.GetThemesAsync(_main.ActiveAccount?.UserId);
             foreach (var theme in themes.Where(x => x.AuthorUserId == userId.Value))
                 target.Add(new ProfileThemeItemViewModel(this, theme));
+            if (ReferenceEquals(target, FoundThemes)) OnPropertyChanged(nameof(HasFoundThemes));
+            if (ReferenceEquals(target, MyThemes)) OnPropertyChanged(nameof(HasMyThemes));
         }
         catch { }
+    }
+    private void NotifyFoundProfileState()
+    {
+        OnPropertyChanged(nameof(HasFoundProfile));
+        OnPropertyChanged(nameof(FoundServerText));
+        OnPropertyChanged(nameof(FoundPresenceText));
+        OnPropertyChanged(nameof(FoundIsOnline));
+        OnPropertyChanged(nameof(FoundDescriptionDisplay));
+        OnPropertyChanged(nameof(FoundFavoriteServerText));
+        OnPropertyChanged(nameof(FoundActivityText));
+        OnPropertyChanged(nameof(FoundProfileIsCreator));
+        OnPropertyChanged(nameof(FoundInitial));
+        OnPropertyChanged(nameof(FoundIsSelf));
+        OnPropertyChanged(nameof(FoundIsFriend));
+        OnPropertyChanged(nameof(FoundHasIncomingRequest));
+        OnPropertyChanged(nameof(FoundHasOutgoingRequest));
+        OnPropertyChanged(nameof(CanAddFoundFriend));
+        OnPropertyChanged(nameof(CanAcceptFoundFriend));
+        OnPropertyChanged(nameof(CanRemoveFoundFriend));
+        OnPropertyChanged(nameof(FoundCanConnect));
+        OnPropertyChanged(nameof(FoundCanInvite));
+        OnPropertyChanged(nameof(FoundRelationshipText));
+        OnPropertyChanged(nameof(FoundRemoveActionText));
     }
     internal void OpenThemeWorkshop() => _main.CustomThemeTab.OpenWorkshop();
     internal void OpenThemeWorkshop(Guid themeId) => _main.CustomThemeTab.OpenWorkshopThemeById(themeId);
@@ -309,6 +386,7 @@ public sealed class ProfileTabViewModel : MainWindowTabViewModel, IDisposable
 public sealed class OrbitraFriendItemViewModel(ProfileTabViewModel owner, OrbitraFriendDto data)
 {
     public Guid UserId => data.Profile.UserId; public string Username => data.Profile.Username;
+    public string Initial => string.IsNullOrWhiteSpace(Username) ? "?" : Username[..1].ToUpperInvariant();
     public bool IsCreator => UserId == ProfileTabViewModel.CreatorId;
     public bool IsIncoming => data.IsIncoming; public bool IsAccepted => data.Status == "accepted";
     public string State => IsIncoming ? "Входящая заявка" : IsAccepted ? "В друзьях" : "Заявка отправлена";

@@ -70,8 +70,8 @@ Taken & modified from Avalonia's git repo.
 
   <Style Selector="TabControl[TabStripPlacement=Left] /template/ ContentPresenter#PART_SelectedContentHost">
     <Style.Animations>
-      <Animation Duration="0:0:0.3" Easing="CubicEaseOut">
-        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0" /></KeyFrame>
+      <Animation Duration="0:0:0.18" Easing="CubicEaseOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.94" /></KeyFrame>
         <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /></KeyFrame>
       </Animation>
     </Style.Animations>

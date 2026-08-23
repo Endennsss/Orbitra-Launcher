@@ -37,6 +37,8 @@ public partial class HomePageViewModel : MainWindowTabViewModel
     public bool HasRecentServers => RecentServers.Count > 0;
     private readonly Dictionary<string, FavoritePresenceState> _favoritePresence = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, ServerStatusData> _notificationServers = new(StringComparer.OrdinalIgnoreCase);
+    private ServerEntryViewModel? _selectedServer;
+    private bool _isFocusedDetailOpen;
 
     public HomePageViewModel(MainWindowViewModel mainWindowViewModel)
     {
@@ -46,7 +48,11 @@ public partial class HomePageViewModel : MainWindowTabViewModel
 
         _cfg.FavoriteServers
             .Connect()
-            .Select(x => new ServerEntryViewModel(MainWindowViewModel, _statusCache.GetStatusFor(x.Address), x, _statusCache, _cfg) { ViewedInFavoritesPane = true })
+            .Select(x => new ServerEntryViewModel(MainWindowViewModel, _statusCache.GetStatusFor(x.Address), x, _statusCache, _cfg)
+            {
+                ViewedInFavoritesPane = true,
+                IsActive = true
+            })
             .OnItemAdded(a =>
             {
                 a.CacheData.PropertyChanged += FavoriteUiStatusChanged;
@@ -58,6 +64,7 @@ public partial class HomePageViewModel : MainWindowTabViewModel
             })
             .OnItemRemoved(a =>
             {
+                a.IsActive = false;
                 a.CacheData.PropertyChanged -= FavoriteUiStatusChanged;
                 if (_notificationServers.Remove(a.CacheData.Address, out var backgroundData))
                     backgroundData.PropertyChanged -= FavoriteStatusChanged;
@@ -76,6 +83,8 @@ public partial class HomePageViewModel : MainWindowTabViewModel
             .Subscribe(_ =>
             {
                 FavoritesEmpty = favorites.Count == 0;
+                if (_selectedServer != null && !favorites.Contains(_selectedServer))
+                    SelectedServer = favorites.FirstOrDefault();
                 BadgeChanged();
             });
 
@@ -94,6 +103,76 @@ public partial class HomePageViewModel : MainWindowTabViewModel
     }
 
     public ReadOnlyObservableCollection<ServerEntryViewModel> Favorites { get; }
+
+    public ServerEntryViewModel? SelectedServer
+    {
+        get => _selectedServer;
+        set
+        {
+            if (!SetProperty(ref _selectedServer, value)) return;
+            OnPropertyChanged(nameof(HasSelectedServer));
+            OnPropertyChanged(nameof(ShowFocusDetail));
+            OnPropertyChanged(nameof(ServerLayoutPageIndex));
+        }
+    }
+    public bool HasSelectedServer => SelectedServer != null;
+    public int ServerListLayout => Math.Clamp(_cfg.GetCVar(CVars.ServerListLayout), 1, 3);
+    public bool IsTableLayout => ServerListLayout == 1;
+    public bool IsSplitLayout => ServerListLayout == 2;
+    public bool IsFocusLayout => ServerListLayout == 3;
+    public bool ShowFocusList => IsFocusLayout && !_isFocusedDetailOpen;
+    public bool ShowFocusDetail => IsFocusLayout && _isFocusedDetailOpen && SelectedServer != null;
+    public int ServerLayoutPageIndex => IsSplitLayout ? 0 : IsTableLayout ? 1 : ShowFocusDetail ? 3 : 2;
+
+    public void RefreshServerLayout()
+    {
+        _isFocusedDetailOpen = false;
+        SelectedServer = IsSplitLayout ? Favorites.FirstOrDefault() : null;
+        OnPropertyChanged(nameof(ServerListLayout));
+        OnPropertyChanged(nameof(IsTableLayout));
+        OnPropertyChanged(nameof(IsSplitLayout));
+        OnPropertyChanged(nameof(IsFocusLayout));
+        OnPropertyChanged(nameof(ShowFocusList));
+        OnPropertyChanged(nameof(ShowFocusDetail));
+        OnPropertyChanged(nameof(ServerLayoutPageIndex));
+    }
+
+    public void OpenSelectedServer()
+    {
+        if (!IsFocusLayout || SelectedServer == null) return;
+        _isFocusedDetailOpen = true;
+        OnPropertyChanged(nameof(ShowFocusList));
+        OnPropertyChanged(nameof(ShowFocusDetail));
+        OnPropertyChanged(nameof(ServerLayoutPageIndex));
+    }
+
+    public void BackToServerList()
+    {
+        _isFocusedDetailOpen = false;
+        SelectedServer = null;
+        OnPropertyChanged(nameof(ShowFocusList));
+        OnPropertyChanged(nameof(ShowFocusDetail));
+        OnPropertyChanged(nameof(ServerLayoutPageIndex));
+    }
+
+    public void ConnectCurrent()
+    {
+        var server = IsTableLayout
+            ? Favorites.FirstOrDefault(x => x.IsExpanded && x.CanConnect)
+            : SelectedServer is { CanConnect: true } selected ? selected : null;
+        server?.ConnectPressed();
+    }
+
+    public void CloseExpanded()
+    {
+        if (ShowFocusDetail)
+            BackToServerList();
+        else if (IsSplitLayout)
+            SelectedServer = null;
+        else
+            foreach (var server in Favorites.Where(x => x.IsExpanded))
+                server.IsExpanded = false;
+    }
 
     [ObservableProperty] private bool _favoritesEmpty = true;
 
@@ -161,6 +240,8 @@ public partial class HomePageViewModel : MainWindowTabViewModel
         {
             _statusCache.InitialUpdateStatus(favorite.CacheData);
         }
+        if (IsSplitLayout && SelectedServer == null)
+            SelectedServer = Favorites.FirstOrDefault();
         _serverListCache.RequestInitialUpdate();
     }
 
@@ -262,7 +343,14 @@ public partial class HomePageViewModel : MainWindowTabViewModel
         }
         MainWindowViewModel.SelectTabHome();
         var favorite = Favorites.FirstOrDefault(f => string.Equals(f.CacheData.Address, address, StringComparison.OrdinalIgnoreCase));
-        if (favorite != null) favorite.IsExpanded = true;
+        if (favorite == null) return;
+        if (IsTableLayout)
+            favorite.IsExpanded = true;
+        else
+        {
+            SelectedServer = favorite;
+            if (IsFocusLayout) OpenSelectedServer();
+        }
     }
 
     public void RecordRecentServer(string name, string address)

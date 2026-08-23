@@ -151,6 +151,49 @@ public class OptionsTabViewModel : MainWindowTabViewModel
         new(2048, "2 МБ/с"), new(5120, "5 МБ/с"), new(10240, "10 МБ/с"),
         new(20480, "20 МБ/с"), new(51200, "50 МБ/с")
     ];
+    public IReadOnlyList<ServerLayoutOption> ServerLayouts { get; } =
+    [
+        new(1, "Классическая таблица"),
+        new(2, "Список и панель справа"),
+        new(3, "Отдельная страница сервера")
+    ];
+    public ServerLayoutOption SelectedServerLayout
+    {
+        get => ServerLayouts.FirstOrDefault(x => x.Id == Cfg.GetCVar(CVars.ServerListLayout)) ?? ServerLayouts[2];
+        set
+        {
+            if (value == null) return;
+            SetServerLayout(value.Id);
+        }
+    }
+    public bool IsClassicServerLayout => Cfg.GetCVar(CVars.ServerListLayout) == 1;
+    public bool IsSplitServerLayout => Cfg.GetCVar(CVars.ServerListLayout) == 2;
+    public bool IsFocusServerLayout => Cfg.GetCVar(CVars.ServerListLayout) == 3;
+    public void SelectClassicServerLayout() => SetServerLayout(1);
+    public void SelectSplitServerLayout() => SetServerLayout(2);
+    public void SelectFocusServerLayout() => SetServerLayout(3);
+
+    private void SetServerLayout(int layout)
+    {
+        layout = Math.Clamp(layout, 1, 3);
+        if (_mainWindow != null)
+        {
+            if (layout == 1) _mainWindow.ServersTab.UseTableLayout();
+            else if (layout == 2) _mainWindow.ServersTab.UseSplitLayout();
+            else _mainWindow.ServersTab.UseFocusLayout();
+            _mainWindow.HomeTab.RefreshServerLayout();
+        }
+        else
+        {
+            Cfg.SetCVar(CVars.ServerListLayout, layout);
+            Cfg.CommitConfig();
+        }
+
+        OnPropertyChanged(nameof(SelectedServerLayout));
+        OnPropertyChanged(nameof(IsClassicServerLayout));
+        OnPropertyChanged(nameof(IsSplitServerLayout));
+        OnPropertyChanged(nameof(IsFocusServerLayout));
+    }
     public DownloadLimitOption SelectedDownloadLimit
     {
         get => DownloadLimits.FirstOrDefault(x => x.KibPerSecond == Cfg.GetCVar(CVars.DownloadSpeedLimitKib)) ?? DownloadLimits[0];
@@ -298,6 +341,11 @@ public class OptionsTabViewModel : MainWindowTabViewModel
 }
 
 public sealed record DownloadLimitOption(int KibPerSecond, string Name)
+{
+    public override string ToString() => Name;
+}
+
+public sealed record ServerLayoutOption(int Id, string Name)
 {
     public override string ToString() => Name;
 }

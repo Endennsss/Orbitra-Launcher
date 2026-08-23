@@ -118,7 +118,8 @@
           </Grid>
           </Border>
           <Border Grid.Column="1" Background="{DynamicResource ThemeStripebackEdgeBrush}"/>
-          <ContentControl Grid.Column="2" Content="{Binding SelectedTab}" Margin="22" ClipToBounds="True"><ContentControl.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.22"/></Transitions></ContentControl.Transitions></ContentControl>
+          <ContentControl Name="PageHost" Classes="PageHost PagePulse" Grid.Column="2"
+                          Content="{Binding SelectedTab}" Margin="22" ClipToBounds="True" />
         </Grid>
         <!-- Login interface when not logged in -->
         <v:MainWindowLogin

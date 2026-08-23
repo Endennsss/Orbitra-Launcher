@@ -11,12 +11,12 @@
 
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
     <StackPanel Spacing="16">
-      <StackPanel>
+      <StackPanel Classes="MotionHeader">
         <TextBlock Text="DEV LAB" Classes="SectionLabel" />
         <TextBlock Text="Проверка интерфейса и интеграций" Classes="NanoHeadingMedium" />
       </StackPanel>
 
-      <Border Classes="Surface" Padding="20">
+      <Border Classes="Surface MotionCard" Padding="20">
         <StackPanel Spacing="10">
           <TextBlock Text="СООБЩЕНИЯ И УВЕДОМЛЕНИЯ" Classes="SectionLabel" />
           <WrapPanel>
@@ -31,7 +31,7 @@
         </StackPanel>
       </Border>
 
-      <Border Classes="Surface" Padding="20">
+      <Border Classes="Surface MotionCard" Padding="20">
         <StackPanel Spacing="10">
           <TextBlock Text="DISCORD RPC" Classes="SectionLabel" />
           <WrapPanel>
@@ -44,7 +44,7 @@
         </StackPanel>
       </Border>
 
-      <Border Classes="Surface" Padding="20">
+      <Border Classes="Surface MotionCard" Padding="20">
         <StackPanel Spacing="10">
           <TextBlock Text="ТЕМА И АНИМАЦИИ" Classes="SectionLabel" />
           <WrapPanel>
@@ -70,7 +70,7 @@
         </StackPanel>
       </Border>
 
-      <Border Classes="Surface" Padding="20">
+      <Border Classes="Surface MotionCard" Padding="20">
         <StackPanel Spacing="8">
           <TextBlock Text="ПАРАМЕТРЫ РАЗРАБОТКИ" Classes="SectionLabel" />
           <CheckBox IsChecked="{Binding DisableSigning}" Content="{loc:Loc tab-development-disable-signing}" />

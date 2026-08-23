@@ -8,6 +8,8 @@ obj/
 cmake-build*
 publish_test
 Dependencies
+artifacts/
+Orbitra_Launcher_Windows/
 SS14.Launcher/FodyWeavers.xsd
 
 !PublishFiles/Space Station 14 Launcher.app/Contents/Resources/bin/

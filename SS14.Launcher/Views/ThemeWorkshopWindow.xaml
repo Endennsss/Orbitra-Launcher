@@ -32,7 +32,7 @@
 
     <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
       <StackPanel Margin="24" Spacing="14">
-        <Grid ColumnDefinitions="*,Auto">
+        <Grid Classes="MotionHeader" ColumnDefinitions="*,Auto">
           <StackPanel>
             <TextBlock Text="COMMUNITY WORKSHOP" Classes="SectionLabel" />
             <TextBlock Text="Темы сообщества Orbitra" Classes="NanoHeadingMedium" />
@@ -75,10 +75,10 @@
                     VerticalAlignment="Center" />
         </Grid>
 
-        <ItemsControl ItemsSource="{Binding WorkshopThemes}" IsVisible="{Binding !HasSelectedWorkshopTheme}">
+        <ItemsControl Classes="MotionList" ItemsSource="{Binding WorkshopThemes}" IsVisible="{Binding !HasSelectedWorkshopTheme}">
           <ItemsControl.ItemTemplate>
             <DataTemplate x:DataType="vm:WorkshopThemeItemViewModel">
-              <Border Classes="Surface" Padding="16" Margin="0,0,0,8">
+              <Border Classes="Surface MotionCard" Padding="16" Margin="0,0,0,8">
                 <Grid ColumnDefinitions="210,*,Auto">
                   <Border Background="{DynamicResource LauncherSurfaceAltBrush}" Height="118" ClipToBounds="True">
                     <Grid>
@@ -108,7 +108,7 @@
           </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <Border Classes="Surface" Padding="18" IsVisible="{Binding HasSelectedWorkshopTheme}">
+        <Border Classes="Surface ModalPanel" Padding="18" IsVisible="{Binding HasSelectedWorkshopTheme}">
           <StackPanel Spacing="12">
             <Grid ColumnDefinitions="*,Auto">
               <StackPanel>
@@ -134,10 +134,10 @@
                       IsVisible="{Binding SelectedWorkshopTheme.IsOwn}" />
             </WrapPanel>
             <TextBlock Text="КОММЕНТАРИИ" Classes="SectionLabel" Margin="0,8,0,0" />
-            <ItemsControl ItemsSource="{Binding WorkshopComments}">
+            <ItemsControl Classes="MotionList" ItemsSource="{Binding WorkshopComments}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="vm:WorkshopCommentItemViewModel">
-                  <Border Background="{DynamicResource LauncherSurfaceAltBrush}" Padding="11" Margin="0,0,0,6">
+                  <Border Classes="MotionCard" Background="{DynamicResource LauncherSurfaceAltBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="11" Margin="0,0,0,6">
                     <StackPanel>
                       <Grid ColumnDefinitions="*,Auto,Auto">
                         <TextBlock Text="{Binding Author}" FontWeight="SemiBold" />

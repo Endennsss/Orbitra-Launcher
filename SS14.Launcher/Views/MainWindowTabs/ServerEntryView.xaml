@@ -30,8 +30,8 @@
       <Setter Property="IsHitTestVisible" Value="False" />
       <Setter Property="Transitions">
         <Transitions>
-          <DoubleTransition Property="Progress" Duration="0:0:0.22" Easing="CubicEaseInOut" />
-          <DoubleTransition Property="Opacity" Duration="0:0:0.15" Easing="CubicEaseInOut" />
+          <DoubleTransition Property="Progress" Duration="0:0:0.30" Easing="CubicEaseInOut" />
+          <DoubleTransition Property="Opacity" Duration="0:0:0.24" Easing="CubicEaseInOut" />
         </Transitions>
       </Setter>
     </Style>
@@ -67,6 +67,16 @@
     <Style Selector="Viewbox.ServerPingIcon">
       <Setter Property="RenderTransformOrigin" Value="50%,50%" />
     </Style>
+    <Style Selector="Border.ServerIconTile, Image.ServerIconImage, Path.ServerIconFallback">
+      <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+      <Setter Property="Transitions"><Transitions><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.22" Easing="CubicEaseOut"/></Transitions></Setter>
+    </Style>
+    <Style Selector="Border.ServerIconTile">
+      <Setter Property="Transitions"><Transitions><BrushTransition Property="BorderBrush" Duration="0:0:0.18"/><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.22" Easing="CubicEaseOut"/></Transitions></Setter>
+    </Style>
+    <Style Selector="Expander.ServerCard:pointerover Border.ServerIconTile"><Setter Property="BorderBrush" Value="{DynamicResource ThemeForegroundMutedBrush}"/><Setter Property="RenderTransform" Value="scale(1.06)"/></Style>
+    <Style Selector="Expander.ServerCard:pointerover Image.ServerIconImage"><Setter Property="RenderTransform" Value="scale(1.08)"/></Style>
+    <Style Selector="Expander.ServerCard:pointerover Path.ServerIconFallback"><Setter Property="RenderTransform" Value="scale(1.08)"/></Style>
     <Style Selector="Button:pointerover Viewbox.ServerPingIcon, Viewbox.ServerPingIcon.Pinging">
       <Style.Animations>
         <Animation Duration="0:0:0.62" IterationCount="INFINITE" Easing="LinearEasing">
@@ -79,7 +89,7 @@
 
   <Panel>
     <Panel.ContextMenu>
-      <ContextMenu Classes="ServerActionsMenu">
+      <ContextMenu Classes="ServerActionsMenu" Classes.FavoriteActionsMenu="{Binding ViewedInFavoritesPane}">
         <MenuItem Classes="MenuSection" Header="ДЕЙСТВИЯ С СЕРВЕРОМ" IsEnabled="False" />
         <Separator />
         <MenuItem Header="Подключиться" Command="{Binding ConnectPressed}" IsEnabled="{Binding CanConnect}" />
@@ -94,22 +104,22 @@
     </Panel.ContextMenu>
     <Expander Name="Expando" Classes="NoPad ServerCard" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
       <Expander.Header>
-        <Grid>
+        <Grid Name="ServerRowGrid">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" /> <!-- Server Name -->
-            <ColumnDefinition SharedSizeGroup="TimeCol" MinWidth="80" Width="Auto" />
-            <ColumnDefinition SharedSizeGroup="StatusCol" MinWidth="80" Width="Auto" />
-            <ColumnDefinition SharedSizeGroup="PingCol" MinWidth="72" Width="Auto" />
-            <ColumnDefinition SharedSizeGroup="ConnectCol" Width="Auto" />
+            <ColumnDefinition Width="88" />
+            <ColumnDefinition Width="96" />
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="196" />
           </Grid.ColumnDefinitions>
 
           <Border Grid.Column="0" Classes="GridCell">
             <Grid ColumnDefinitions="30,*">
-              <Border Width="24" Height="24" Background="{DynamicResource LauncherControlBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1"
+              <Border Classes="ServerIconTile" Width="24" Height="24" Background="{DynamicResource LauncherControlBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1"
                       VerticalAlignment="Center">
                 <Grid>
-                  <Image Source="{Binding ServerIcon}" Stretch="UniformToFill" IsVisible="{Binding HasServerIcon}" />
-                  <Path Data="M4,5 L20,5 L20,19 L4,19 Z M8,9 L16,9 M8,13 L14,13"
+                  <Image Classes="ServerIconImage" Source="{Binding ServerIcon}" Stretch="UniformToFill" IsVisible="{Binding HasServerIcon}" />
+                  <Path Classes="ServerIconFallback" Data="M4,5 L20,5 L20,19 L4,19 Z M8,9 L16,9 M8,13 L14,13"
                         Stroke="{DynamicResource ThemeForegroundMutedBrush}" StrokeThickness="1.4" Margin="5" IsVisible="{Binding !HasServerIcon}" />
                 </Grid>
               </Border>
@@ -125,7 +135,7 @@
             <TextBlock Text="{Binding ServerStatusString}" TextAlignment="Left" Classes="Center" />
           </Border>
 
-          <Border Grid.Column="1" Classes="GridCell" IsVisible="{Binding HaveData}">
+          <Border Name="RoundTimeCell" Grid.Column="1" Classes="GridCell" IsVisible="{Binding HaveData}">
             <Panel>
               <controls:TimerTextCell Value="{Binding RoundStartTime}"
                 IsVisible="{Binding RoundStatusString,Converter={x:Static StringConverters.IsNullOrEmpty}}" />
@@ -136,7 +146,7 @@
             </Panel>
           </Border>
 
-          <Border Grid.Column="2" Classes="GridCell" IsVisible="{Binding HaveData}">
+          <Border Name="PlayersCell" Grid.Column="2" Classes="GridCell" IsVisible="{Binding HaveData}">
             <TextBlock DockPanel.Dock="Right" Classes="Numeric"
                        Classes.MetricUp="{Binding PlayerMetricUp}" Classes.MetricDown="{Binding PlayerMetricDown}"
                        Text="{Binding PlayerCountString}" />
@@ -183,7 +193,7 @@
 
           <Border Grid.Column="4" Classes="GridCell">
             <StackPanel Orientation="Horizontal" Spacing="6">
-            <Button Width="38" Height="38" Padding="0" Command="{Binding PingPressed}"
+            <Button Name="RowPingButton" Width="38" Height="38" Padding="0" Command="{Binding PingPressed}"
                     IsEnabled="{Binding !IsPinging}" ToolTip.Tip="Проверить сервер">
               <Viewbox Classes="ServerPingIcon" Classes.Pinging="{Binding IsPinging}"
                        Width="18" Height="18" Stretch="Uniform">
@@ -193,7 +203,7 @@
                 </Canvas>
               </Viewbox>
             </Button>
-            <Button IsEnabled="{Binding CanConnect}" MinWidth="112" Classes="ConnectAction"
+            <Button IsEnabled="{Binding CanConnect}" Width="132" Height="38" Classes="ConnectAction"
                     Classes.Connecting="{Binding IsConnecting}"
                     Command="{Binding ConnectPressed}">
               <Grid>
@@ -220,6 +230,7 @@
                       </Canvas>
                     </Viewbox>
                     <TextBlock Text="{Binding ConnectionStageText}" FontSize="9" FontWeight="Bold"
+                               MaxWidth="105" TextTrimming="CharacterEllipsis"
                                Foreground="{DynamicResource ThemeForegroundBrush}" />
                   </StackPanel>
                   <ProgressBar Width="76" Height="3" Maximum="1" Value="{Binding ConnectionProgress}"
@@ -332,9 +343,9 @@
                     Command="{Binding FavoriteButtonPressed}">
               <StackPanel Orientation="Horizontal" Spacing="8">
                 <Grid Width="17" Height="17">
-                  <Path Classes="FavoriteIcon" Data="M9,1 L11,6 L16,6 L12,9 L14,15 L9,12 L4,15 L6,9 L2,6 L7,6 Z"
+                  <Path Classes="FavoriteIcon" Data="M12,2 L15.09,8.26 L22,9.27 L17,14.14 L18.18,21.02 L12,17.77 L5.82,21.02 L7,14.14 L2,9.27 L8.91,8.26 Z"
                         Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.2" IsVisible="{Binding !IsFavorite}" />
-                  <Path Classes="FavoriteIcon" Data="M9,1 L11,6 L16,6 L12,9 L14,15 L9,12 L4,15 L6,9 L2,6 L7,6 Z"
+                  <Path Classes="FavoriteIcon" Data="M12,2 L15.09,8.26 L22,9.27 L17,14.14 L18.18,21.02 L12,17.77 L5.82,21.02 L7,14.14 L2,9.27 L8.91,8.26 Z"
                         Fill="{DynamicResource ThemeForegroundBrush}" IsVisible="{Binding IsFavorite}" />
                 </Grid>
                 <TextBlock Text="{Binding FavoriteButtonText}" />

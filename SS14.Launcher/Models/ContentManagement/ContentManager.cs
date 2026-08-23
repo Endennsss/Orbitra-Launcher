@@ -15,6 +15,73 @@ namespace SS14.Launcher.Models.ContentManagement;
 
 public sealed class ContentManager
 {
+    public ContentDeduplicationReport AnalyzeDeduplication()
+    {
+        using var con = GetSqliteConnection();
+        var referencedFiles = con.ExecuteScalar<long>("SELECT COUNT(*) FROM ContentManifest");
+        var uniqueReferencedFiles = con.ExecuteScalar<long>(
+            "SELECT COUNT(DISTINCT ContentId) FROM ContentManifest");
+        var logicalSize = con.ExecuteScalar<long>(@"
+            SELECT COALESCE(SUM(c.Size), 0)
+            FROM ContentManifest cm
+            JOIN Content c ON c.Id = cm.ContentId");
+        var uniqueLogicalSize = con.ExecuteScalar<long>(@"
+            SELECT COALESCE(SUM(Size), 0)
+            FROM Content
+            WHERE EXISTS (SELECT 1 FROM ContentManifest cm WHERE cm.ContentId = Content.Id)");
+        var orphanedFiles = con.ExecuteScalar<long>(@"
+            SELECT COUNT(*) FROM Content
+            WHERE NOT EXISTS (SELECT 1 FROM ContentManifest cm WHERE cm.ContentId = Content.Id)");
+        var orphanedSize = con.ExecuteScalar<long>(@"
+            SELECT COALESCE(SUM(Size), 0) FROM Content
+            WHERE NOT EXISTS (SELECT 1 FROM ContentManifest cm WHERE cm.ContentId = Content.Id)");
+
+        return new ContentDeduplicationReport(
+            referencedFiles,
+            uniqueReferencedFiles,
+            Math.Max(0, referencedFiles - uniqueReferencedFiles),
+            logicalSize,
+            uniqueLogicalSize,
+            Math.Max(0, logicalSize - uniqueLogicalSize),
+            orphanedFiles,
+            orphanedSize,
+            GetDatabaseSize());
+    }
+
+    public async Task<ContentDeduplicationResult> OptimizeDeduplication()
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                using var con = GetSqliteConnection();
+                if (GetRunningClientVersions(con).Count > 0)
+                    return new ContentDeduplicationResult(false, 0, 0,
+                        "Оптимизация недоступна, пока запущен игровой клиент.");
+
+                var before = GetDatabaseSize();
+                var orphaned = con.ExecuteScalar<long>(@"
+                    SELECT COUNT(*) FROM Content
+                    WHERE NOT EXISTS (SELECT 1 FROM ContentManifest cm WHERE cm.ContentId = Content.Id)");
+                con.Execute(@"
+                    DELETE FROM Content
+                    WHERE NOT EXISTS (SELECT 1 FROM ContentManifest cm WHERE cm.ContentId = Content.Id)");
+                con.Execute("PRAGMA optimize");
+                con.Execute("VACUUM");
+                var after = GetDatabaseSize();
+                return new ContentDeduplicationResult(true, orphaned, Math.Max(0, before - after),
+                    orphaned > 0
+                        ? $"Удалено неиспользуемых объектов: {orphaned:N0}."
+                        : "Повторяющиеся файлы уже объединены, база уплотнена.");
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Unable to optimize content deduplication");
+                return new ContentDeduplicationResult(false, 0, 0, e.GetBaseException().Message);
+            }
+        });
+    }
+
     public IReadOnlyList<ManagedContentVersion> GetManagedVersions()
     {
         using var con = GetSqliteConnection();
@@ -248,3 +315,16 @@ public sealed record ManagedContentVersion
     public long LogicalSize { get; init; }
     public bool InUse { get; init; }
 }
+
+public sealed record ContentDeduplicationReport(
+    long ReferencedFiles,
+    long UniqueFiles,
+    long SharedReferences,
+    long LogicalSize,
+    long UniqueLogicalSize,
+    long SavedBytes,
+    long OrphanedFiles,
+    long OrphanedBytes,
+    long DatabaseBytes);
+
+public sealed record ContentDeduplicationResult(bool Success, long RemovedObjects, long FreedBytes, string Details);

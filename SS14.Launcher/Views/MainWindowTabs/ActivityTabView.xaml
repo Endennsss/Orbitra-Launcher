@@ -2,15 +2,15 @@
              xmlns:vm="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs"
              x:Class="SS14.Launcher.Views.MainWindowTabs.ActivityTabView">
   <StackPanel Spacing="16">
-    <Grid ColumnDefinitions="*,Auto">
+    <Grid Classes="MotionHeader" ColumnDefinitions="*,Auto">
       <StackPanel><TextBlock Text="EVENTS" Classes="SectionLabel" /><TextBlock Text="Центр активности" Classes="NanoHeadingMedium" /></StackPanel>
       <Button Grid.Column="1" Content="Очистить журнал" Command="{Binding Clear}" VerticalAlignment="Center" />
     </Grid>
     <Border Classes="Surface" Padding="14">
       <ScrollViewer>
-        <ItemsControl ItemsSource="{Binding Entries}" IsVisible="{Binding !IsEmpty}">
+        <ItemsControl Classes="MotionList" ItemsSource="{Binding Entries}" IsVisible="{Binding !IsEmpty}">
           <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:ActivityEntryViewModel">
-            <Border Background="{DynamicResource LauncherSurfaceAltBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="12,9" Margin="0,0,0,6">
+            <Border Classes="MotionCard" Background="{DynamicResource LauncherSurfaceAltBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="12,9" Margin="0,0,0,6">
               <Grid ColumnDefinitions="Auto,Auto,*">
                 <TextBlock Text="{Binding TimeText}" Classes="SubText" VerticalAlignment="Center" />
                 <TextBlock Grid.Column="1" Text="{Binding Category}" Classes="SectionLabel" VerticalAlignment="Center" Margin="16,0,0,0" />

@@ -1,0 +1,143 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:SS14.Launcher.Controls"
+             xmlns:views="clr-namespace:SS14.Launcher.Views"
+             xmlns:models="clr-namespace:SS14.Launcher.Models"
+             x:Class="SS14.Launcher.Views.MainWindowTabs.ServerFocusDetailView"
+             Name="FocusDetailRoot">
+  <UserControl.Styles>
+    <Style Selector="Border.FocusMetric">
+      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="14"/>
+      <Setter Property="MinWidth" Value="150"/>
+      <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="BorderBrush" Duration="0:0:0.18"/>
+          <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="CubicEaseOut"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Border.FocusMetric:pointerover">
+      <Setter Property="BorderBrush" Value="{DynamicResource ThemeForegroundMutedBrush}"/>
+      <Setter Property="RenderTransform" Value="scale(1.003)"/>
+    </Style>
+    <Style Selector="UserControl.Narrow TextBlock.FocusFavoriteLabel">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="TextBlock.PingGood"><Setter Property="Foreground" Value="#62D68B"/></Style>
+    <Style Selector="TextBlock.PingMedium"><Setter Property="Foreground" Value="#E4C65A"/></Style>
+    <Style Selector="TextBlock.PingBad"><Setter Property="Foreground" Value="#E06B61"/></Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="Auto,*,Auto" Background="{DynamicResource LauncherWorkspaceBrush}">
+    <Border Background="{DynamicResource LauncherChromeBrush}" BorderBrush="{DynamicResource LauncherLineBrush}"
+            BorderThickness="0,0,0,1" Padding="12,9"
+            IsVisible="{Binding ShowNavigation, ElementName=FocusDetailRoot}">
+      <Grid ColumnDefinitions="*,Auto">
+        <Button Content="←  Назад к серверам" Command="{Binding BackToServerList}" HorizontalAlignment="Left"/>
+        <StackPanel Grid.Column="1" DataContext="{Binding SelectedServer}" Orientation="Horizontal" Spacing="6">
+          <Button Width="42" Padding="0" Command="{Binding PingPressed}" IsEnabled="{Binding !IsPinging}" ToolTip.Tip="Проверить сервер">
+            <Viewbox Classes="ServerPingIcon" Classes.Pinging="{Binding IsPinging}" Width="18" Height="18">
+              <Canvas Width="24" Height="24"><Path Data="M21,12 A9,9 0 0 1 5.83,18.55 L3,16 M3,22 L3,16 L9,16 M3,12 A9,9 0 0 1 18.17,5.45 L21,8 M21,2 L21,8 L15,8" Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="2" StrokeLineCap="Round"/></Canvas>
+            </Viewbox>
+          </Button>
+          <Button Command="{Binding FavoriteButtonPressed}">
+            <StackPanel Orientation="Horizontal" Spacing="7">
+              <Path Data="M12,2 L15.09,8.26 L22,9.27 L17,14.14 L18.18,21.02 L12,17.77 L5.82,21.02 L7,14.14 L2,9.27 L8.91,8.26 Z"
+                    Width="16" Height="16" Stretch="Uniform" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.5"
+                    Fill="{DynamicResource ThemeForegroundBrush}" IsVisible="{Binding IsFavorite}"/>
+              <TextBlock Classes="FocusFavoriteLabel" Text="В избранном" IsVisible="{Binding IsFavorite}"/>
+              <TextBlock Classes="FocusFavoriteLabel" Text="В избранное" IsVisible="{Binding !IsFavorite}"/>
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel DataContext="{Binding SelectedServer}" Margin="18" Spacing="14" Classes="MotionHeader">
+        <Grid ColumnDefinitions="86,*">
+          <Border Width="74" Height="74" Background="{DynamicResource LauncherControlBrush}"
+                  BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" ClipToBounds="True">
+            <Grid>
+              <Image Source="{Binding ServerIcon}" Stretch="UniformToFill" IsVisible="{Binding HasServerIcon}"/>
+              <Viewbox Width="30" Height="30" IsVisible="{Binding !HasServerIcon}">
+                <Canvas Width="24" Height="24"><Path Data="M4,4 L20,4 L20,20 L4,20 Z M8,9 L16,9 M8,13 L16,13 M8,17 L13,17" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.5"/></Canvas>
+              </Viewbox>
+            </Grid>
+          </Border>
+          <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="6">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="{Binding Name}" FontSize="27" FontWeight="Bold"
+                         TextWrapping="Wrap" MaxLines="2"/>
+              <StackPanel Grid.Column="1" Margin="10,0,0,0">
+              <Border BorderBrush="#62D68B" BorderThickness="1" Padding="8,2" IsVisible="{Binding IsOnline}" VerticalAlignment="Center">
+                <TextBlock Text="ОНЛАЙН" Foreground="#62D68B" FontSize="9" FontWeight="Bold"/>
+              </Border>
+              <Border BorderBrush="#E06B61" BorderThickness="1" Padding="8,2" IsVisible="{Binding !IsOnline}" VerticalAlignment="Center">
+                <TextBlock Text="НЕДОСТУПЕН" Foreground="#E06B61" FontSize="9" FontWeight="Bold"/>
+              </Border>
+              </StackPanel>
+            </Grid>
+            <TextBlock Text="{Binding Address}" Classes="SubText" FontFamily="Mono" TextTrimming="CharacterEllipsis"/>
+          </StackPanel>
+        </Grid>
+
+        <WrapPanel>
+          <Border Classes="FocusMetric" Margin="0,0,8,8"><StackPanel Spacing="4"><TextBlock Text="ИГРОКИ" Classes="SectionLabel"/><TextBlock Text="{Binding PlayerCountString}" FontSize="21" FontWeight="SemiBold"/></StackPanel></Border>
+          <Border Classes="FocusMetric" Margin="0,0,8,8"><StackPanel Spacing="4"><TextBlock Text="ПИНГ" Classes="SectionLabel"/><TextBlock Text="{Binding PingString}" FontSize="21" FontWeight="SemiBold" Classes.PingGood="{Binding PingGood}" Classes.PingMedium="{Binding PingMedium}" Classes.PingBad="{Binding PingBad}"/></StackPanel></Border>
+          <Border Classes="FocusMetric" Margin="0,0,8,8"><StackPanel Spacing="4"><TextBlock Text="ВРЕМЯ РАУНДА" Classes="SectionLabel"/><controls:TimerTextCell Value="{Binding RoundStartTime}" FontSize="21" FontWeight="SemiBold"/></StackPanel></Border>
+          <Border Classes="FocusMetric" Margin="0,0,0,8"><StackPanel Spacing="4"><TextBlock Text="ВАШЕ ВРЕМЯ" Classes="SectionLabel"/><TextBlock Text="{Binding PlaytimeText}" FontSize="21" FontWeight="SemiBold"/></StackPanel></Border>
+        </WrapPanel>
+
+        <Grid Name="FocusInfoGrid" Classes="FocusPairGrid" ColumnDefinitions="*,*">
+          <Border Classes="FocusMetric" Margin="0,0,6,0"><StackPanel Spacing="5"><TextBlock Text="КАРТА" Classes="SectionLabel"/><TextBlock Text="{Binding CacheData.Map}" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap"/></StackPanel></Border>
+          <Border Name="FocusInfoSecond" Grid.Column="1" Classes="FocusMetric FocusPairSecond" Margin="6,0,0,0"><StackPanel Spacing="5"><TextBlock Text="РЕЖИМ" Classes="SectionLabel"/><TextBlock Text="{Binding CacheData.GamePreset}" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap"/></StackPanel></Border>
+        </Grid>
+
+        <Border Classes="FocusMetric">
+          <StackPanel Spacing="7"><TextBlock Text="ОПИСАНИЕ" Classes="SectionLabel"/><TextBlock Text="{Binding Description}" TextWrapping="Wrap"/></StackPanel>
+        </Border>
+
+        <Grid Name="FocusGraphGrid" Classes="FocusPairGrid" ColumnDefinitions="*,*">
+          <Border Classes="FocusMetric" Margin="0,0,6,0"><StackPanel Spacing="7"><TextBlock Text="ПИНГ · ИСТОРИЯ" Classes="SectionLabel"/><Grid Height="62" ClipToBounds="True"><Path Data="M0,60 L320,60" Stroke="{DynamicResource LauncherLineBrush}"/><Path Data="{Binding PingGraph}" Stroke="#A8A8A8" StrokeThickness="1.8" Stretch="Fill"/></Grid></StackPanel></Border>
+          <Border Name="FocusGraphSecond" Grid.Column="1" Classes="FocusMetric FocusPairSecond" Margin="6,0,0,0"><StackPanel Spacing="7"><TextBlock Text="ОНЛАЙН · ИСТОРИЯ" Classes="SectionLabel"/><Grid Height="62" ClipToBounds="True"><Path Data="M0,60 L320,60" Stroke="{DynamicResource LauncherLineBrush}"/><Path Data="{Binding OnlineGraph}" Stroke="#777777" StrokeThickness="1.8" Stretch="Fill"/></Grid></StackPanel></Border>
+        </Grid>
+
+        <ItemsControl ItemsSource="{Binding CacheData.Links}">
+          <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate><DataTemplate x:DataType="models:ServerInfoLink"><views:ServerInfoLinkControl DataContext="{Binding}"/></DataTemplate></ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </ScrollViewer>
+
+    <Border Grid.Row="2" Background="{DynamicResource LauncherChromeBrush}" BorderBrush="{DynamicResource LauncherLineBrush}"
+            BorderThickness="0,1,0,0" Padding="14,11">
+      <Grid Name="FocusFooterGrid" Classes="FocusFooterGrid" DataContext="{Binding SelectedServer}" ColumnDefinitions="*,Auto">
+        <StackPanel Name="FocusFooterActions" Orientation="Horizontal" Spacing="6">
+          <Button Content="Скопировать адрес" Command="{Binding CopyAddressPressed}"/>
+          <Button Content="Создать ярлык" Command="{Binding CreateDesktopShortcut}"/>
+        </StackPanel>
+        <Button Name="FocusConnectButton" Classes="FocusConnectButton" Grid.Column="1" Width="190" Height="42" Command="{Binding ConnectPressed}" IsEnabled="{Binding CanConnect}">
+          <Grid>
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" IsVisible="{Binding !IsConnecting}">
+              <TextBlock Text="Подключиться"/>
+              <Viewbox Width="17" Height="17"><Canvas Width="24" Height="24"><Path Data="M5,12 L19,12 M14,7 L19,12 L14,17" Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox>
+            </StackPanel>
+            <StackPanel IsVisible="{Binding IsConnectionBusy}" HorizontalAlignment="Center" Spacing="3">
+              <TextBlock Text="{Binding ConnectionStageText}" FontSize="9" FontWeight="Bold" MaxWidth="145" TextTrimming="CharacterEllipsis"/>
+              <ProgressBar Width="125" Height="3" Maximum="1" Value="{Binding ConnectionProgress}" IsIndeterminate="{Binding ConnectionProgressIndeterminate}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="7" IsVisible="{Binding IsConnectionSuccess}" HorizontalAlignment="Center">
+              <Path Data="M4,12 L9.2,17 L20,6" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="2.4" Width="17" Height="17" Stretch="Uniform"/>
+              <TextBlock Text="ГОТОВО" FontSize="9" FontWeight="Bold"/>
+            </StackPanel>
+          </Grid>
+        </Button>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

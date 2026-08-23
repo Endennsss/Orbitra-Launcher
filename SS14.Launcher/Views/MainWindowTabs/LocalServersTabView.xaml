@@ -1,0 +1,196 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" x:Class="SS14.Launcher.Views.MainWindowTabs.LocalServersTabView">
+  <UserControl.Styles>
+    <Style Selector="Border.LocalServerCard">
+      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}"/>
+      <Setter Property="BorderThickness" Value="1"/><Setter Property="CornerRadius" Value="0"/><Setter Property="Margin" Value="0,0,0,8"/><Setter Property="Padding" Value="13"/>
+      <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+      <Setter Property="Transitions"><Transitions><BrushTransition Property="Background" Duration="0:0:0.2"/><BrushTransition Property="BorderBrush" Duration="0:0:0.2"/><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.22" Easing="CubicEaseOut"/></Transitions></Setter>
+    </Style>
+    <Style Selector="ListBoxItem:pointerover Border.LocalServerCard"><Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}"/></Style>
+    <Style Selector="ListBoxItem:selected Border.LocalServerCard"><Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/></Style>
+    <Style Selector="Border.StatusChip">
+      <Setter Property="Background" Value="{DynamicResource LauncherControlBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}"/>
+      <Setter Property="BorderThickness" Value="1"/><Setter Property="CornerRadius" Value="0"/><Setter Property="Padding" Value="8,5"/>
+    </Style>
+    <Style Selector="Border.StatusChip.Running"><Setter Property="Background" Value="#15271C"/><Setter Property="BorderBrush" Value="#386849"/></Style>
+    <Style Selector="Border.StatusChip.Running"><Style.Animations><Animation Duration="0:0:2.4" IterationCount="INFINITE" PlaybackDirection="Alternate" Easing="SineEaseInOut"><KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.82"/></KeyFrame><KeyFrame Cue="100%"><Setter Property="Opacity" Value="1"/></KeyFrame></Animation></Style.Animations></Style>
+    <Style Selector="TextBlock.StatusText.Running"><Setter Property="Foreground" Value="#62D68B"/></Style>
+    <Style Selector="Border.ServerStateRail"><Setter Property="Background" Value="#555555"/><Setter Property="Transitions"><Transitions><BrushTransition Property="Background" Duration="0:0:0.2"/></Transitions></Setter></Style>
+    <Style Selector="Border.ServerStateRail.Running"><Setter Property="Background" Value="#62D68B"/></Style>
+    <Style Selector="Border.MetricCard">
+      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}"/>
+      <Setter Property="BorderThickness" Value="1"/><Setter Property="Padding" Value="14,11"/><Setter Property="CornerRadius" Value="0"/>
+      <Setter Property="RenderTransformOrigin" Value="50%,50%"/><Setter Property="Transitions"><Transitions><BrushTransition Property="BorderBrush" Duration="0:0:0.2"/><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.22" Easing="CubicEaseOut"/></Transitions></Setter>
+    </Style>
+    <Style Selector="Border.MetricCard:pointerover"><Setter Property="BorderBrush" Value="{DynamicResource ThemeForegroundMutedBrush}"/></Style>
+    <Style Selector="Button.AddSourceCard">
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="VerticalContentAlignment" Value="Stretch"/>
+      <Setter Property="Height" Value="116"/><Setter Property="Padding" Value="15"/>
+    </Style>
+    <Style Selector="Border.ConsolePanel"><Setter Property="Background" Value="#080808"/><Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}"/><Setter Property="BorderThickness" Value="1"/></Style>
+    <Style Selector="ListBox.ConsoleOutput > ListBoxItem"><Style.Animations><Animation Duration="0:0:0.18" Easing="CubicEaseOut"><KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.82"/><Setter Property="TranslateTransform.X" Value="5"/></KeyFrame><KeyFrame Cue="100%"><Setter Property="Opacity" Value="1"/><Setter Property="TranslateTransform.X" Value="0"/></KeyFrame></Animation></Style.Animations></Style>
+  </UserControl.Styles>
+
+  <Panel ClipToBounds="True">
+    <Grid RowDefinitions="Auto,*" Margin="4">
+      <Grid Classes="MotionHeader" ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+        <StackPanel>
+          <TextBlock Text="LOCAL HOST" Classes="SectionLabel"/>
+          <TextBlock Text="Локальные серверы" Classes="NanoHeadingMedium"/>
+          <TextBlock Text="Запуск, настройка и контроль локальных сборок Space Station 14." Classes="SubText" Margin="0,4,0,0"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+          <Border Classes="StatusChip"><TextBlock Text="{Binding ServerCountText}" Classes="SubText"/></Border>
+          <Border Classes="StatusChip"><TextBlock Text="{Binding RunningCountText}" Foreground="#62D68B"/></Border>
+          <Border Classes="StatusChip"><TextBlock Text="{Binding ManagedCountText}" Classes="SubText"/></Border>
+          <Button Command="{Binding OpenAddPanelCommand}" MinWidth="158">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Viewbox Width="17" Height="17"><Canvas Width="24" Height="24"><Path Data="M12,5 L12,19 M5,12 L19,12" Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="2" StrokeLineCap="Round"/></Canvas></Viewbox>
+              <TextBlock Text="Добавить сервер" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </Grid>
+
+      <Grid Grid.Row="1" ColumnDefinitions="320,*">
+        <Border Classes="Surface" Padding="12">
+          <Grid RowDefinitions="Auto,Auto,*">
+            <Grid Margin="2,2,2,10"><TextBlock Text="МОИ СЕРВЕРЫ" Classes="SectionLabel"/><TextBlock Text="{Binding Servers.Count}" Classes="SubText" HorizontalAlignment="Right"/></Grid>
+            <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
+              <Viewbox Width="16" Height="16" Margin="10,0" VerticalAlignment="Center" ZIndex="2"><Canvas Width="24" Height="24"><Path Data="M21,21 L16.65,16.65 M19,11 A8,8 0 1 1 3,11 A8,8 0 0 1 19,11" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox>
+              <TextBox Grid.ColumnSpan="3" Text="{Binding SearchText, Mode=TwoWay}" Watermark="Название, тег, версия или источник" Padding="38,8,34,8"/>
+              <Button Grid.Column="2" Classes="IconAction SearchClear" Width="30" MinWidth="30" Height="30" Padding="0" Margin="0,2,2,2" Command="{Binding ClearSearchCommand}" IsVisible="{Binding HasSearchText}">
+                <Viewbox Width="14" Height="14"><Canvas Width="24" Height="24"><Path Data="M18,6 L6,18 M6,6 L18,18" Fill="Transparent" Stroke="{DynamicResource ThemeSubTextBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox>
+              </Button>
+            </Grid>
+            <ListBox Grid.Row="2" ItemsSource="{Binding VisibleServers}" SelectedItem="{Binding SelectedServer, Mode=TwoWay}"
+                     Background="Transparent" BorderThickness="0" Padding="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+              <ListBox.ItemTemplate><DataTemplate>
+                <Border Classes="LocalServerCard">
+                  <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="4,*,Auto">
+                    <Border Grid.RowSpan="2" Classes="ServerStateRail" Classes.Running="{Binding IsRunning}" Width="3" HorizontalAlignment="Left"/>
+                    <StackPanel Grid.Column="1" Margin="9,0,0,0" Spacing="4">
+                      <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                      <TextBlock Text="{Binding Version}" Classes="SubText" FontSize="10" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                    <Border Grid.Column="2" Classes="StatusChip" Classes.Running="{Binding IsRunning}" Margin="8,0,0,0" VerticalAlignment="Top">
+                      <TextBlock Text="{Binding Status}" Classes="SectionLabel StatusText" Classes.Running="{Binding IsRunning}" FontSize="9"/>
+                    </Border>
+                    <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" ColumnDefinitions="*,Auto" Margin="9,10,0,0">
+                      <TextBlock Text="{Binding Tags}" Classes="SubText" FontSize="10" TextTrimming="CharacterEllipsis"/>
+                      <TextBlock Grid.Column="1" Text="{Binding SourceLabel}" Classes="SubText" FontSize="10" Margin="8,0,0,0"/>
+                    </Grid>
+                  </Grid>
+                </Border>
+              </DataTemplate></ListBox.ItemTemplate>
+            </ListBox>
+            <StackPanel Grid.Row="2" IsVisible="{Binding !HasVisibleServers}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="5">
+              <TextBlock Text="Ничего не найдено" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+              <TextBlock Text="Измените поисковый запрос" Classes="SubText" HorizontalAlignment="Center"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+
+        <Grid Grid.Column="1" RowDefinitions="Auto,*" Margin="15,0,0,0" IsVisible="{Binding HasSelection}">
+          <Border Classes="Surface" Padding="18" Margin="0,0,0,13">
+            <Grid RowDefinitions="Auto,Auto">
+              <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="{Binding SelectedServer.Name}" FontSize="22" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                  <StackPanel Orientation="Horizontal" Spacing="7"><TextBlock Text="{Binding SelectedServer.SourceLabel}" Classes="SubText"/><TextBlock Text="·" Classes="SubText"/><TextBlock Text="{Binding SelectedServer.Version}" Classes="SubText"/></StackPanel>
+                </StackPanel>
+                <WrapPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                  <Border Classes="StatusChip" Classes.Running="{Binding SelectedServer.IsRunning}"><TextBlock Text="{Binding SelectedServer.Status}" Classes="SectionLabel StatusText" Classes.Running="{Binding SelectedServer.IsRunning}"/></Border>
+                  <Button Content="Запустить" Command="{Binding StartCommand}" MinWidth="96" Margin="7,0,0,0"/>
+                  <Button Content="Перезапустить" Command="{Binding RestartCommand}" Margin="7,0,0,0"/>
+                  <Button Content="Подключиться" Command="{Binding ConnectCommand}" Margin="7,0,0,0"/>
+                  <Button Content="Остановить" Command="{Binding StopCommand}" Margin="7,0,0,0"/>
+                </WrapPanel>
+              </Grid>
+              <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*" Margin="0,16,0,0">
+                <Border Classes="MetricCard" Margin="0,0,8,0"><StackPanel><TextBlock Text="ПОРТ" Classes="SectionLabel"/><TextBlock Text="{Binding SelectedServer.Port}" FontSize="17" FontWeight="SemiBold" Margin="0,4,0,0"/></StackPanel></Border>
+                <Border Grid.Column="1" Classes="MetricCard" Margin="0,0,8,0"><StackPanel><TextBlock Text="PID" Classes="SectionLabel"/><TextBlock Text="{Binding SelectedServer.ProcessIdText}" FontSize="17" FontWeight="SemiBold" Margin="0,4,0,0"/></StackPanel></Border>
+                <Border Grid.Column="2" Classes="MetricCard" Margin="0,0,8,0"><StackPanel><TextBlock Text="ВРЕМЯ РАБОТЫ" Classes="SectionLabel"/><TextBlock Text="{Binding SelectedServer.UptimeText}" FontSize="17" FontWeight="SemiBold" Margin="0,4,0,0"/></StackPanel></Border>
+                <Border Grid.Column="3" Classes="MetricCard"><StackPanel><TextBlock Text="ПАМЯТЬ" Classes="SectionLabel"/><TextBlock Text="{Binding SelectedServer.MemoryText}" FontSize="17" FontWeight="SemiBold" Margin="0,4,0,0"/></StackPanel></Border>
+              </Grid>
+            </Grid>
+          </Border>
+
+          <TabControl Grid.Row="1">
+            <TabItem Header="Обзор">
+              <ScrollViewer HorizontalScrollBarVisibility="Disabled"><StackPanel Margin="10" Spacing="12">
+                <Border Classes="Surface" Padding="17"><Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                  <TextBlock Text="Источник" Classes="SectionLabel"/><TextBlock Grid.Column="1" Text="{Binding SelectedServer.SourceLabel}"/>
+                  <TextBlock Grid.Row="1" Text="Версия" Classes="SectionLabel" Margin="0,10,0,0"/><TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedServer.Version}" Margin="0,10,0,0"/>
+                  <TextBlock Grid.Row="2" Text="Файл запуска" Classes="SectionLabel" Margin="0,10,0,0"/><TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedServer.LaunchFile}" Margin="0,10,0,0"/>
+                  <TextBlock Grid.Row="3" Text="Каталог" Classes="SectionLabel" Margin="0,10,0,0"/><TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedServer.Directory}" Margin="0,10,0,0" TextWrapping="Wrap"/>
+                  <TextBlock Grid.Row="4" Text="Последний запуск" Classes="SectionLabel" Margin="0,10,0,0"/><TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedServer.LastStartedText}" Margin="0,10,0,0"/>
+                </Grid></Border>
+                <Border Classes="Surface" Padding="17"><StackPanel Spacing="8"><TextBlock Text="СОСТОЯНИЕ" Classes="SectionLabel"/><TextBlock Text="{Binding StatusText}" Classes="SubText" TextWrapping="Wrap"/></StackPanel></Border>
+              </StackPanel></ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Консоль">
+              <Border Classes="ConsolePanel" Margin="10" Padding="12"><Grid RowDefinitions="Auto,*,Auto">
+                <Grid ColumnDefinitions="*,Auto,Auto"><StackPanel><TextBlock Text="КОНСОЛЬ СЕРВЕРА" Classes="SectionLabel"/><TextBlock Text="Вывод процесса и серверные команды" Classes="SubText" FontSize="10"/></StackPanel><TextBlock Grid.Column="1" Text="{Binding ConsoleLineCountText}" Classes="SubText" VerticalAlignment="Center" Margin="0,0,12,0"/><Button Grid.Column="2" Content="Очистить" Command="{Binding ClearConsoleCommand}"/></Grid>
+                <ListBox Grid.Row="1" Name="ConsoleList" Classes="ConsoleOutput" ItemsSource="{Binding ConsoleLines}" Background="Transparent" BorderThickness="0" FontFamily="Mono" FontSize="11" Margin="0,10"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                  <ListBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding}" TextWrapping="NoWrap"/></DataTemplate></ListBox.ItemTemplate>
+                </ListBox>
+                <Grid Grid.Row="2" ColumnDefinitions="*,Auto"><TextBox Text="{Binding ConsoleCommand, Mode=TwoWay}" Watermark="Введите серверную команду" IsEnabled="{Binding CanStop}" KeyDown="ConsoleInputKeyDown"/><Button Grid.Column="1" Content="Отправить" Command="{Binding SendCommand}" Margin="8,0,0,0"/></Grid>
+              </Grid></Border>
+            </TabItem>
+
+            <TabItem Header="Настройки">
+              <ScrollViewer HorizontalScrollBarVisibility="Disabled"><StackPanel Margin="10" Spacing="12">
+                <Border Classes="Surface" Padding="18"><Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto">
+                  <StackPanel><TextBlock Text="Название" Classes="SectionLabel"/><TextBox Text="{Binding SelectedServer.Name, Mode=TwoWay}"/></StackPanel>
+                  <StackPanel Grid.Column="1" Margin="12,0,0,0"><TextBlock Text="Локальные теги" Classes="SectionLabel"/><TextBox Text="{Binding SelectedServer.Tags, Mode=TwoWay}" Watermark="RP, тестовый, друзья"/></StackPanel>
+                  <StackPanel Grid.Row="1" Margin="0,11,0,0"><TextBlock Text="Порт" Classes="SectionLabel"/><TextBox Text="{Binding SelectedServer.Port, Mode=TwoWay}"/></StackPanel>
+                  <StackPanel Grid.Row="1" Grid.Column="1" Margin="12,11,0,0"><TextBlock Text="Файл запуска" Classes="SectionLabel"/><ComboBox ItemsSource="{Binding SelectedServer.LaunchFiles}" SelectedItem="{Binding SelectedServer.LaunchFile, Mode=TwoWay}"/></StackPanel>
+                  <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,11,0,0"><TextBlock Text="Аргументы запуска" Classes="SectionLabel"/><TextBox Text="{Binding SelectedServer.Arguments, Mode=TwoWay}" Watermark="Необязательные параметры BAT или EXE"/></StackPanel>
+                </Grid></Border>
+                <Border Classes="Surface" Padding="18"><Grid RowDefinitions="Auto,*">
+                  <Grid ColumnDefinitions="*,Auto,Auto"><ComboBox ItemsSource="{Binding SelectedServer.ConfigFiles}" SelectedItem="{Binding SelectedServer.ConfigFile, Mode=TwoWay}"/><Button Grid.Column="1" Content="Загрузить конфиг" Command="{Binding LoadConfigCommand}" Margin="8,0,0,0"/><Button Grid.Column="2" Content="Сохранить конфиг" Command="{Binding SaveConfigCommand}" Margin="8,0,0,0"/></Grid>
+                  <TextBox Grid.Row="1" Text="{Binding SelectedServer.ConfigText, Mode=TwoWay}" AcceptsReturn="True" TextWrapping="NoWrap" FontFamily="Mono" FontSize="11" MinHeight="220" Margin="0,10,0,0" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                </Grid></Border>
+                <Button Content="Сохранить настройки профиля" Command="{Binding SaveCommand}" HorizontalAlignment="Left"/>
+              </StackPanel></ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Файлы">
+              <StackPanel Margin="10" Spacing="12">
+                <Border Classes="Surface" Padding="18"><StackPanel Spacing="8"><TextBlock Text="КАТАЛОГ СБОРКИ" Classes="SectionLabel"/><TextBlock Text="{Binding SelectedServer.Directory}" TextWrapping="Wrap"/><TextBlock Text="Для готовой папки удаление профиля не удаляет исходные файлы." Classes="SubText" TextWrapping="Wrap"/></StackPanel></Border>
+                <StackPanel Orientation="Horizontal" Spacing="8"><Button Content="Открыть папку" Command="{Binding OpenFolderCommand}"/><Button Content="Удалить профиль" Command="{Binding RemoveCommand}"/></StackPanel>
+              </StackPanel>
+            </TabItem>
+          </TabControl>
+        </Grid>
+
+        <Border Grid.Column="1" Classes="Surface" Margin="15,0,0,0" IsVisible="{Binding !HasSelection}">
+          <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="9"><TextBlock Text="Выберите или добавьте сервер" FontSize="20" FontWeight="SemiBold"/><TextBlock Text="Поддерживаются Robust CDN, ZIP и готовые папки." Classes="SubText"/></StackPanel>
+        </Border>
+      </Grid>
+    </Grid>
+
+    <Border Background="#C8000000" IsVisible="{Binding IsAddPanelOpen}" ZIndex="20">
+      <Border Classes="Surface ModalPanel" Width="720" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto">
+          <Grid ColumnDefinitions="*,Auto"><StackPanel><TextBlock Text="Добавить локальный сервер" FontSize="22" FontWeight="SemiBold"/><TextBlock Text="Выберите источник серверной сборки." Classes="SubText" Margin="0,4,0,0"/></StackPanel><Button Grid.Column="1" Content="Закрыть" Command="{Binding CloseAddPanelCommand}"/></Grid>
+          <Grid Grid.Row="1" ColumnDefinitions="*,*" Margin="0,20,0,0">
+            <Button Classes="AddSourceCard" Command="{Binding ImportZipCommand}" Margin="0,0,6,0"><Grid ColumnDefinitions="42,*"><Viewbox Width="25" Height="25"><Canvas Width="24" Height="24"><Path Data="M3,7 L3,19 A2,2 0 0 0 5,21 L19,21 A2,2 0 0 0 21,19 L21,7 M8,3 L16,3 L19,7 L5,7 Z M12,10 L12,17 M9,14 L12,17 L15,14" Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.7" StrokeLineCap="Round"/></Canvas></Viewbox><StackPanel Grid.Column="1" Spacing="5"><TextBlock Text="ZIP-архив" FontSize="16" FontWeight="SemiBold"/><TextBlock Text="Проверить и распаковать локальную сборку." Classes="SubText" TextWrapping="Wrap"/></StackPanel></Grid></Button>
+            <Button Grid.Column="1" Classes="AddSourceCard" Command="{Binding ImportFolderCommand}" Margin="6,0,0,0"><Grid ColumnDefinitions="42,*"><Viewbox Width="25" Height="25"><Canvas Width="24" Height="24"><Path Data="M3,6 A2,2 0 0 1 5,4 L10,4 L12,6 L19,6 A2,2 0 0 1 21,8 L21,18 A2,2 0 0 1 19,20 L5,20 A2,2 0 0 1 3,18 Z" Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.7" StrokeLineCap="Round"/></Canvas></Viewbox><StackPanel Grid.Column="1" Spacing="5"><TextBlock Text="Готовая папка" FontSize="16" FontWeight="SemiBold"/><TextBlock Text="Использовать файлы без копирования." Classes="SubText" TextWrapping="Wrap"/></StackPanel></Grid></Button>
+          </Grid>
+          <Border Grid.Row="2" Background="{DynamicResource LauncherSurfaceAltBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" Padding="16" Margin="0,12,0,0">
+            <Grid RowDefinitions="Auto,Auto"><StackPanel><TextBlock Text="Robust CDN или прямая ссылка" FontSize="16" FontWeight="SemiBold"/><TextBlock Text="Orbitra найдёт последнюю Windows x64-сборку и проверит SHA-256." Classes="SubText" Margin="0,3,0,0"/></StackPanel>
+              <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,12,0,0"><TextBox Text="{Binding SourceUrl, Mode=TwoWay}" Watermark="https://cdn.ss14.org/fork/fish_station"/><Button Grid.Column="1" Content="Установить" Command="{Binding AddUrlCommand}" Margin="8,0,0,0" MinWidth="120"/></Grid>
+            </Grid>
+          </Border>
+          <StackPanel Grid.Row="3" Margin="0,14,0,0"><ProgressBar Height="4" Maximum="1" Value="{Binding Progress}" IsVisible="{Binding IsBusy}"/><TextBlock Text="{Binding StatusText}" Classes="SubText" Margin="0,7,0,0" TextWrapping="Wrap"/></StackPanel>
+        </Grid>
+      </Border>
+    </Border>
+  </Panel>
+</UserControl>

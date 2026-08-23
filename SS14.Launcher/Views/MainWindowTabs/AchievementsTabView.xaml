@@ -1,0 +1,75 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:SS14.Launcher.ViewModels.MainWindowTabs"
+             x:Class="SS14.Launcher.Views.MainWindowTabs.AchievementsTabView">
+  <UserControl.Styles>
+    <Style Selector="Border.AchievementCard">
+      <Setter Property="Width" Value="292"/>
+      <Setter Property="MinHeight" Value="176"/>
+      <Setter Property="Padding" Value="15"/>
+      <Setter Property="Margin" Value="0,0,9,9"/>
+      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Opacity" Value="0.72"/>
+      <Setter Property="Transitions"><Transitions><BrushTransition Property="Background" Duration="0:0:0.22"/><BrushTransition Property="BorderBrush" Duration="0:0:0.22"/><DoubleTransition Property="Opacity" Duration="0:0:0.22"/></Transitions></Setter>
+    </Style>
+    <Style Selector="Border.AchievementCard.Unlocked">
+      <Setter Property="Opacity" Value="1"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}"/>
+    </Style>
+    <Style Selector="Border.AchievementCard Path.AchievementIcon"><Setter Property="Stroke" Value="{DynamicResource ThemeSubTextBrush}"/></Style>
+    <Style Selector="Border.AchievementCard.Unlocked Path.AchievementIcon"><Setter Property="Stroke" Value="{DynamicResource ThemeForegroundBrush}"/></Style>
+    <Style Selector="Border.AchievementCard TextBlock.AchievementState"><Setter Property="Foreground" Value="{DynamicResource ThemeSubTextBrush}"/></Style>
+    <Style Selector="Border.AchievementCard.Unlocked TextBlock.AchievementState"><Setter Property="Foreground" Value="{DynamicResource ThemeAccentBrush}"/></Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="Auto,*">
+    <Grid Classes="MotionHeader" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
+      <StackPanel Spacing="3">
+        <TextBlock Text="ORBITRA RECORDS" Classes="SectionLabel"/>
+        <TextBlock Text="Достижения" Classes="NanoHeadingMedium"/>
+        <TextBlock Text="Личная коллекция игровых отметок и исследованных серверов." Classes="SubText"/>
+      </StackPanel>
+      <StackPanel Grid.Column="1" Width="220" Spacing="5" VerticalAlignment="Bottom">
+        <Grid ColumnDefinitions="*,Auto"><TextBlock Text="ОБЩИЙ ПРОГРЕСС" Classes="SectionLabel"/><TextBlock Grid.Column="1" Text="{Binding UnlockedText}" FontWeight="SemiBold"/></Grid>
+        <ProgressBar Minimum="0" Maximum="1" Value="{Binding CompletionProgress}" Height="4"/>
+      </StackPanel>
+    </Grid>
+
+    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Spacing="12">
+        <Grid ColumnDefinitions="*,*,*">
+          <Border Classes="Surface MotionCard" Padding="15" Margin="0,0,6,0"><StackPanel Spacing="4"><TextBlock Text="ОБЩЕЕ ВРЕМЯ" Classes="SectionLabel"/><TextBlock Text="{Binding TotalPlaytime}" FontSize="22" FontWeight="SemiBold"/><TextBlock Text="Время во всех запущенных клиентах" Classes="SubText"/></StackPanel></Border>
+          <Border Grid.Column="1" Classes="Surface MotionCard" Padding="15" Margin="6,0"><StackPanel Spacing="4"><TextBlock Text="СЕРВЕРОВ ПОСЕЩЕНО" Classes="SectionLabel"/><TextBlock Text="{Binding ServersVisited}" FontSize="22" FontWeight="SemiBold"/><TextBlock Text="Уникальные станции в истории" Classes="SubText"/></StackPanel></Border>
+          <Border Grid.Column="2" Classes="Surface MotionCard" Padding="15" Margin="6,0,0,0"><StackPanel Spacing="4"><TextBlock Text="БОЛЬШЕ ВСЕГО ВРЕМЕНИ" Classes="SectionLabel"/><TextBlock Text="{Binding FavoriteServer}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/><TextBlock Text="Сервер с максимальным временем" Classes="SubText"/></StackPanel></Border>
+        </Grid>
+
+        <StackPanel Spacing="7">
+          <TextBlock Text="КОЛЛЕКЦИЯ" Classes="SectionLabel"/>
+          <ItemsControl Classes="MotionList" ItemsSource="{Binding Achievements}">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:OrbitraAchievementViewModel">
+                <Border Classes="AchievementCard MotionCard" Classes.Unlocked="{Binding IsUnlocked}">
+                  <Grid RowDefinitions="Auto,*,Auto">
+                    <Grid ColumnDefinitions="44,*,Auto">
+                      <Border Width="36" Height="36" Background="{DynamicResource LauncherControlBrush}" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1">
+                        <Viewbox Width="20" Height="20"><Canvas Width="24" Height="24"><Path Classes="AchievementIcon" Data="{Binding IconData}" Fill="Transparent" StrokeThickness="1.7" StrokeLineCap="Round"/></Canvas></Viewbox>
+                      </Border>
+                      <TextBlock Grid.Column="1" Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Margin="10,0" TextWrapping="Wrap"/>
+                      <TextBlock Grid.Column="2" Classes="SectionLabel AchievementState" Text="{Binding StateText}" VerticalAlignment="Center"/>
+                    </Grid>
+                    <TextBlock Grid.Row="1" Text="{Binding Description}" Classes="SubText" TextWrapping="Wrap" Margin="0,12,0,10"/>
+                    <StackPanel Grid.Row="2" Spacing="5"><Grid ColumnDefinitions="*,Auto"><TextBlock Text="ПРОГРЕСС" Classes="SectionLabel"/><TextBlock Grid.Column="1" Text="{Binding ProgressText}" Classes="SubText"/></Grid><ProgressBar Minimum="0" Maximum="1" Value="{Binding Progress}" Height="4"/></StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

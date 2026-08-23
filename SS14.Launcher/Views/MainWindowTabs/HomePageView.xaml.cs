@@ -1,7 +1,9 @@
 using System;
+using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Serilog;
 using SS14.Launcher.ViewModels;
@@ -16,6 +18,59 @@ public partial class HomePageView : UserControl
     public HomePageView()
     {
         InitializeComponent();
+        SizeChanged += (_, _) => UpdateAdaptiveLayout();
+
+        // The saved layout is applied without showing another page first.
+        // Only deliberate layout changes made after startup use a transition.
+        Loaded += (_, _) => Dispatcher.UIThread.Post(
+            () => FavoriteLayoutCarousel.PageTransition ??= new CrossFade(TimeSpan.FromMilliseconds(280)),
+            DispatcherPriority.Background);
+    }
+
+    private void UpdateAdaptiveLayout()
+    {
+        if (Bounds.Width <= 0)
+            return;
+
+        if (Bounds.Width < 900)
+        {
+            var listHeight = Math.Clamp(Bounds.Height * 0.36, 190, 290);
+            FavoriteSplitGrid.ColumnDefinitions = new ColumnDefinitions("*");
+            FavoriteSplitGrid.RowDefinitions = new RowDefinitions($"{listHeight:0},5,*");
+            Grid.SetColumn(FavoriteSplitListPane, 0);
+            Grid.SetRow(FavoriteSplitListPane, 0);
+            Grid.SetColumn(FavoriteSplitDivider, 0);
+            Grid.SetRow(FavoriteSplitDivider, 1);
+            Grid.SetColumn(FavoriteSplitDetailPane, 0);
+            Grid.SetRow(FavoriteSplitDetailPane, 2);
+            FavoriteSplitDivider.ResizeDirection = GridResizeDirection.Rows;
+            FavoriteSplitListPane.MinWidth = 0;
+            FavoriteSplitDetailPane.MinWidth = 0;
+        }
+        else
+        {
+            var listWidth = Math.Clamp(Bounds.Width * 0.34, 320, 430);
+            FavoriteSplitGrid.ColumnDefinitions = new ColumnDefinitions($"{listWidth:0},5,*");
+            FavoriteSplitGrid.RowDefinitions = new RowDefinitions("*");
+            Grid.SetColumn(FavoriteSplitListPane, 0);
+            Grid.SetRow(FavoriteSplitListPane, 0);
+            Grid.SetColumn(FavoriteSplitDivider, 1);
+            Grid.SetRow(FavoriteSplitDivider, 0);
+            Grid.SetColumn(FavoriteSplitDetailPane, 2);
+            Grid.SetRow(FavoriteSplitDetailPane, 0);
+            FavoriteSplitDivider.ResizeDirection = GridResizeDirection.Columns;
+            FavoriteSplitListPane.MinWidth = 280;
+            FavoriteSplitDetailPane.MinWidth = 460;
+        }
+    }
+
+    private void FavoriteFocusSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (_viewModel == null || sender is not ListBox { SelectedItem: ServerEntryViewModel server })
+            return;
+
+        _viewModel.SelectedServer = server;
+        _viewModel.OpenSelectedServer();
     }
 
     protected override void OnDataContextChanged(EventArgs e)
