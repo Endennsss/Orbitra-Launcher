@@ -493,6 +493,7 @@ public class App : Application
 
     private void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {
+        _mainWindowViewModel?.LocalServersTab.TerminateAllManagedProcesses();
         OrbitraProtocol.StopPresence();
         PlaytimeTracker.Stop();
         _trayIcon?.Dispose();

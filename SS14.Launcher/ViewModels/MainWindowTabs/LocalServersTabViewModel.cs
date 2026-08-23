@@ -57,6 +57,7 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
             if (!SetProperty(ref _selectedServer, value)) return;
             ConsoleLines.Clear();
             if (value != null) foreach (var line in value.ConsoleHistory) ConsoleLines.Add(line);
+            OnAdvancedSelectionChanged(value);
             NotifyState();
         }
     }
@@ -71,7 +72,7 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
     public bool IsBusy
     {
         get => _isBusy;
-        set { if (SetProperty(ref _isBusy, value)) NotifyState(); }
+        set { if (SetProperty(ref _isBusy, value)) { NotifyState(); NotifyWizard(); } }
     }
     [ObservableProperty] private double _progress;
     private bool _isAddPanelOpen;
@@ -89,7 +90,7 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
     public bool CanStart => SelectedServer is { IsRunning: false } && !IsBusy;
     public bool CanStop => SelectedServer?.IsRunning == true;
     public bool CanRestart => CanStop;
-    public bool CanConnect => CanStop;
+    public bool CanConnect => SelectedServer?.IsReady == true;
     public string ServerCountText => $"{Servers.Count:N0} всего";
     public string RunningCountText => $"{Servers.Count(x => x.IsRunning):N0} запущено";
     public string ManagedCountText => $"{Servers.Count(x => x.ManagedFiles):N0} управляемых";
@@ -98,8 +99,8 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
     public IAsyncRelayCommand ImportZipCommand { get; }
     public IAsyncRelayCommand ImportFolderCommand { get; }
     public IAsyncRelayCommand AddUrlCommand { get; }
-    public IRelayCommand StartCommand { get; }
-    public IRelayCommand StopCommand { get; }
+    public IAsyncRelayCommand StartCommand { get; }
+    public IAsyncRelayCommand StopCommand { get; }
     public IRelayCommand SendCommand { get; }
     public IRelayCommand SaveCommand { get; }
     public IRelayCommand OpenFolderCommand { get; }
@@ -108,7 +109,7 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
     public IRelayCommand SaveConfigCommand { get; }
     public IRelayCommand OpenAddPanelCommand { get; }
     public IRelayCommand CloseAddPanelCommand { get; }
-    public IRelayCommand RestartCommand { get; }
+    public IAsyncRelayCommand RestartCommand { get; }
     public IRelayCommand ConnectCommand { get; }
     public IRelayCommand ClearConsoleCommand { get; }
     public IRelayCommand ClearSearchCommand { get; }
@@ -122,25 +123,30 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
         ImportZipCommand = new AsyncRelayCommand(ImportZipAsync, () => !IsBusy);
         ImportFolderCommand = new AsyncRelayCommand(ImportFolderAsync, () => !IsBusy);
         AddUrlCommand = new AsyncRelayCommand(AddUrlAsync, () => !IsBusy && Uri.TryCreate(SourceUrl, UriKind.Absolute, out _));
-        StartCommand = new RelayCommand(StartSelected, () => CanStart);
-        StopCommand = new RelayCommand(StopSelected, () => CanStop);
+        StartCommand = new AsyncRelayCommand(StartSelectedAsync, () => CanStart);
+        StopCommand = new AsyncRelayCommand(StopSelectedAsync, () => CanStop);
         SendCommand = new RelayCommand(SendConsoleCommand, () => CanStop && !string.IsNullOrWhiteSpace(ConsoleCommand));
         SaveCommand = new RelayCommand(SaveProfiles, () => HasSelection);
         OpenFolderCommand = new RelayCommand(OpenSelectedFolder, () => HasSelection);
         RemoveCommand = new RelayCommand(RemoveSelected, () => HasSelection && !CanStop);
         LoadConfigCommand = new RelayCommand(LoadSelectedConfig, () => HasSelection);
         SaveConfigCommand = new RelayCommand(SaveSelectedConfig, () => HasSelection && !CanStop);
-        OpenAddPanelCommand = new RelayCommand(() => IsAddPanelOpen = true);
-        CloseAddPanelCommand = new RelayCommand(() => IsAddPanelOpen = false);
-        RestartCommand = new RelayCommand(RestartSelected, () => CanRestart);
+        OpenAddPanelCommand = new RelayCommand(OpenServerWizard);
+        CloseAddPanelCommand = new RelayCommand(CancelServerWizard);
+        RestartCommand = new AsyncRelayCommand(RestartSelectedAsync, () => CanRestart);
         ConnectCommand = new RelayCommand(ConnectSelected, () => CanConnect);
         ClearConsoleCommand = new RelayCommand(ClearConsole, () => HasSelection);
         ClearSearchCommand = new RelayCommand(() => SearchText = string.Empty);
         ConsoleLines.CollectionChanged += (_, _) => OnPropertyChanged(nameof(ConsoleLineCountText));
+        InitializeAdvancedFeatures();
         LoadProfiles();
         RefreshVisibleServers();
         _metricsTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _metricsTimer.Tick += (_, _) => { foreach (var server in Servers) server.RefreshRuntimeStats(); };
+        _metricsTimer.Tick += (_, _) =>
+        {
+            foreach (var server in Servers) server.RefreshRuntimeStats();
+            AdvancedTick();
+        };
         _metricsTimer.Start();
     }
 
@@ -176,9 +182,7 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
                 LaunchFiles = new ObservableCollection<string>(candidates), ConfigFiles = new ObservableCollection<string>(configs),
                 ConfigFile = configs.FirstOrDefault() ?? string.Empty, Version = "Готовая папка", ManagedFiles = false
             };
-            profile.PropertyChanged += ProfileChanged;
-            Servers.Add(profile); SelectedServer = profile; IsAddPanelOpen = false; SaveProfiles();
-            RefreshVisibleServers(); StatusText = "Папка добавлена без копирования файлов.";
+            PrepareWizardProfile(profile, "Папка проверена. Выберите файл запуска.");
         }
         catch (Exception e) { StatusText = "Ошибка добавления папки: " + e.Message; _main.ShowToast(StatusText, true); }
     }
@@ -294,14 +298,7 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
                     Version = version ?? "Локальный ZIP",
                     ManagedFiles = true
                 };
-                profile.PropertyChanged += ProfileChanged;
-                Servers.Add(profile);
-                SelectedServer = profile;
-                SaveProfiles();
-                RefreshVisibleServers();
-                StatusText = $"Сервер «{profile.Name}» готов к настройке и запуску.";
-                IsAddPanelOpen = false;
-                _main.ShowToast("Локальный сервер добавлен");
+                PrepareWizardProfile(profile, "Архив проверен и безопасно распакован. Выберите файл запуска.");
             }
             catch
             {
@@ -366,13 +363,26 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
                        || path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
         .Where(path => new FileInfo(path).Length <= 2 * 1024 * 1024)
         .Select(path => Path.GetRelativePath(root, path))
-        .OrderBy(path => path.Contains("server", StringComparison.OrdinalIgnoreCase) ? 0 : 1)
+        .OrderBy(ConfigFilePriority)
         .ThenBy(path => path);
 
-    private void StartSelected()
+    private static int ConfigFilePriority(string path)
+    {
+        var normalized = path.Replace('\\', '/');
+        var file = Path.GetFileName(normalized);
+        if (file.Equals("server_config.toml", StringComparison.OrdinalIgnoreCase)) return 0;
+        if (!normalized.Contains('/') && Path.GetExtension(file).Equals(".toml", StringComparison.OrdinalIgnoreCase)) return 1;
+        if (file.Contains("server_config", StringComparison.OrdinalIgnoreCase)) return 2;
+        if (normalized.Contains("ConfigPresets/", StringComparison.OrdinalIgnoreCase)) return 5;
+        return 20 + normalized.Count(x => x == '/');
+    }
+
+    private async Task StartSelectedAsync()
     {
         var server = SelectedServer;
         if (server == null || server.IsRunning) return;
+        if (server.AutoSnapshotBeforeStart && !await CreateSnapshotAsync(isAutomatic: true))
+            return;
         var launchPath = Path.GetFullPath(Path.Combine(server.Directory, server.LaunchFile));
         if (!launchPath.StartsWith(Path.GetFullPath(server.Directory) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
             || !File.Exists(launchPath))
@@ -380,6 +390,7 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
             StatusText = "Файл запуска не найден или находится вне папки сервера.";
             return;
         }
+        string? jobGate = null;
         try
         {
             var info = new ProcessStartInfo
@@ -393,17 +404,21 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
                 StandardOutputEncoding = Encoding.UTF8,
                 StandardErrorEncoding = Encoding.UTF8
             };
-            if (launchPath.EndsWith(".bat", StringComparison.OrdinalIgnoreCase) || launchPath.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase))
+            if (OperatingSystem.IsWindows())
             {
-                // Passing a complete CALL expression through ArgumentList makes cmd.exe quote it a second time.
-                // A tiny wrapper keeps paths with spaces reliable and switches cmd output to UTF-8.
                 var wrapper = Path.Combine(Path.GetDirectoryName(launchPath)!, ".orbitra-launch.cmd");
+                jobGate = Path.Combine(Path.GetDirectoryName(launchPath)!, $".orbitra-job-{Guid.NewGuid():N}.ready");
                 var safeArguments = server.Arguments.Replace('\r', ' ').Replace('\n', ' ');
-                var wrapperText = "@echo off\r\nchcp 65001 >nul\r\ncall \"" + Path.GetFileName(launchPath) + "\" " + safeArguments + "\r\nexit /b %errorlevel%\r\n";
+                var wrapperText = "@echo off\r\nchcp 65001 >nul\r\n:orbitra_wait_job\r\nif exist \"" + jobGate + "\" goto orbitra_start\r\n>nul 2>nul ping 127.0.0.1 -n 2 -w 50\r\ngoto orbitra_wait_job\r\n:orbitra_start\r\ndel /q \"" + jobGate + "\" >nul 2>nul\r\ncall \"" + Path.GetFileName(launchPath) + "\" " + safeArguments + "\r\nexit /b %errorlevel%\r\n";
                 File.WriteAllText(wrapper, wrapperText, new UTF8Encoding(false));
                 info.FileName = Environment.GetEnvironmentVariable("COMSPEC") ?? "cmd.exe";
                 info.ArgumentList.Add("/D"); info.ArgumentList.Add("/Q"); info.ArgumentList.Add("/C");
                 info.ArgumentList.Add(wrapper);
+            }
+            else if (launchPath.EndsWith(".bat", StringComparison.OrdinalIgnoreCase) || launchPath.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase))
+            {
+                info.FileName = launchPath;
+                if (!string.IsNullOrWhiteSpace(server.Arguments)) info.Arguments = server.Arguments;
             }
             else
             {
@@ -415,14 +430,40 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
             process.ErrorDataReceived += (_, e) => AppendConsole(server, e.Data == null ? null : "[ERR] " + e.Data);
             process.Exited += (_, _) => Dispatcher.UIThread.Post(() =>
             {
+                var expected = server.StopRequested;
+                var exitCode = process.ExitCode;
                 server.IsRunning = false;
                 server.Process = null;
-                AppendConsole(server, $"[Orbitra] Процесс завершён с кодом {process.ExitCode}.");
+                server.JobObject?.Dispose();
+                server.JobObject = null;
+                server.LaunchStage = exitCode == 0 || expected ? "Остановлен" : "Аварийное завершение";
+                AppendConsole(server, $"[Orbitra] Процесс завершён с кодом {exitCode}.");
+                if (!expected && exitCode != 0)
+                    SystemNotificationService.Show("Локальный сервер аварийно завершён", $"{server.Name}: код {exitCode}");
+                server.StopRequested = false;
                 NotifyState();
             });
             if (!process.Start()) throw new InvalidOperationException("Не удалось создать процесс.");
+            if (OperatingSystem.IsWindows())
+            {
+                try
+                {
+                    server.JobObject?.Dispose();
+                    server.JobObject = WindowsJobObject.CreateAndAssign(process);
+                    File.WriteAllText(jobGate!, "ready", new UTF8Encoding(false));
+                    jobGate = null; // The wrapper removes the gate after observing it.
+                }
+                catch
+                {
+                    try { process.Kill(true); } catch { }
+                    throw;
+                }
+            }
             server.Process = process;
             server.IsRunning = true;
+            server.StopRequested = false;
+            server.LaunchStage = "Процесс запущен";
+            server.MarkStarted();
             server.LastStartedUtc = DateTimeOffset.UtcNow;
             server.NotifyLastStartedChanged();
             process.BeginOutputReadLine(); process.BeginErrorReadLine();
@@ -437,25 +478,78 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
             AppendConsole(server, "[Orbitra] " + StatusText);
             _main.ShowToast(StatusText, true);
         }
+        finally
+        {
+            if (jobGate != null) try { File.Delete(jobGate); } catch { }
+        }
     }
 
-    private void StopSelected()
+    private async Task StopSelectedAsync()
     {
         var server = SelectedServer;
         if (server?.Process is not { HasExited: false } process) return;
-        try { process.Kill(true); StatusText = "Остановка сервера…"; }
+        try
+        {
+            server.StopRequested = true;
+            server.LaunchStage = "Штатная остановка";
+            StatusText = "Отправлена команда штатного завершения…";
+            AppendConsole(server, "[Orbitra] Запрошена штатная остановка сервера.");
+            try
+            {
+                await process.StandardInput.WriteLineAsync("shutdown");
+                await process.StandardInput.FlushAsync();
+            }
+            catch { }
+
+            var graceful = process.WaitForExitAsync();
+            if (await Task.WhenAny(graceful, Task.Delay(TimeSpan.FromSeconds(6))) != graceful && !process.HasExited)
+            {
+                AppendConsole(server, "[WARN] Сервер не завершился за 6 секунд, выполняется принудительная остановка.");
+                if (server.JobObject != null) server.JobObject.Terminate(); else process.Kill(true);
+                await process.WaitForExitAsync();
+            }
+            StatusText = $"Сервер «{server.Name}» остановлен.";
+        }
         catch (Exception e) { StatusText = "Не удалось остановить сервер: " + e.Message; }
     }
 
-    private async void RestartSelected()
+    internal void TerminateAllManagedProcesses()
     {
-        if (SelectedServer?.Process is not { HasExited: false } process) return;
+        foreach (var server in Servers)
+        {
+            var process = server.Process;
+            if (process == null && server.JobObject == null) continue;
+            server.StopRequested = true;
+            try
+            {
+                if (server.JobObject != null)
+                    server.JobObject.Terminate();
+                else if (process is { HasExited: false })
+                    process.Kill(true);
+            }
+            catch
+            {
+                try { if (process is { HasExited: false }) process.Kill(true); } catch { }
+            }
+            finally
+            {
+                server.JobObject?.Dispose();
+                server.JobObject = null;
+            }
+        }
+    }
+
+    private async Task RestartSelectedAsync()
+    {
+        var server = SelectedServer;
+        if (server?.Process is not { HasExited: false }) return;
         try
         {
-            process.Kill(true);
-            await process.WaitForExitAsync();
+            await StopSelectedAsync();
             await Task.Delay(350);
-            StartSelected();
+            SelectedServer = server;
+            await StartSelectedAsync();
+            SystemNotificationService.Show("Локальный сервер перезапущен", server.Name);
         }
         catch (Exception e) { StatusText = "Перезапуск не выполнен: " + e.Message; }
     }
@@ -471,6 +565,7 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
         if (SelectedServer == null) return;
         SelectedServer.ConsoleHistory.Clear();
         ConsoleLines.Clear();
+        ClearAdvancedConsole();
     }
 
     private async void SendConsoleCommand()
@@ -483,6 +578,7 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
             await process.StandardInput.WriteLineAsync(command);
             await process.StandardInput.FlushAsync();
             AppendConsole(server, "> " + command);
+            RememberConsoleCommand(command);
             ConsoleCommand = string.Empty;
         }
         catch (Exception e) { StatusText = "Команда не отправлена: " + e.Message; }
@@ -494,11 +590,13 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
         Dispatcher.UIThread.Post(() =>
         {
             server.ConsoleHistory.Add(line);
-            while (server.ConsoleHistory.Count > 2000) server.ConsoleHistory.RemoveAt(0);
+            server.RecordLogLine(line);
+            while (server.ConsoleHistory.Count > ConsoleLineLimit) server.ConsoleHistory.RemoveAt(0);
             if (ReferenceEquals(server, SelectedServer))
             {
                 ConsoleLines.Add(line);
-                while (ConsoleLines.Count > 2000) ConsoleLines.RemoveAt(0);
+                AddAdvancedConsoleLine(line);
+                while (ConsoleLines.Count > ConsoleLineLimit) ConsoleLines.RemoveAt(0);
             }
         });
     }
@@ -517,6 +615,7 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
         {
             var path = ResolveInsideServer(server, server.ConfigFile);
             server.ConfigText = File.ReadAllText(path);
+            OnConfigLoaded(server);
             StatusText = "Конфигурация загружена.";
         }
         catch (Exception e) { StatusText = "Не удалось открыть конфигурацию: " + e.Message; }
@@ -524,18 +623,7 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
 
     private void SaveSelectedConfig()
     {
-        var server = SelectedServer;
-        if (server == null || string.IsNullOrWhiteSpace(server.ConfigFile)) return;
-        try
-        {
-            var path = ResolveInsideServer(server, server.ConfigFile);
-            var backup = path + ".orbitra-backup";
-            if (File.Exists(path)) File.Copy(path, backup, true);
-            File.WriteAllText(path, server.ConfigText);
-            SaveProfiles();
-            StatusText = "Конфигурация сохранена, резервная копия создана.";
-        }
-        catch (Exception e) { StatusText = "Не удалось сохранить конфигурацию: " + e.Message; }
+        SaveSelectedConfigWithHistory();
     }
 
     private static string ResolveInsideServer(LocalServerProfileViewModel server, string relative)
@@ -568,7 +656,13 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
             {
                 var vm = LocalServerProfileViewModel.FromRecord(record);
                 vm.LaunchFiles = new ObservableCollection<string>(FindLaunchFiles(vm.Directory));
-                vm.ConfigFiles = new ObservableCollection<string>(FindConfigFiles(vm.Directory));
+                var configs = FindConfigFiles(vm.Directory).ToList();
+                vm.ConfigFiles = new ObservableCollection<string>(configs);
+                var preferred = configs.FirstOrDefault();
+                if (preferred != null && (!configs.Contains(vm.ConfigFile, StringComparer.OrdinalIgnoreCase)
+                                          || Path.GetFileName(preferred).Equals("server_config.toml", StringComparison.OrdinalIgnoreCase)
+                                          && !Path.GetFileName(vm.ConfigFile).Equals("server_config.toml", StringComparison.OrdinalIgnoreCase)))
+                    vm.ConfigFile = preferred;
                 vm.PropertyChanged += ProfileChanged;
                 Servers.Add(vm);
             }
@@ -598,11 +692,16 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
         OpenFolderCommand.NotifyCanExecuteChanged(); RemoveCommand.NotifyCanExecuteChanged();
         LoadConfigCommand.NotifyCanExecuteChanged(); SaveConfigCommand.NotifyCanExecuteChanged();
         ImportFolderCommand.NotifyCanExecuteChanged(); RestartCommand.NotifyCanExecuteChanged(); ConnectCommand.NotifyCanExecuteChanged(); ClearConsoleCommand.NotifyCanExecuteChanged();
+        CreateSnapshotCommand?.NotifyCanExecuteChanged(); RestoreSnapshotCommand?.NotifyCanExecuteChanged();
+        CopyLocalAddressCommand?.NotifyCanExecuteChanged(); CopyLanAddressCommand?.NotifyCanExecuteChanged(); CopyOrbitraAddressCommand?.NotifyCanExecuteChanged();
+        ExportConsoleCommand?.NotifyCanExecuteChanged(); QuickConsoleCommand?.NotifyCanExecuteChanged();
+        UpdateSelectedServerCommand?.NotifyCanExecuteChanged();
+        NotifyConfigurationCommands();
     }
 
     private void ProfileChanged(object? sender, PropertyChangedEventArgs args)
     {
-        if (args.PropertyName == nameof(LocalServerProfileViewModel.IsRunning))
+        if (args.PropertyName is nameof(LocalServerProfileViewModel.IsRunning) or nameof(LocalServerProfileViewModel.IsReady))
         {
             NotifyState();
             OnPropertyChanged(nameof(RunningCountText));
@@ -611,6 +710,11 @@ public sealed partial class LocalServersTabViewModel : MainWindowTabViewModel
         if (args.PropertyName is nameof(LocalServerProfileViewModel.Name) or
             nameof(LocalServerProfileViewModel.Tags) or nameof(LocalServerProfileViewModel.Version))
             RefreshVisibleServers();
+        if (sender is LocalServerProfileViewModel profile && ReferenceEquals(profile, SelectedServer))
+        {
+            if (args.PropertyName == nameof(LocalServerProfileViewModel.ConfigText)) OnConfigTextEdited();
+            if (args.PropertyName == nameof(LocalServerProfileViewModel.ConfigFile)) OnConfigurationSelectionChanged(profile);
+        }
     }
 
     private void RefreshVisibleServers()
@@ -660,7 +764,7 @@ public sealed partial class LocalServerProfileViewModel : ViewModelBase
     internal Process? Process { get; set; }
     public string Status => IsRunning ? "РАБОТАЕТ" : "ОСТАНОВЛЕН";
     public string SourceLabel => !ManagedFiles ? "Готовая папка" : string.IsNullOrWhiteSpace(SourceManifest) ? "Локальный ZIP" : "CDN";
-    public string ProcessIdText => Process is { HasExited: false } process ? process.Id.ToString() : "—";
+    public string ProcessIdText => IsRunning && MetricsProcessId > 0 ? MetricsProcessId.ToString() : Process is { HasExited: false } process ? process.Id.ToString() : "—";
     public string UptimeText => IsRunning && LastStartedUtc is { } started ? FormatDuration(DateTimeOffset.UtcNow - started) : "—";
     public string LastStartedText => LastStartedUtc is { } started
         ? started.ToLocalTime().ToString("dd.MM.yyyy · HH:mm")
@@ -670,6 +774,7 @@ public sealed partial class LocalServerProfileViewModel : ViewModelBase
     {
         get
         {
+            if (IsRunning && CurrentMemoryMb >= 0) return $"{CurrentMemoryMb:F0} МБ";
             try { if (Process is { HasExited: false } process) { process.Refresh(); return $"{process.WorkingSet64 / 1024d / 1024d:F0} МБ"; } }
             catch { }
             return "—";
@@ -677,10 +782,11 @@ public sealed partial class LocalServerProfileViewModel : ViewModelBase
     }
     internal void RefreshRuntimeStats() { OnPropertyChanged(nameof(ProcessIdText)); OnPropertyChanged(nameof(UptimeText)); OnPropertyChanged(nameof(MemoryText)); }
     private static string FormatDuration(TimeSpan value) => value.TotalHours >= 1 ? $"{(int)value.TotalHours}ч {value.Minutes:00}м" : $"{value.Minutes}м {value.Seconds:00}с";
-    public LocalServerRecord ToRecord() => new(Id, Name, Directory, LaunchFile, Arguments, Tags, SourceManifest, Version, LastStartedUtc, ConfigFile, Port, ManagedFiles);
+    public LocalServerRecord ToRecord() => new(Id, Name, Directory, LaunchFile, Arguments, Tags, SourceManifest, Version, LastStartedUtc, ConfigFile, Port, ManagedFiles, AutoSnapshotBeforeStart, SnapshotRetention);
     public static LocalServerProfileViewModel FromRecord(LocalServerRecord x) => new()
-    { Id=x.Id, Name=x.Name, Directory=x.Directory, LaunchFile=x.LaunchFile, Arguments=x.Arguments, Tags=x.Tags, SourceManifest=x.SourceManifest, Version=x.Version, LastStartedUtc=x.LastStartedUtc, ConfigFile=x.ConfigFile, Port=x.Port, ManagedFiles=x.ManagedFiles };
+    { Id=x.Id, Name=x.Name, Directory=x.Directory, LaunchFile=x.LaunchFile, Arguments=x.Arguments, Tags=x.Tags, SourceManifest=x.SourceManifest, Version=x.Version, LastStartedUtc=x.LastStartedUtc, ConfigFile=x.ConfigFile, Port=x.Port, ManagedFiles=x.ManagedFiles, AutoSnapshotBeforeStart=x.AutoSnapshotBeforeStart, SnapshotRetention=x.SnapshotRetention };
 }
 
 public sealed record LocalServerRecord(string Id, string Name, string Directory, string LaunchFile, string Arguments,
-    string Tags, string SourceManifest, string Version, DateTimeOffset? LastStartedUtc, string ConfigFile = "", int Port = 1212, bool ManagedFiles = true);
+    string Tags, string SourceManifest, string Version, DateTimeOffset? LastStartedUtc, string ConfigFile = "", int Port = 1212, bool ManagedFiles = true,
+    bool AutoSnapshotBeforeStart = false, int SnapshotRetention = 8);
