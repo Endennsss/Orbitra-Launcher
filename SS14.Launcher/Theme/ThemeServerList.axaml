@@ -94,7 +94,7 @@
               <ColumnDefinition Width="88" />
               <ColumnDefinition Width="96" />
               <ColumnDefinition Width="100" />
-              <ColumnDefinition Width="196" />
+              <ColumnDefinition Width="236" />
               <!-- Keep the header on the same viewport width as the rows. The
                    list always reserves this lane for its vertical scrollbar. -->
               <ColumnDefinition Width="Auto" />
@@ -150,28 +150,28 @@
                              Text="{TemplateBinding ListText}" />
                   <StackPanel IsVisible="{TemplateBinding SpinnerVisible}"
                               VerticalAlignment="Top" Margin="18,16" Spacing="8">
-                    <Grid ColumnDefinitions="*,88,96,100,196" Height="42" Margin="0,0,24,0">
+                    <Grid ColumnDefinitions="*,88,96,100,236" Height="42" Margin="0,0,24,0">
                       <Border Classes="SkeletonBar" Margin="12,10" />
                       <Border Grid.Column="1" Classes="SkeletonBar" Margin="10,10" />
                       <Border Grid.Column="2" Classes="SkeletonBar" Margin="10,10" />
                       <Border Grid.Column="3" Classes="SkeletonBar" Margin="10,10" />
                       <Border Grid.Column="4" Classes="SkeletonBar" Margin="10,10" />
                     </Grid>
-                    <Grid ColumnDefinitions="*,88,96,100,196" Height="42" Margin="0,0,24,0">
+                    <Grid ColumnDefinitions="*,88,96,100,236" Height="42" Margin="0,0,24,0">
                       <Border Classes="SkeletonBar Delay1" Margin="12,10" />
                       <Border Grid.Column="1" Classes="SkeletonBar Delay1" Margin="10,10" />
                       <Border Grid.Column="2" Classes="SkeletonBar Delay1" Margin="10,10" />
                       <Border Grid.Column="3" Classes="SkeletonBar Delay1" Margin="10,10" />
                       <Border Grid.Column="4" Classes="SkeletonBar Delay1" Margin="10,10" />
                     </Grid>
-                    <Grid ColumnDefinitions="*,88,96,100,196" Height="42" Margin="0,0,24,0">
+                    <Grid ColumnDefinitions="*,88,96,100,236" Height="42" Margin="0,0,24,0">
                       <Border Classes="SkeletonBar Delay2" Margin="12,10" />
                       <Border Grid.Column="1" Classes="SkeletonBar Delay2" Margin="10,10" />
                       <Border Grid.Column="2" Classes="SkeletonBar Delay2" Margin="10,10" />
                       <Border Grid.Column="3" Classes="SkeletonBar Delay2" Margin="10,10" />
                       <Border Grid.Column="4" Classes="SkeletonBar Delay2" Margin="10,10" />
                     </Grid>
-                    <Grid ColumnDefinitions="*,88,96,100,196" Height="42" Margin="0,0,24,0">
+                    <Grid ColumnDefinitions="*,88,96,100,236" Height="42" Margin="0,0,24,0">
                       <Border Classes="SkeletonBar Delay3" Margin="12,10" />
                       <Border Grid.Column="1" Classes="SkeletonBar Delay3" Margin="10,10" />
                       <Border Grid.Column="2" Classes="SkeletonBar Delay3" Margin="10,10" />

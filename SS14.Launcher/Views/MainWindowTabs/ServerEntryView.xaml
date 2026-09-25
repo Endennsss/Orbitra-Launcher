@@ -46,6 +46,9 @@
     <Style Selector="TextBlock.MetricDown">
       <Style.Animations><Animation Duration="0:0:0.65"><KeyFrame Cue="0%"><Setter Property="Foreground" Value="#E06B61" /><Setter Property="Opacity" Value="0.55" /></KeyFrame><KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /></KeyFrame></Animation></Style.Animations>
     </Style>
+    <Style Selector="Button.ConnectAction /template/ Panel#PART_Margin">
+      <Setter Property="Margin" Value="0" />
+    </Style>
     <Style Selector="Button.ConnectAction:pointerover Path.ConnectArrow">
       <Style.Animations>
         <Animation Duration="0:0:0.24" Easing="CubicEaseOut">
@@ -110,7 +113,7 @@
             <ColumnDefinition Width="88" />
             <ColumnDefinition Width="96" />
             <ColumnDefinition Width="100" />
-            <ColumnDefinition Width="196" />
+            <ColumnDefinition Width="236" />
           </Grid.ColumnDefinitions>
 
           <Border Grid.Column="0" Classes="GridCell">
@@ -191,9 +194,9 @@
             </StackPanel>
           </Border>
 
-          <Border Grid.Column="4" Classes="GridCell">
-            <StackPanel Orientation="Horizontal" Spacing="6">
-            <Button Name="RowPingButton" Width="38" Height="38" Padding="0" Command="{Binding PingPressed}"
+          <Border Grid.Column="4" Classes="GridCell" Padding="10,3,18,3">
+            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+            <Button Name="RowPingButton" Width="38" Height="38" Margin="0" Padding="0" Command="{Binding PingPressed}"
                     IsEnabled="{Binding !IsPinging}" ToolTip.Tip="Проверить сервер">
               <Viewbox Classes="ServerPingIcon" Classes.Pinging="{Binding IsPinging}"
                        Width="18" Height="18" Stretch="Uniform">
@@ -203,14 +206,14 @@
                 </Canvas>
               </Viewbox>
             </Button>
-            <Button IsEnabled="{Binding CanConnect}" Width="132" Height="38" Classes="ConnectAction"
+            <Button IsEnabled="{Binding CanConnect}" Width="164" Height="38" Margin="0" Padding="12,6" Classes="ConnectAction"
                     Classes.Connecting="{Binding IsConnecting}"
                     Command="{Binding ConnectPressed}">
               <Grid>
                 <Grid ColumnDefinitions="Auto,18" IsVisible="{Binding !IsConnecting}"
                       HorizontalAlignment="Center" VerticalAlignment="Center">
                   <TextBlock Grid.Column="0" Text="{loc:Loc server-entry-connect}"
-                             Margin="0,0,7,0" VerticalAlignment="Center" />
+                             Margin="0,0,8,0" VerticalAlignment="Center" />
                   <Viewbox Grid.Column="1" Width="18" Height="18" Stretch="Uniform"
                            HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Canvas Width="24" Height="24">

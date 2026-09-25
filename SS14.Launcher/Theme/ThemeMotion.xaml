@@ -1,8 +1,51 @@
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mwt="clr-namespace:SS14.Launcher.Views.MainWindowTabs">
 
   <!-- Orbitra motion language: short transform and color transitions keep the
        interface responsive without re-measuring large lists. -->
+  <Style Selector="ListBox.MasterServerList > ListBoxItem, ListBox.FavoriteServerList > ListBoxItem">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid Background="Transparent">
+          <Border Name="ServerSelection" Background="{DynamicResource LauncherSurfaceAltBrush}" IsHitTestVisible="False">
+            <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.26" Easing="CubicEaseInOut" /></Transitions></Border.Transitions>
+          </Border>
+          <Border Name="ServerHover" Background="{DynamicResource LauncherHoverBrush}" IsHitTestVisible="False">
+            <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.30" Easing="CubicEaseInOut" /></Transitions></Border.Transitions>
+          </Border>
+          <Border Name="ServerSelectionMark" Width="3" HorizontalAlignment="Left" Background="{DynamicResource ThemeAccentBrush}" IsHitTestVisible="False">
+            <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.26" Easing="CubicEaseInOut" /></Transitions></Border.Transitions>
+          </Border>
+          <ContentPresenter Name="PART_ContentPresenter" Margin="3,0,0,0"
+                            Background="Transparent" BorderThickness="0"
+                            Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="ListBox.MasterServerList > ListBoxItem /template/ Border#ServerHover, ListBox.FavoriteServerList > ListBoxItem /template/ Border#ServerHover, ListBox.MasterServerList > ListBoxItem /template/ Border#ServerSelection, ListBox.FavoriteServerList > ListBoxItem /template/ Border#ServerSelection, ListBox.MasterServerList > ListBoxItem /template/ Border#ServerSelectionMark, ListBox.FavoriteServerList > ListBoxItem /template/ Border#ServerSelectionMark">
+    <Setter Property="Opacity" Value="0" />
+  </Style>
+  <Style Selector="ListBox.MasterServerList > ListBoxItem:pointerover /template/ Border#ServerHover, ListBox.FavoriteServerList > ListBoxItem:pointerover /template/ Border#ServerHover">
+    <Setter Property="Opacity" Value="0.65" />
+  </Style>
+  <Style Selector="ListBox.MasterServerList > ListBoxItem:selected /template/ Border#ServerSelection, ListBox.FavoriteServerList > ListBoxItem:selected /template/ Border#ServerSelection, ListBox.MasterServerList > ListBoxItem:selected /template/ Border#ServerSelectionMark, ListBox.FavoriteServerList > ListBoxItem:selected /template/ Border#ServerSelectionMark">
+    <Setter Property="Opacity" Value="1" />
+  </Style>
+  <Style Selector="Viewbox.DetailConnectArrow">
+    <Setter Property="RenderTransform" Value="translate(0px, 0px)" />
+    <Setter Property="Transitions">
+      <Transitions><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut" /></Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Button:pointerover Viewbox.DetailConnectArrow">
+    <Setter Property="RenderTransform" Value="translate(2px, 0px)" />
+  </Style>
+  <Style Selector="Button:pressed Viewbox.DetailConnectArrow">
+    <Setter Property="RenderTransform" Value="translate(0px, 0px)" />
+  </Style>
   <Style Selector="Button, ToggleButton">
     <Setter Property="RenderTransformOrigin" Value="50%,50%" />
     <Setter Property="Transitions">
@@ -22,6 +65,11 @@
     <Setter Property="RenderTransform" Value="scale(0.985)" />
   </Style>
   <Style Selector="Button:disabled, ToggleButton:disabled">
+    <Setter Property="RenderTransform" Value="none" />
+  </Style>
+  <!-- Keep server actions stationary: scaling the whole button blurs text and
+       makes its border jump. The arrow has its own small transition. -->
+  <Style Selector="mwt|ServerFocusDetailView Button:pointerover, mwt|ServerFocusDetailView Button:pressed, Grid.SplitFooterGrid Button:pointerover, Grid.SplitFooterGrid Button:pressed, Border#SplitDetailPane Button:pointerover, Border#SplitDetailPane Button:pressed">
     <Setter Property="RenderTransform" Value="none" />
   </Style>
 

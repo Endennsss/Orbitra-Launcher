@@ -68,9 +68,9 @@ public sealed partial class ServerList : TemplatedControl
 
         _headerGrid.ColumnDefinitions = Bounds.Width switch
         {
-            < 520 => new ColumnDefinitions("*,0,0,82,152,Auto"),
-            < 650 => new ColumnDefinitions("*,0,82,90,152,Auto"),
-            _ => new ColumnDefinitions("*,88,96,100,196,Auto")
+            < 520 => new ColumnDefinitions("*,0,0,82,192,Auto"),
+            < 650 => new ColumnDefinitions("*,0,82,90,192,Auto"),
+            _ => new ColumnDefinitions("*,88,96,100,236,Auto")
         };
     }
 

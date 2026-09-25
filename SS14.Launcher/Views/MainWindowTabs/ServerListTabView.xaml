@@ -69,14 +69,6 @@
       <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
       <Setter Property="Background" Value="Transparent"/>
     </Style>
-    <Style Selector="ListBox.MasterServerList > ListBoxItem:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource LauncherHoverBrush}"/>
-    </Style>
-    <Style Selector="ListBox.MasterServerList > ListBoxItem:selected /template/ ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
-      <Setter Property="BorderThickness" Value="3,0,0,0"/>
-    </Style>
     <Style Selector="Border.MasterServerRow">
       <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
       <Setter Property="Transitions">
@@ -87,9 +79,6 @@
           <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/>
         </Transitions>
       </Setter>
-    </Style>
-    <Style Selector="Border.MasterServerRow:pointerover">
-      <Setter Property="Background" Value="{DynamicResource LauncherHoverBrush}"/>
     </Style>
     <Style Selector="TextBlock.PingGood"><Setter Property="Foreground" Value="#62D68B"/></Style>
     <Style Selector="TextBlock.PingMedium"><Setter Property="Foreground" Value="#E4C65A"/></Style>
@@ -184,7 +173,7 @@
     <Grid Grid.Row="2">
       <Carousel Name="ServerLayoutCarousel" SelectedIndex="{Binding ServerLayoutPageIndex}">
 
-      <Grid Name="SplitLayoutGrid" ColumnDefinitions="360,5,*">
+      <Grid Name="SplitLayoutGrid" ColumnDefinitions="360,5,*" controls:ServerDetailMotion.Delay="0">
         <Border Name="SplitListPane" Grid.Column="0" Classes="Surface" ClipToBounds="True" MinWidth="280">
           <Grid RowDefinitions="Auto,*,Auto">
             <Grid ColumnDefinitions="*,64,72,72" Margin="12,9" Background="{DynamicResource LauncherChromeBrush}">
@@ -279,8 +268,8 @@
               </TransitioningContentControl.PageTransition>
               <TransitioningContentControl.ContentTemplate>
                 <DataTemplate x:DataType="vm:ServerEntryViewModel">
-            <Grid RowDefinitions="Auto,Auto,*,Auto" Classes="MotionCard">
-              <Border Padding="20" Background="{DynamicResource LauncherChromeBrush}"
+            <Grid RowDefinitions="Auto,Auto,*,Auto">
+              <Border Padding="20" controls:ServerDetailMotion.Delay="0" Background="{DynamicResource LauncherChromeBrush}"
                       BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,0,0,1">
                 <Grid ColumnDefinitions="70,*" RowDefinitions="Auto,Auto">
                   <Border Grid.RowSpan="2" Width="58" Height="58" Background="{DynamicResource LauncherControlBrush}"
@@ -329,7 +318,7 @@
                 </Grid>
               </Border>
 
-              <Grid Name="SplitMetricGrid" Grid.Row="1" ColumnDefinitions="*,*,*" Margin="16,16,16,8">
+              <Grid Name="SplitMetricGrid" Grid.Row="1" ColumnDefinitions="*,*,*" Margin="16,16,16,8" controls:ServerDetailMotion.Delay="20">
                 <Border Classes="DetailMetric" Margin="0,0,5,0"><StackPanel Spacing="4"><TextBlock Text="ИГРОКИ" Classes="SectionLabel"/><TextBlock Text="{Binding PlayerCountString}" FontSize="20" FontWeight="SemiBold"/></StackPanel></Border>
                 <Border Grid.Column="1" Classes="DetailMetric" Margin="5,0"><StackPanel Spacing="4"><TextBlock Text="ПИНГ" Classes="SectionLabel"/><TextBlock Text="{Binding PingString}" FontSize="20" FontWeight="SemiBold" Classes.PingGood="{Binding PingGood}" Classes.PingMedium="{Binding PingMedium}" Classes.PingBad="{Binding PingBad}"/></StackPanel></Border>
                 <Border Grid.Column="2" Classes="DetailMetric" Margin="5,0,0,0"><StackPanel Spacing="4"><TextBlock Text="ВРЕМЯ РАУНДА" Classes="SectionLabel"/><controls:TimerTextCell Value="{Binding RoundStartTime}" FontSize="20" FontWeight="SemiBold"/></StackPanel></Border>
@@ -337,20 +326,20 @@
 
               <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" Margin="16,8">
                 <StackPanel Spacing="12">
-                  <WrapPanel>
+                  <WrapPanel controls:ServerDetailMotion.Delay="40">
                     <Border Classes="DetailMetric" Margin="0,0,8,0" MinWidth="170"><StackPanel Spacing="4"><TextBlock Text="КАРТА" Classes="SectionLabel"/><TextBlock Text="{Binding CacheData.Map}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"/></StackPanel></Border>
                     <Border Classes="DetailMetric" MinWidth="170"><StackPanel Spacing="4"><TextBlock Text="РЕЖИМ" Classes="SectionLabel"/><TextBlock Text="{Binding CacheData.GamePreset}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"/></StackPanel></Border>
                     <Border Classes="DetailMetric" Margin="8,0,0,0" MinWidth="150"><StackPanel Spacing="4"><TextBlock Text="ВАШЕ ВРЕМЯ" Classes="SectionLabel"/><TextBlock Text="{Binding PlaytimeText}" FontSize="16" FontWeight="SemiBold"/></StackPanel></Border>
                   </WrapPanel>
 
-                  <Border Classes="DetailMetric">
+                  <Border Classes="DetailMetric" controls:ServerDetailMotion.Delay="60">
                     <StackPanel Spacing="6">
                       <TextBlock Text="ОПИСАНИЕ" Classes="SectionLabel"/>
                       <TextBlock Text="{Binding Description}" TextWrapping="Wrap"/>
                     </StackPanel>
                   </Border>
 
-                  <Grid Classes="SplitGraphGrid" ColumnDefinitions="*,*">
+                  <Grid Classes="SplitGraphGrid" ColumnDefinitions="*,*" controls:ServerDetailMotion.Delay="80">
                     <Border Classes="DetailMetric" Margin="0,0,5,0"><StackPanel Spacing="6"><TextBlock Text="ПИНГ · ИСТОРИЯ" Classes="SectionLabel"/><Grid Height="54" ClipToBounds="True"><Path Data="M0,52 L260,52" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="1" Stretch="Fill"/><Path Data="{Binding PingGraph}" Stroke="#A8A8A8" StrokeThickness="1.8" Stretch="Fill"/></Grid></StackPanel></Border>
                     <Border Grid.Column="1" Classes="DetailMetric SplitGraphSecond" Margin="5,0,0,0"><StackPanel Spacing="6"><TextBlock Text="ОНЛАЙН · ИСТОРИЯ" Classes="SectionLabel"/><Grid Height="54" ClipToBounds="True"><Path Data="M0,52 L260,52" Stroke="{DynamicResource LauncherLineBrush}" StrokeThickness="1" Stretch="Fill"/><Path Data="{Binding OnlineGraph}" Stroke="#777777" StrokeThickness="1.8" Stretch="Fill"/></Grid></StackPanel></Border>
                   </Grid>
@@ -363,7 +352,7 @@
               </ScrollViewer>
 
               <Border Grid.Row="3" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,1,0,0" Padding="16,12">
-                <Grid Classes="SplitFooterGrid" ColumnDefinitions="*,Auto">
+                <Grid Classes="SplitFooterGrid" ColumnDefinitions="*,Auto" controls:ServerDetailMotion.Delay="40">
                   <StackPanel Name="SplitFooterActions" Orientation="Horizontal" Spacing="6">
                     <Button Content="Скопировать адрес" Command="{Binding CopyAddressPressed}"/>
                     <Button Content="Создать ярлык" Command="{Binding CreateDesktopShortcut}"/>
@@ -372,7 +361,7 @@
                     <Grid>
                       <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" IsVisible="{Binding !IsConnecting}">
                         <TextBlock Text="Подключиться"/>
-                        <Viewbox Width="17" Height="17"><Canvas Width="24" Height="24"><Path Data="M5,12 L19,12 M14,7 L19,12 L14,17" Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox>
+                        <Viewbox Classes="DetailConnectArrow" Width="17" Height="17"><Canvas Width="24" Height="24"><Path Data="M5,12 L19,12 M14,7 L19,12 L14,17" Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox>
                       </StackPanel>
                       <StackPanel IsVisible="{Binding IsConnectionBusy}" HorizontalAlignment="Center" Spacing="3">
                         <TextBlock Text="{Binding ConnectionStageText}" FontSize="9" FontWeight="Bold" MaxWidth="135" TextTrimming="CharacterEllipsis"/>
@@ -425,7 +414,7 @@
           </Grid>
 
           <Grid Grid.Row="1">
-            <ListBox Classes="MasterServerList MotionList" ItemsSource="{Binding SearchedServers}"
+            <ListBox Classes="MasterServerList MotionList" ItemsSource="{Binding SearchedServers}" controls:ServerDetailMotion.Delay="0"
                      SelectedItem="{Binding SelectedServer, Mode=TwoWay}"
                      SelectionChanged="FocusServerSelectionChanged"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"

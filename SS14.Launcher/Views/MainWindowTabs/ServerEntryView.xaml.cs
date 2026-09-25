@@ -27,9 +27,9 @@ public partial class ServerEntryView : UserControl
         var hideRoundTime = Bounds.Width < 650;
         ServerRowGrid.ColumnDefinitions = Bounds.Width switch
         {
-            < 520 => new ColumnDefinitions("*,0,0,82,152"),
-            < 650 => new ColumnDefinitions("*,0,82,90,152"),
-            _ => new ColumnDefinitions("*,88,96,100,196")
+            < 520 => new ColumnDefinitions("*,0,0,82,192"),
+            < 650 => new ColumnDefinitions("*,0,82,90,192"),
+            _ => new ColumnDefinitions("*,88,96,100,236")
         };
 
         RowPingButton.IsVisible = !hideRoundTime;

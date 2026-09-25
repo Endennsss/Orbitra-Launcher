@@ -22,7 +22,6 @@
     </Style>
     <Style Selector="Border.FocusMetric:pointerover">
       <Setter Property="BorderBrush" Value="{DynamicResource ThemeForegroundMutedBrush}"/>
-      <Setter Property="RenderTransform" Value="scale(1.003)"/>
     </Style>
     <Style Selector="UserControl.Narrow TextBlock.FocusFavoriteLabel">
       <Setter Property="IsVisible" Value="False"/>
@@ -58,8 +57,8 @@
     </Border>
 
     <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
-      <StackPanel DataContext="{Binding SelectedServer}" Margin="18" Spacing="14" Classes="MotionHeader">
-        <Grid ColumnDefinitions="86,*">
+      <StackPanel DataContext="{Binding SelectedServer}" Margin="18" Spacing="14">
+        <Grid ColumnDefinitions="86,*" controls:ServerDetailMotion.Delay="0">
           <Border Width="74" Height="74" Background="{DynamicResource LauncherControlBrush}"
                   BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="1" ClipToBounds="True">
             <Grid>
@@ -86,23 +85,23 @@
           </StackPanel>
         </Grid>
 
-        <WrapPanel>
+        <WrapPanel controls:ServerDetailMotion.Delay="20">
           <Border Classes="FocusMetric" Margin="0,0,8,8"><StackPanel Spacing="4"><TextBlock Text="ИГРОКИ" Classes="SectionLabel"/><TextBlock Text="{Binding PlayerCountString}" FontSize="21" FontWeight="SemiBold"/></StackPanel></Border>
           <Border Classes="FocusMetric" Margin="0,0,8,8"><StackPanel Spacing="4"><TextBlock Text="ПИНГ" Classes="SectionLabel"/><TextBlock Text="{Binding PingString}" FontSize="21" FontWeight="SemiBold" Classes.PingGood="{Binding PingGood}" Classes.PingMedium="{Binding PingMedium}" Classes.PingBad="{Binding PingBad}"/></StackPanel></Border>
           <Border Classes="FocusMetric" Margin="0,0,8,8"><StackPanel Spacing="4"><TextBlock Text="ВРЕМЯ РАУНДА" Classes="SectionLabel"/><controls:TimerTextCell Value="{Binding RoundStartTime}" FontSize="21" FontWeight="SemiBold"/></StackPanel></Border>
           <Border Classes="FocusMetric" Margin="0,0,0,8"><StackPanel Spacing="4"><TextBlock Text="ВАШЕ ВРЕМЯ" Classes="SectionLabel"/><TextBlock Text="{Binding PlaytimeText}" FontSize="21" FontWeight="SemiBold"/></StackPanel></Border>
         </WrapPanel>
 
-        <Grid Name="FocusInfoGrid" Classes="FocusPairGrid" ColumnDefinitions="*,*">
+        <Grid Name="FocusInfoGrid" Classes="FocusPairGrid" ColumnDefinitions="*,*" controls:ServerDetailMotion.Delay="40">
           <Border Classes="FocusMetric" Margin="0,0,6,0"><StackPanel Spacing="5"><TextBlock Text="КАРТА" Classes="SectionLabel"/><TextBlock Text="{Binding CacheData.Map}" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap"/></StackPanel></Border>
           <Border Name="FocusInfoSecond" Grid.Column="1" Classes="FocusMetric FocusPairSecond" Margin="6,0,0,0"><StackPanel Spacing="5"><TextBlock Text="РЕЖИМ" Classes="SectionLabel"/><TextBlock Text="{Binding CacheData.GamePreset}" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap"/></StackPanel></Border>
         </Grid>
 
-        <Border Classes="FocusMetric">
+        <Border Classes="FocusMetric" controls:ServerDetailMotion.Delay="60">
           <StackPanel Spacing="7"><TextBlock Text="ОПИСАНИЕ" Classes="SectionLabel"/><TextBlock Text="{Binding Description}" TextWrapping="Wrap"/></StackPanel>
         </Border>
 
-        <Grid Name="FocusGraphGrid" Classes="FocusPairGrid" ColumnDefinitions="*,*">
+        <Grid Name="FocusGraphGrid" Classes="FocusPairGrid" ColumnDefinitions="*,*" controls:ServerDetailMotion.Delay="80">
           <Border Classes="FocusMetric" Margin="0,0,6,0"><StackPanel Spacing="7"><TextBlock Text="ПИНГ · ИСТОРИЯ" Classes="SectionLabel"/><Grid Height="62" ClipToBounds="True"><Path Data="M0,60 L320,60" Stroke="{DynamicResource LauncherLineBrush}"/><Path Data="{Binding PingGraph}" Stroke="#A8A8A8" StrokeThickness="1.8" Stretch="Fill"/></Grid></StackPanel></Border>
           <Border Name="FocusGraphSecond" Grid.Column="1" Classes="FocusMetric FocusPairSecond" Margin="6,0,0,0"><StackPanel Spacing="7"><TextBlock Text="ОНЛАЙН · ИСТОРИЯ" Classes="SectionLabel"/><Grid Height="62" ClipToBounds="True"><Path Data="M0,60 L320,60" Stroke="{DynamicResource LauncherLineBrush}"/><Path Data="{Binding OnlineGraph}" Stroke="#777777" StrokeThickness="1.8" Stretch="Fill"/></Grid></StackPanel></Border>
         </Grid>
@@ -116,7 +115,7 @@
 
     <Border Grid.Row="2" Background="{DynamicResource LauncherChromeBrush}" BorderBrush="{DynamicResource LauncherLineBrush}"
             BorderThickness="0,1,0,0" Padding="14,11">
-      <Grid Name="FocusFooterGrid" Classes="FocusFooterGrid" DataContext="{Binding SelectedServer}" ColumnDefinitions="*,Auto">
+      <Grid Name="FocusFooterGrid" Classes="FocusFooterGrid" DataContext="{Binding SelectedServer}" ColumnDefinitions="*,Auto" controls:ServerDetailMotion.Delay="40">
         <StackPanel Name="FocusFooterActions" Orientation="Horizontal" Spacing="6">
           <Button Content="Скопировать адрес" Command="{Binding CopyAddressPressed}"/>
           <Button Content="Создать ярлык" Command="{Binding CreateDesktopShortcut}"/>
@@ -125,7 +124,7 @@
           <Grid>
             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" IsVisible="{Binding !IsConnecting}">
               <TextBlock Text="Подключиться"/>
-              <Viewbox Width="17" Height="17"><Canvas Width="24" Height="24"><Path Data="M5,12 L19,12 M14,7 L19,12 L14,17" Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox>
+              <Viewbox Classes="DetailConnectArrow" Width="17" Height="17"><Canvas Width="24" Height="24"><Path Data="M5,12 L19,12 M14,7 L19,12 L14,17" Fill="Transparent" Stroke="{DynamicResource ThemeForegroundBrush}" StrokeThickness="1.8" StrokeLineCap="Round"/></Canvas></Viewbox>
             </StackPanel>
             <StackPanel IsVisible="{Binding IsConnectionBusy}" HorizontalAlignment="Center" Spacing="3">
               <TextBlock Text="{Binding ConnectionStageText}" FontSize="9" FontWeight="Bold" MaxWidth="145" TextTrimming="CharacterEllipsis"/>

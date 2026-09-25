@@ -61,9 +61,7 @@
   <UserControl.Styles>
     <Style Selector="ListBox.FavoriteServerList"><Setter Property="Background" Value="Transparent"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Padding" Value="0"/></Style>
     <Style Selector="ListBox.FavoriteServerList > ListBoxItem"><Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Background" Value="Transparent"/></Style>
-    <Style Selector="ListBox.FavoriteServerList > ListBoxItem:selected /template/ ContentPresenter"><Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/><Setter Property="BorderThickness" Value="3,0,0,0"/></Style>
     <Style Selector="Border.FavoriteServerRow"><Setter Property="RenderTransformOrigin" Value="50%,50%"/><Setter Property="Transitions"><Transitions><BrushTransition Property="Background" Duration="0:0:0.16"/><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut"/></Transitions></Setter></Style>
-    <Style Selector="Border.FavoriteServerRow:pointerover"><Setter Property="Background" Value="{DynamicResource LauncherHoverBrush}"/></Style>
     <Style Selector="Border.FavoriteMetric"><Setter Property="Background" Value="{DynamicResource LauncherSurfaceAltBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource LauncherLineBrush}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="Padding" Value="7,3"/><Setter Property="Margin" Value="0,0,5,0"/></Style>
     <Style Selector="Border.FavoriteMetric TextBlock"><Setter Property="FontSize" Value="10"/><Setter Property="Foreground" Value="{DynamicResource ThemeSubTextBrush}"/></Style>
     <Style Selector="TextBlock.PingGood"><Setter Property="Foreground" Value="#62D68B"/></Style>
@@ -112,7 +110,7 @@
       <Carousel Name="FavoriteLayoutCarousel" Grid.Row="0" SelectedIndex="{Binding ServerLayoutPageIndex}" IsVisible="{Binding !FavoritesEmpty}">
 
         <!-- Variant 2: favorites list and details side by side. -->
-        <Grid Name="FavoriteSplitGrid" ColumnDefinitions="360,5,*">
+        <Grid Name="FavoriteSplitGrid" ColumnDefinitions="360,5,*" controls:ServerDetailMotion.Delay="0">
           <Border Name="FavoriteSplitListPane" Grid.Column="0" BorderBrush="{DynamicResource LauncherLineBrush}" BorderThickness="0,0,1,0" MinWidth="280">
             <Grid RowDefinitions="Auto,*">
               <StackPanel Margin="14,11" Spacing="3"><TextBlock Text="ИЗБРАННОЕ" Classes="SectionLabel"/><TextBlock Text="Выберите сервер для просмотра" Classes="SubText"/></StackPanel>
@@ -135,7 +133,7 @@
         <Border>
           <Grid RowDefinitions="Auto,*">
             <StackPanel Margin="14,11" Spacing="3"><TextBlock Text="ИЗБРАННЫЕ СЕРВЕРЫ" Classes="SectionLabel"/><TextBlock Text="Нажмите на сервер, чтобы открыть его страницу" Classes="SubText"/></StackPanel>
-            <ListBox Grid.Row="1" Classes="FavoriteServerList MotionList" ItemsSource="{Binding Favorites}" SelectedItem="{Binding SelectedServer, Mode=TwoWay}" SelectionChanged="FavoriteFocusSelectionChanged" ItemTemplate="{StaticResource FavoriteServerCard}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible"><ListBox.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel/></ItemsPanelTemplate></ListBox.ItemsPanel></ListBox>
+            <ListBox Grid.Row="1" Classes="FavoriteServerList MotionList" controls:ServerDetailMotion.Delay="0" ItemsSource="{Binding Favorites}" SelectedItem="{Binding SelectedServer, Mode=TwoWay}" SelectionChanged="FavoriteFocusSelectionChanged" ItemTemplate="{StaticResource FavoriteServerCard}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible"><ListBox.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel/></ItemsPanelTemplate></ListBox.ItemsPanel></ListBox>
           </Grid>
         </Border>
 

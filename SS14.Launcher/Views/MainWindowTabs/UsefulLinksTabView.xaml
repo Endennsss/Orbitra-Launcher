@@ -47,6 +47,15 @@
         </Grid>
       </Border>
 
+      <Button Classes="MotionCard" Padding="18" HorizontalContentAlignment="Stretch"
+              Command="{Binding OpenOrbitraStation}">
+        <StackPanel Spacing="5">
+          <TextBlock Text="Orbitra Station" FontSize="17" FontWeight="SemiBold" />
+          <TextBlock Text="Собственная сборка Space Station 14 от автора лаунчера. Открыть проект на GitHub."
+                     Classes="SubText" TextWrapping="Wrap" />
+        </StackPanel>
+      </Button>
+
       <TextBlock Text="ORBITRA LAUNCHER" Classes="SectionLabel" Margin="0,6,0,0" />
       <UniformGrid Classes="ResourceGrid" Columns="2">
         <Button Margin="0,0,6,6" Padding="18" HorizontalContentAlignment="Stretch" Command="{Binding OpenLauncherSite}">
